@@ -284,23 +284,37 @@ public class GujikjaCompanyCtrl {
 		  
 		   do {
 			    System.out.print("▷ 암호변경 => ");
-			    String passwd = sc.nextLine();
+			    String newPasswd = sc.nextLine();
 				
-				gu.setPasswd(passwd);
-				passwd = gu.getPasswd();
+				gu.setPasswd(newPasswd);
+				String passwd = gu.getPasswd();
 				
-				if(passwd != null) 
-					break;
-				
+				if(newPasswd.equals(passwd)) 
+					break;	
 			} while(true);
 		   
-		   System.out.print("▷ 성명변경 => ");
-		   String name = sc.nextLine();
+		   do {
+			   System.out.print("▷ 성명변경 => ");
+			   String newName = sc.nextLine();
+				
+				gu.setName(newName);
+				String name = gu.getName();
+				
+				if(newName.equals(name)) 
+					break;	
+			} while(true);
 		   
-		   System.out.print("▷ 주민번호 7자리 변경 => ");
-		   String jubun = sc.nextLine();
-		   
-		   gu.setPasswd(passwd);
+		   do {
+			   System.out.print("▷ 주민번호 7자리 변경 => ");
+			   String newJubun = sc.nextLine();
+				
+				gu.setJubun(newJubun);
+				String jubun = gu.getJubun();
+				
+				if(newJubun.equals(jubun)) 
+					break;	
+			} while(true);
+
 		   
 		   return null;
 	}
@@ -308,6 +322,54 @@ public class GujikjaCompanyCtrl {
 	// == 구인회사의 내 정보 변경하기 메소드 생성하기 ==  
 	   public Company updateMyInfo(Scanner sc, Company co) {
 		   System.out.println(co);
+		   
+		   System.out.println("\n~~~~~ 내 정보 변경하기 ~~~~~\n");
+		   
+			  
+		   do {
+			    System.out.print("▷ 암호변경 => ");
+			    String newPasswd = sc.nextLine();
+				
+				co.setPasswd(newPasswd);
+				String passwd = co.getPasswd();
+				
+				if(newPasswd.equals(passwd)) 
+					break;	
+			} while(true);
+		   
+		   do {
+			   System.out.print("▷ 회사명 변경 => ");
+			   String newName = sc.nextLine();
+				
+			   co.setName(newName);
+				String name = co.getName();
+				
+				if(newName.equals(name)) 
+					break;	
+			} while(true);
+		   
+		   do {
+			   System.out.print("▷ 직종 변경 => ");
+			   String newJobType = sc.nextLine();
+				
+			   co.setJobType(newJobType);
+				String jobType = co.getJobType();
+				
+				if(newJobType.equals(jobType)) 
+					break;	
+			} while(true);
+		   
+		   do {
+			   System.out.print("▷ 자본금 변경 => ");
+			   Long newSeedMoney = Long.parseLong(sc.nextLine());
+				
+			   co.setSeedMoney(newSeedMoney);
+			   Long seedMoney = co.getSeedMoney();
+				
+				if(newSeedMoney.equals(seedMoney)) 
+					break;	
+			} while(true);
+
 		   return null;
 		}
 	
