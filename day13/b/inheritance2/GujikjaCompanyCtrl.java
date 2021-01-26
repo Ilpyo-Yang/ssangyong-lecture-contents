@@ -196,7 +196,7 @@ public class GujikjaCompanyCtrl {
 	}// end of public void showAllGujikja(Gujikja[] guArr)----------
 	
 	
-	// == 구직자의 정보를 모두 보여주는 메소드 생성하기 == 
+	// == 구인회사의 정보를 모두 보여주는 메소드 생성하기 == 
 	public void showAllCompany(Company[] coArr) {
 		
 		System.out.println("------------------------------------------------------");

@@ -39,5 +39,9 @@ public class Animal {
 				+ "1. 성명 : "+name+"\n"
 				+ "2. 생년 : "+birthYear+"년\n");
 	}
+	
+	public void cry() {
+		System.out.println(">>> 동물들이 소리를 냅니다. <<<");
+	}
 		
 }

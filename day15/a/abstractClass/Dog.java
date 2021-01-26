@@ -1,4 +1,4 @@
-package my.day14.c.polymorphism;
+package my.day15.a.abstractClass;
 
 public class Dog extends Animal {
 	
@@ -26,7 +26,10 @@ public class Dog extends Animal {
 	}
 	
 	@Override
-	public void cry() {
+	protected void cry() {
+	// 메서드 오버라이딩(메서드 재정의)시 접근제한자는 부모클래스에서 정의해둔
+	// 미완성(추상메서드)의 접근제한자와 같든지 또는 접근허용이 더 큰 것으로 
+	// 해주어야 한다.
 		System.out.println("강아지는 '멍멍'하며 짖습니다.");
 	}
 	

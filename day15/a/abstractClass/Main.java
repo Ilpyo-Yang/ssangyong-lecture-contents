@@ -1,10 +1,10 @@
-package my.day14.c.polymorphism;
+package my.day15.a.abstractClass;
 
 public class Main {
 
-	// >>> 다형성(Polymorphism) <<<
-	// => 상속을 이용하여 여러 클래스 타입을 하나의 클래스 타입으로 다루는 기술 
-	// 자식클래스로 생성된 객체를 부모 클래스 타입으로 받을 수 있다는 것이 다형성
+	// == 미완성 클래스 == //
+	// 미완성 클래스는 스스로 객체생성(인스턴스화)은 불가하지만 
+	// 일반적인 자식클래스로 생성된 객체를 저장하는 용도로는 사용이 가능하다!!!
 	
 	public static void main(String[] args) {
 
@@ -29,6 +29,13 @@ public class Main {
 		duck.setBirthYear(2018);
 		duck.setPrice(5000);
 		aniArr[2] = duck;			//가능
+
+	/*	
+		Animal ani = new Animal();  
+		// Animal 은 미완성 클래스(== 추상클래스, abstract class)이므로
+		// Animal 을 사용하여 객체(인스턴스)를 생성할 수 없다!!!
+		ani.cry();
+	*/
 		
 		for (int i=0; i<aniArr.length; i++) {
 			if(aniArr[i]!=null)
@@ -42,24 +49,6 @@ public class Main {
 				aniArr[i].cry();
 		}
 		
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-		
-		for (int i=0; i<aniArr.length; i++) {
-			if(aniArr[i]!=null) {
-				if(aniArr[i] instanceof Dog) {
-					// aniArr[i]에 들어있는 instance(객체)가 Dog라는 클래스로 만든 instance(객체)입니까?
-					((Dog) aniArr[i]).run();
-				}
-				if(aniArr[i] instanceof Cat) {
-					// aniArr[i]에 들어있는 instance(객체)가 Cat라는 클래스로 만든 instance(객체)입니까?
-					((Cat) aniArr[i]).jump();
-				}
-				if(aniArr[i] instanceof Duck) {
-					// aniArr[i]에 들어있는 instance(객체)가 Duck라는 클래스로 만든 instance(객체)입니까?
-					((Duck) aniArr[i]).swim();
-				}
-			}
-		}
 		
 	}//end of main() ----------------------------
 

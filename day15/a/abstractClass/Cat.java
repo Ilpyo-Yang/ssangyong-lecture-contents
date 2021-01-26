@@ -1,4 +1,4 @@
-package my.day14.c.polymorphism;
+package my.day15.a.abstractClass;
 
 public class Cat extends Animal {
 	
