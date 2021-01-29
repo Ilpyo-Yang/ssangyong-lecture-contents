@@ -98,10 +98,7 @@ public class MainLambda_2 {
 		double db3 = objH.area(10.5, 20.5);
 		System.out.println(db3);
 			// 31.0
-				
-			// æ»≥Á«œººø‰~~~
-		
-		
-	}
+
+	}// end of main( ) --------------------------------------------
 
 }
