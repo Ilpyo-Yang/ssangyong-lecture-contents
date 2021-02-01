@@ -73,7 +73,7 @@ public class HashMapMain_4 {
 		
 		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		
-		// === mbrMap 에 저장되어진 모든 key들을 읽어온다. ===
+		// === mbrMap 에 저장되어진 모든 key들을 읽어오는 첫번째 방법 ===
 		Set<String> keySets = mbrMap.keySet();
 		
 		for(String key : keySets) {
@@ -108,7 +108,100 @@ public class HashMapMain_4 {
 		
 		//  >>> leess 아이디는 이미 사용중입니다. 회원가입 실패!! <<<
 		
+		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		
+		// === mbrMap 에 저장되어진 모든 key들을 읽어오는 두번째 방법 ===
+		Set<String> keySets2 = mbrMap.keySet();
+		
+		Iterator<String> itra = keySets2.iterator();
+		// Iterator는 저장소가 아니라 Collection 에 저장되어진 요소(Element)를 읽어오는 용도로 쓰이는 것이다.
+		
+		while(itra.hasNext()) {
+			/*
+             	 itrator.hasNext() 은 
+             	 itrator 에서 현재 itrator 가 가지고 있는 여러 String 데이터중
+                 하나를 끄집어내서 존재하는지를 알아보는 것이다.
+                 존재하면 true , 존재하지 않으면 false 리턴해준다.
+                 그러므로 현재는 키의 갯수가 6개 이므로 6번 반복을 할 것이다.
+             */
+			String key = itra.next();
+			/*
+			 	 실제로 키값인 String 값을 itra 에서 끄집어 낸다.
+			 	 그러면 끄집어 낸 String 값은 더 이상 itra 에는 남아있지 않게 된다.
+			 */
+			System.out.println(key);
+		}
+		
+		System.out.println("\n~~~~~~~~~~~~ 또 한 번 더 ~~~~~~~~~~~~~~~~\n");
+		
+		while(itra.hasNext()) {
+			String key = itra.next();
+			System.out.println(key);
+		}
+		/*
+		 	itra 에는 더 이상 String 데이터가 존재하지 않으므로
+		 	처음부터 itra.hasNext() 은 false가 되어진다.
+		 	그래서 아무것도 출력이 되지 않는다.
+		 */
+		
+		System.out.println("\n~~~~~~~~~~~~ 다시 처음부터 해본다 ~~~~~~~~~~~~~~~~\n");
+		
+		Iterator<String> itra2 = keySets2.iterator();
+		
+		while(itra2.hasNext()) {
+			String key = itra2.next();
+			System.out.println(key);
+		}
+		
+		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		
+		Iterator<String> itra3 = keySets2.iterator();
+		
+		id = "kangkc";
+	    flag = false;
+	    
+		while(itra3.hasNext()) {
+			String existsId = itra3.next();
+			if(existsId.equals(existsId)) {
+				System.out.println(id+" 아이디가 이미 존재하므로 회원가입이 불가합니다.\n");
+				flag = true;
+				break;
+			}
+		}// end of while ------------------------------------------
+		
+		if(!flag) {
+			mbrMap.put(id, new Member(id, "qwer1234$", "강군천"));
+		}
+		
+		System.out.println("\n~~~~~~~~~ [퀴즈] mbrMap 에 저장되어진 모든 회원들의 정보를 출력 ~~~~~~~~~~~~~~~\n");
+		
+		Set<String> keyK = mbrMap.keySet();
+		for (String key : keyK) {
+			mbrMap.get(key).infoPrint();	
+		}
+		
+		System.out.println("\n----------------- 또는 ------------------\n");
 	
+		Iterator<String> it = keyK.iterator();
+		while(it.hasNext()) {
+			String key = it.next();
+			mbrMap.get(key).infoPrint();
+		}
+		
+		System.out.println("\n------------- key 값이 kangkc 인 Member 를 삭제하기 --------------\n");
+		mbrMap.remove("kangkc");
+		for (String key : keyK) {
+			mbrMap.get(key).infoPrint();	
+		}
+		
+		System.out.println("\n------------- mbrMap 에 저장된 모든 멤버 삭제하기 --------------\n");
+		mbrMap.clear();
+		for (String key : keyK) {
+			mbrMap.get(key).infoPrint();	
+		}
+		System.out.println("mbrMap.isEmpty() => "+mbrMap.isEmpty());
+		// mbrMap.isEmpty() => true
+		
 	}// end of main() ------------------------------------------------------------
 
 }
