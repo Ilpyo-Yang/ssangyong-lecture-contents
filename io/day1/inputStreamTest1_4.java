@@ -5,82 +5,82 @@ import java.io.IOException;
 public class inputStreamTest1_4 {
 
 /*
-	    ¡Ø Data Source (File, Å°º¸µå, ¿ø°Ý ÄÄÇ»ÅÍ)
-	  : µ¥ÀÌÅÍÀÇ ±Ù¿ø
+	    â€» Data Source (File, í‚¤ë³´ë“œ, ì›ê²© ì»´í“¨í„°)
+	  : ë°ì´í„°ì˜ ê·¼ì›
 	    
-	    ¡Ø Data Destination (ÆÄÀÏ, ¸ð´ÏÅÍ, ÇÁ¸°ÅÍ, ¸Þ¸ð¸®)
-	   : µ¥ÀÌÅÍ°¡ ÃÖÁ¾ÀûÀ¸·Î µµÂøÇÏ´Â °÷
+	    â€» Data Destination (íŒŒì¼, ëª¨ë‹ˆí„°, í”„ë¦°í„°, ë©”ëª¨ë¦¬)
+	   : ë°ì´í„°ê°€ ìµœì¢…ì ìœ¼ë¡œ ë„ì°©í•˜ëŠ” ê³³
 	
-	  Data Source¤·======>¤· ÇÁ·Î±×·¥ ¤·======>¤· Data Destination
-	                             ÀÔ·Â½ºÆ®¸²                    Ãâ·Â½ºÆ®¸²
+	  Data Sourceã…‡======>ã…‡ í”„ë¡œê·¸ëž¨ ã…‡======>ã…‡ Data Destination
+	                             ìž…ë ¥ìŠ¤íŠ¸ë¦¼                    ì¶œë ¥ìŠ¤íŠ¸ë¦¼
 	                              InputStream                  OutputStream          
 	   
 	    
 	  >>>>> System.in :
-	             ºÎ¸ðÅ¬·¡½º°¡ Ãß»óÅ¬·¡½º InputStream(±âº» ÀÔ·Â ½ºÆ®¸²) Å¸ÀÔÀÎ °ÍÀ¸·Î¼­ 
-	             Á¢¼ÓÁ¡(»¡´ë)ÀÌ Å°º¸µåÀÎ ÀÔ·Â ½ºÆ®¸²ÀÌ´Ù.
+	             ë¶€ëª¨í´ëž˜ìŠ¤ê°€ ì¶”ìƒí´ëž˜ìŠ¤ InputStream(ê¸°ë³¸ ìž…ë ¥ ìŠ¤íŠ¸ë¦¼) íƒ€ìž…ì¸ ê²ƒìœ¼ë¡œì„œ 
+	             ì ‘ì†ì (ë¹¨ëŒ€)ì´ í‚¤ë³´ë“œì¸ ìž…ë ¥ ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
 	             
-	    -- Node(Á¢¼ÓÁ¡)°¡ Å°º¸µåÀÎ ÀÔ·Â½ºÆ®¸²ÀÌ´Ù.
-	    -- 1 byte ±â¹Ý ½ºÆ®¸²ÀÌ´Ù.
-	    -- ÁÖ¿ä¸Þ¼Òµå :
+	    -- Node(ì ‘ì†ì )ê°€ í‚¤ë³´ë“œì¸ ìž…ë ¥ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+	    -- 1 byte ê¸°ë°˜ ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+	    -- ì£¼ìš”ë©”ì†Œë“œ :
 	          public int read() throws IOException
-	          ==> 1byte ¾¿ µ¥ÀÌÅÍ¸¦ ÀÐ¾î¼­
-	              1byte ¾¿ ¹ÝÈ¯ÇÏ°í
-	                          ÀÔ·Â¹ÞÀº Å°º¸µå°¡ Ctrl+C(À©µµ¿ì), Ctrl+D(À¯´Ð½º,¸®´ª½º)
-	                          ÀÌ¶ó¸é -1 À» ¹ÝÈ¯ÇØÁÖ´Â ¸Þ¼ÒµåÀÌ´Ù.
-	              read() ¸Þ¼ÒµåÀÇ ¸®ÅÏÅ¸ÀÔÀº byte °¡ ¾Æ´Ï¶ó int ÀÌ´Ù.
-	                          µ¥ÀÌÅÍ ÀÔ·ÂÀÇ ³¡À» ³ªÅ¸³»´Â °ÍÀ¸·Î -1 À» »ç¿ëÇÏ´Âµ¥
-	              Ctrl+C(À©µµ¿ì), Ctrl+D(À¯´Ð½º,¸®´ª½º)À» »ç¿ëÇÏ¸é µÈ´Ù.
-	                          ¶ÇÇÑ IOException ÀÌ ¹ß»ýÇÒ¼öµµ ÀÖÀ¸¹Ç·Î ¹Ýµå½Ã ¿¹¿ÜÃ³¸®¸¦ ²À ÇØÁÖ¾î¾ß ÇÑ´Ù.              
-	                          ±×·¡¼­ ÇöÀç ¿ì¸®´Â À©µµ¿ì¸¦ »ç¿ëÇÏ°í ÀÖÀ¸¹Ç·Î InputStream ÀÛ¾÷À» 
-	                          °­Á¦·Î Á¾·áÇÏ·Á¸é  Ctrl+C(À©µµ¿ì) ÇÏ¸é µÈ´Ù.
+	          ==> 1byte ì”© ë°ì´í„°ë¥¼ ì½ì–´ì„œ
+	              1byte ì”© ë°˜í™˜í•˜ê³ 
+	                          ìž…ë ¥ë°›ì€ í‚¤ë³´ë“œê°€ Ctrl+C(ìœˆë„ìš°), Ctrl+D(ìœ ë‹‰ìŠ¤,ë¦¬ëˆ…ìŠ¤)
+	                          ì´ë¼ë©´ -1 ì„ ë°˜í™˜í•´ì£¼ëŠ” ë©”ì†Œë“œì´ë‹¤.
+	              read() ë©”ì†Œë“œì˜ ë¦¬í„´íƒ€ìž…ì€ byte ê°€ ì•„ë‹ˆë¼ int ì´ë‹¤.
+	                          ë°ì´í„° ìž…ë ¥ì˜ ëì„ ë‚˜íƒ€ë‚´ëŠ” ê²ƒìœ¼ë¡œ -1 ì„ ì‚¬ìš©í•˜ëŠ”ë°
+	              Ctrl+C(ìœˆë„ìš°), Ctrl+D(ìœ ë‹‰ìŠ¤,ë¦¬ëˆ…ìŠ¤)ì„ ì‚¬ìš©í•˜ë©´ ëœë‹¤.
+	                          ë˜í•œ IOException ì´ ë°œìƒí• ìˆ˜ë„ ìžˆìœ¼ë¯€ë¡œ ë°˜ë“œì‹œ ì˜ˆì™¸ì²˜ë¦¬ë¥¼ ê¼­ í•´ì£¼ì–´ì•¼ í•œë‹¤.              
+	                          ê·¸ëž˜ì„œ í˜„ìž¬ ìš°ë¦¬ëŠ” ìœˆë„ìš°ë¥¼ ì‚¬ìš©í•˜ê³  ìžˆìœ¼ë¯€ë¡œ InputStream ìž‘ì—…ì„ 
+	                          ê°•ì œë¡œ ì¢…ë£Œí•˜ë ¤ë©´  Ctrl+C(ìœˆë„ìš°) í•˜ë©´ ëœë‹¤.
 	    
 	  >>>>> System.out :
-	              ºÎ¸ðÅ¬·¡½º°¡ Ãß»óÅ¬·¡½ºÀÎ OutputStream(±âº» Ãâ·Â ½ºÆ®¸²) Å¸ÀÔÀÎ °ÍÀ¸·Î¼­
-	              Á¢¼ÓÁ¡(»¡´ë)ÀÌ ÄÜ¼ÖÈ­¸é(¸ð´ÏÅÍ)ÀÎ Ãâ·Â ½ºÆ®¸²(PrintStream)ÀÌ´Ù.
+	              ë¶€ëª¨í´ëž˜ìŠ¤ê°€ ì¶”ìƒí´ëž˜ìŠ¤ì¸ OutputStream(ê¸°ë³¸ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼) íƒ€ìž…ì¸ ê²ƒìœ¼ë¡œì„œ
+	              ì ‘ì†ì (ë¹¨ëŒ€)ì´ ì½˜ì†”í™”ë©´(ëª¨ë‹ˆí„°)ì¸ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼(PrintStream)ì´ë‹¤.
 	                   
-	    -- Node(Á¢¼ÓÁ¡)°¡ ÄÜ¼ÖÈ­¸é(¸ð´ÏÅÍ)ÀÎ Ãâ·Â½ºÆ®¸²ÀÌ´Ù.
-	    -- 1byte ±â¹Ý ½ºÆ®¸²ÀÌ´Ù.
-	    -- ÁÖ¿ä ¸Þ¼Òµå : println(String str),
+	    -- Node(ì ‘ì†ì )ê°€ ì½˜ì†”í™”ë©´(ëª¨ë‹ˆí„°)ì¸ ì¶œë ¥ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+	    -- 1byte ê¸°ë°˜ ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+	    -- ì£¼ìš” ë©”ì†Œë“œ : println(String str),
 	                  print(String str),
 	                  write(int b)             
 */
 	
 	public static void main(String[] args) throws IOException {
 
-		// Å°º¸µå¿¡¼­ "´ëÇÑ¹Î±¹¼­¿ï½ÃÈ«´ëÀÔ±¸¿£ÅÍ" Çß´Ù¶ó¸é
-		// "´ëÇÑ¹Î±¹¼­"  "¿ï½ÃÈ«´ëÀÔ"  "±¸¿£ÅÍ"
+		// í‚¤ë³´ë“œì—ì„œ "ëŒ€í•œë¯¼êµ­ì„œìš¸ì‹œí™ëŒ€ìž…êµ¬ì—”í„°" í–ˆë‹¤ë¼ë©´
+		// "ëŒ€í•œë¯¼êµ­ì„œ"  "ìš¸ì‹œí™ëŒ€ìž…"  "êµ¬ì—”í„°"
 		//  10byte			10byte			4byte
 		
 		byte[] dataArr = new byte[10];
-		// dataArr º¯¼öÀÇ ¿ëµµ´Â »¡´ë(System.in, Å°º¸µå)¿¡¼­ ÈíÀÔÇÒ ¶§ ´ÜÀ§Å©±â¸¦ 10byte·Î ÇÏ´Â °ÍÀÌ´Ù.
+		// dataArr ë³€ìˆ˜ì˜ ìš©ë„ëŠ” ë¹¨ëŒ€(System.in, í‚¤ë³´ë“œ)ì—ì„œ í¡ìž…í•  ë•Œ ë‹¨ìœ„í¬ê¸°ë¥¼ 10byteë¡œ í•˜ëŠ” ê²ƒì´ë‹¤.
 		
 		int inputLength = 0;
-		// inputLength º¯¼öÀÇ ¿ëµµ´Â »¡´ë(System.in, Å°º¸µå)¿¡¼­ ÈíÀÔÇÑ ½ÇÁ¦ Å©±â¸¦ ³ªÅ¸³»´Â ¿ëµµÀÓ.
+		// inputLength ë³€ìˆ˜ì˜ ìš©ë„ëŠ” ë¹¨ëŒ€(System.in, í‚¤ë³´ë“œ)ì—ì„œ í¡ìž…í•œ ì‹¤ì œ í¬ê¸°ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ìš©ë„ìž„.
 		
 		int totalByte = 0;
 		
 		while( (inputLength = System.in.read(dataArr)) != -1 ) {
-			// Å°º¸µå·Î Ctrl+C(°­Á¦Á¾·á)¸¦ ´©¸£Áö ¾ÊÀ¸¸é °è¼Ó ½ÇÇàÇØ¶ó.
+			// í‚¤ë³´ë“œë¡œ Ctrl+C(ê°•ì œì¢…ë£Œ)ë¥¼ ëˆ„ë¥´ì§€ ì•Šìœ¼ë©´ ê³„ì† ì‹¤í–‰í•´ë¼.
 			
 		/*
-               System.in.read(dataArr)Àº 
-               ÀÔ·ÂÇÑ µ¥ÀÌÅÍ°¡ "´ëÇÑ¹Î±¹¼­¿ï½ÃÈ«´ëÀÔ±¸¿£ÅÍ" ÀÌ¶ó¸é
-               ÀÔ·ÂÇÑ ³»¿ë¿¡¼­ ¹è¿­ dataArrÀÇ Å©±â¸¸Å­(Áö±ÝÀº  10byte) ÀÐ¾îµéÀÎ´Ù(Áö±ÝÀº "´ëÇÑ¹Î±¹¼­"). 
-               ÀÐ¾îµéÀÎ "´ëÇÑ¹Î±¹¼­"À» ¹è¿­ dataArr ¿¡ ÀúÀå½ÃÅ°°í, ÀÐ¾îµéÀÎ Å©±â¸¦(Áö±ÝÀº 10byte) ¸®ÅÏ½ÃÄÑÁØ´Ù. 
+               System.in.read(dataArr)ì€ 
+               ìž…ë ¥í•œ ë°ì´í„°ê°€ "ëŒ€í•œë¯¼êµ­ì„œìš¸ì‹œí™ëŒ€ìž…êµ¬ì—”í„°" ì´ë¼ë©´
+               ìž…ë ¥í•œ ë‚´ìš©ì—ì„œ ë°°ì—´ dataArrì˜ í¬ê¸°ë§Œí¼(ì§€ê¸ˆì€  10byte) ì½ì–´ë“¤ì¸ë‹¤(ì§€ê¸ˆì€ "ëŒ€í•œë¯¼êµ­ì„œ"). 
+               ì½ì–´ë“¤ì¸ "ëŒ€í•œë¯¼êµ­ì„œ"ì„ ë°°ì—´ dataArr ì— ì €ìž¥ì‹œí‚¤ê³ , ì½ì–´ë“¤ì¸ í¬ê¸°ë¥¼(ì§€ê¸ˆì€ 10byte) ë¦¬í„´ì‹œì¼œì¤€ë‹¤. 
            
-               ¹Ýº¹¹®ÀÇ Ã¹¹øÂ°ÀÏ¶§
-               dataArr ¿¡´Â  "´ëÇÑ¹Î±¹¼­" °¡ µé¾î°¡°í, inputLength ¿¡´Â 10 ÀÌ µé¾î°£´Ù.
+               ë°˜ë³µë¬¸ì˜ ì²«ë²ˆì§¸ì¼ë•Œ
+               dataArr ì—ëŠ”  "ëŒ€í•œë¯¼êµ­ì„œ" ê°€ ë“¤ì–´ê°€ê³ , inputLength ì—ëŠ” 10 ì´ ë“¤ì–´ê°„ë‹¤.
          
-               ¹Ýº¹¹®ÀÇ µÎ¹øÂ°ÀÏ¶§
-               dataArr ¿¡´Â  "¿ï½ÃÈ«´ëÀÔ" ÀÌ µé¾î°¡°í, inputLength ¿¡´Â 10 ÀÌ µé¾î°£´Ù.
+               ë°˜ë³µë¬¸ì˜ ë‘ë²ˆì§¸ì¼ë•Œ
+               dataArr ì—ëŠ”  "ìš¸ì‹œí™ëŒ€ìž…" ì´ ë“¤ì–´ê°€ê³ , inputLength ì—ëŠ” 10 ì´ ë“¤ì–´ê°„ë‹¤.
             
-               ¹Ýº¹¹®ÀÇ ¼¼¹øÂ°ÀÏ¶§
-               dataArr ¿¡´Â  "±¸¿£ÅÍ" °¡ µé¾î°¡°í, inputLength ¿¡´Â 4 °¡ µé¾î°£´Ù.    
+               ë°˜ë³µë¬¸ì˜ ì„¸ë²ˆì§¸ì¼ë•Œ
+               dataArr ì—ëŠ”  "êµ¬ì—”í„°" ê°€ ë“¤ì–´ê°€ê³ , inputLength ì—ëŠ” 4 ê°€ ë“¤ì–´ê°„ë‹¤.    
          */
 			
 			System.out.write(dataArr, 0, inputLength);
-			// ¹è¿­ dataArr ¿¡ ÀúÀåµÈ µ¥ÀÌÅÍ¿¡¼­ ½ÃÀÛÁ¡ÀÌ 0¹øÂ° index ºÎÅÍ(Ã³À½ºÎÅÍ) inputLength byte ¼ö ¸¸Å­ Ãâ·ÂÇØ¶ó´Â ¸»ÀÌ´Ù.
+			// ë°°ì—´ dataArr ì— ì €ìž¥ëœ ë°ì´í„°ì—ì„œ ì‹œìž‘ì ì´ 0ë²ˆì§¸ index ë¶€í„°(ì²˜ìŒë¶€í„°) inputLength byte ìˆ˜ ë§Œí¼ ì¶œë ¥í•´ë¼ëŠ” ë§ì´ë‹¤.
 			System.out.flush();
 			
 			totalByte+=inputLength;		// 10+10+4
@@ -88,10 +88,10 @@ public class inputStreamTest1_4 {
 	
 		}// end of while ----------------------------------------
 		
-		System.out.println("ÃÑ : "+(totalByte-2)+"byte ÀÔ·ÂÇÔ");		// ¿£ÅÍ Å©±â¸¦ »©·Á°í +2¸¦ ÇÑ °ÍÀÓ.
+		System.out.println("ì´ : "+(totalByte-2)+"byte ìž…ë ¥í•¨");		// ì—”í„° í¬ê¸°ë¥¼ ë¹¼ë ¤ê³  +2ë¥¼ í•œ ê²ƒìž„.
 		
-		System.in.close(); 	// ÀÔ·Â³ëµå(Å°º¸µå) ¿¬°á ´Ý±â
-		System.out.close();   // ÀÔ·Â³ëµå(¸ð´ÏÅÍ) ¿¬°á ´Ý±â
+		System.in.close(); 	// ìž…ë ¥ë…¸ë“œ(í‚¤ë³´ë“œ) ì—°ê²° ë‹«ê¸°
+		System.out.close();   // ìž…ë ¥ë…¸ë“œ(ëª¨ë‹ˆí„°) ì—°ê²° ë‹«ê¸°
 		
 	}// end of main() -------------------------------------------
 

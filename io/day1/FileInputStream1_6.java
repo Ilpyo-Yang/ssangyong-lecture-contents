@@ -6,32 +6,32 @@ import java.util.Scanner;
 public class FileInputStream1_6 {
 
 /*
-	    ¡Ø Data Source (File, Å°º¸µå, ¿ø°İ ÄÄÇ»ÅÍ)
-	  : µ¥ÀÌÅÍÀÇ ±Ù¿ø
+	    â€» Data Source (File, í‚¤ë³´ë“œ, ì›ê²© ì»´í“¨í„°)
+	  : ë°ì´í„°ì˜ ê·¼ì›
 	    
-	    ¡Ø Data Destination (ÆÄÀÏ, ¸ğ´ÏÅÍ, ÇÁ¸°ÅÍ, ¸Ş¸ğ¸®)
-	   : µ¥ÀÌÅÍ°¡ ÃÖÁ¾ÀûÀ¸·Î µµÂøÇÏ´Â °÷
+	    â€» Data Destination (íŒŒì¼, ëª¨ë‹ˆí„°, í”„ë¦°í„°, ë©”ëª¨ë¦¬)
+	   : ë°ì´í„°ê°€ ìµœì¢…ì ìœ¼ë¡œ ë„ì°©í•˜ëŠ” ê³³
 	
-	  Data Source¤·======>¤· ÇÁ·Î±×·¥ ¤·======>¤· Data Destination
-	                             ÀÔ·Â½ºÆ®¸²                    Ãâ·Â½ºÆ®¸²
+	  Data Sourceã…‡======>ã…‡ í”„ë¡œê·¸ë¨ ã…‡======>ã…‡ Data Destination
+	                             ì…ë ¥ìŠ¤íŠ¸ë¦¼                    ì¶œë ¥ìŠ¤íŠ¸ë¦¼
 	                              InputStream                  OutputStream           
 	                              
-	 === c:\iotestdata\korea.txt ÆÄÀÏÀ» ÀĞ¾î¼­ ±× ³»¿ëÀ» ¸ğ´ÏÅÍ(ÄÜ¼ÖÈ­¸é)¿¡ Ãâ·ÂÇÏ´Â ¿¹Á¦ ===
+	 === c:\iotestdata\korea.txt íŒŒì¼ì„ ì½ì–´ì„œ ê·¸ ë‚´ìš©ì„ ëª¨ë‹ˆí„°(ì½˜ì†”í™”ë©´)ì— ì¶œë ¥í•˜ëŠ” ì˜ˆì œ ===
                   
-      1. µ¥ÀÌÅÍ¼Ò½º    : ÆÄÀÏ·Î ºÎÅÍ ÀĞ¾îµéÀÓ   (³ëµå½ºÆ®¸²: FileInputStream) 
-      2. µ¥ÀÌÅÍ¸ñÀûÁö : °á°ú¹°À» ¸ğ´ÏÅÍ¿¡ Ãâ·Â(³ëµå½ºÆ®¸²: System.out)
+      1. ë°ì´í„°ì†ŒìŠ¤    : íŒŒì¼ë¡œ ë¶€í„° ì½ì–´ë“¤ì„   (ë…¸ë“œìŠ¤íŠ¸ë¦¼: FileInputStream) 
+      2. ë°ì´í„°ëª©ì ì§€ : ê²°ê³¼ë¬¼ì„ ëª¨ë‹ˆí„°ì— ì¶œë ¥(ë…¸ë“œìŠ¤íŠ¸ë¦¼: System.out)
       
       >>>> FileInputStream
-         - Node ½ºÆ®¸²(Á¢¼ÓÁ¡ÀÌ ÆÄÀÏÀÎ ÀÔ·Â½ºÆ®¸²)
-         - 1byte ±â¹İ ½ºÆ®¸².
+         - Node ìŠ¤íŠ¸ë¦¼(ì ‘ì†ì ì´ íŒŒì¼ì¸ ì…ë ¥ìŠ¤íŠ¸ë¦¼)
+         - 1byte ê¸°ë°˜ ìŠ¤íŠ¸ë¦¼.
         
       >>>>> System.out :
-                    ºÎ¸ğÅ¬·¡½º°¡ Ãß»óÅ¬·¡½º OutputStream(±âº» Ãâ·Â ½ºÆ®¸²) Å¸ÀÔÀÎ °ÍÀ¸·Î¼­
-                    Á¢¼ÓÁ¡(»¡´ë)ÀÌ ÄÜ¼ÖÈ­¸é(¸ğ´ÏÅÍ)ÀÎ Ãâ·Â ½ºÆ®¸²(PrintStream)ÀÌ´Ù.
+                    ë¶€ëª¨í´ë˜ìŠ¤ê°€ ì¶”ìƒí´ë˜ìŠ¤ OutputStream(ê¸°ë³¸ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼) íƒ€ì…ì¸ ê²ƒìœ¼ë¡œì„œ
+                    ì ‘ì†ì (ë¹¨ëŒ€)ì´ ì½˜ì†”í™”ë©´(ëª¨ë‹ˆí„°)ì¸ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼(PrintStream)ì´ë‹¤.
                     
-       -- Node(Á¢¼ÓÁ¡)°¡ ÄÜ¼ÖÈ­¸é(¸ğ´ÏÅÍ)ÀÎ Ãâ·Â½ºÆ®¸²ÀÌ´Ù.
-       -- 1byte ±â¹İ ½ºÆ®¸²ÀÌ´Ù.
-       -- ÁÖ¿ä ¸Ş¼Òµå : println(String str),
+       -- Node(ì ‘ì†ì )ê°€ ì½˜ì†”í™”ë©´(ëª¨ë‹ˆí„°)ì¸ ì¶œë ¥ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+       -- 1byte ê¸°ë°˜ ìŠ¤íŠ¸ë¦¼ì´ë‹¤.
+       -- ì£¼ìš” ë©”ì†Œë“œ : println(String str),
 		                     print(String str),
 		                     write(int b)  
 */
@@ -40,15 +40,15 @@ public class FileInputStream1_6 {
 
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.print(">> ÀĞÀ» ÆÄÀÏÀÇ ÀÌ¸§(Àı´ë°æ·Î)À» ÀÔ·Â => ");
+		System.out.print(">> ì½ì„ íŒŒì¼ì˜ ì´ë¦„(ì ˆëŒ€ê²½ë¡œ)ì„ ì…ë ¥ => ");
 		String fileName = sc.nextLine();
-		// ÆÄÀÏ¸í ÀÔ·Â ==> µ¥ÀÌÅÍ¼Ò½º°¡ µÈ´Ù.
+		// íŒŒì¼ëª… ì…ë ¥ ==> ë°ì´í„°ì†ŒìŠ¤ê°€ ëœë‹¤.
 		// c:\iotestdata\korea.txt
 		
 		byte[] dataArr = new byte[64];
 		int inputLength = 0;
-		int totalByte = 0;		// byte ¼ö ´©Àû¿ëµµ
-		int cnt = 0;		// while ¹®ÀÇ ¹İº¹È½¼ö
+		int totalByte = 0;		// byte ìˆ˜ ëˆ„ì ìš©ë„
+		int cnt = 0;		// while ë¬¸ì˜ ë°˜ë³µíšŸìˆ˜
 		
 		try {
 		
@@ -56,16 +56,16 @@ public class FileInputStream1_6 {
 				
 			while( (inputLength = fist.read(dataArr)) != -1 ) {
 				/*
-		                fist.read(dataArr) ¸Ş¼Òµå´Â ÇØ´ç ÆÄÀÏ¿¡¼­ 
-		                µ¥ÀÌÅÍ¸¦ ¹è¿­ dataArr Å©±âÀÎ 64 byte ¾¿ Àß¶ó¼­ ÀĞ´Âµ¥  
-		                ½ÇÁ¦ ÀĞ¾î¿Â byte Å©±â(int Å¸ÀÔ)¸¦ inputLength ¿¡ ³Ö¾îÁØ´Ù.
-		                ÀÌ¾î¼­ ÀĞ¾î¿Â ³»¿ë¹°Àº ¹è¿­ dataArr ¿¡ ÀúÀå½ÃÅ²´Ù.
+		                fist.read(dataArr) ë©”ì†Œë“œëŠ” í•´ë‹¹ íŒŒì¼ì—ì„œ 
+		                ë°ì´í„°ë¥¼ ë°°ì—´ dataArr í¬ê¸°ì¸ 64 byte ì”© ì˜ë¼ì„œ ì½ëŠ”ë°  
+		                ì‹¤ì œ ì½ì–´ì˜¨ byte í¬ê¸°(int íƒ€ì…)ë¥¼ inputLength ì— ë„£ì–´ì¤€ë‹¤.
+		                ì´ì–´ì„œ ì½ì–´ì˜¨ ë‚´ìš©ë¬¼ì€ ë°°ì—´ dataArr ì— ì €ì¥ì‹œí‚¨ë‹¤.
 		               
-		                ¸¸¾à¿¡ ÆÄÀÏÀÇ ³»¿ë¹°¿¡¼­ ÀĞ¾îµéÀÏ µ¥ÀÌÅÍ°¡ ¾ø´Ù¶ó¸é  -1 À» ¸®ÅÏ½ÃÄÑÁØ´Ù.
-		                Áï, ÆÄÀÏ¼ÓÀÇ ³»¿ë¹°ÀÌ ³¡ÀÌ ¾Æ´Ï¶ó¸é °è¼ÓÇØ¼­ while{} ºÎºĞÀ» ½ÇÇàÇØ¶ó´Â ¸»ÀÌ´Ù.
+		                ë§Œì•½ì— íŒŒì¼ì˜ ë‚´ìš©ë¬¼ì—ì„œ ì½ì–´ë“¤ì¼ ë°ì´í„°ê°€ ì—†ë‹¤ë¼ë©´  -1 ì„ ë¦¬í„´ì‹œì¼œì¤€ë‹¤.
+		                ì¦‰, íŒŒì¼ì†ì˜ ë‚´ìš©ë¬¼ì´ ëì´ ì•„ë‹ˆë¼ë©´ ê³„ì†í•´ì„œ while{} ë¶€ë¶„ì„ ì‹¤í–‰í•´ë¼ëŠ” ë§ì´ë‹¤.
 		         */
 					
-				System.out.write(dataArr, 0, inputLength);		// ¸ğ´ÏÅÍ (ÄÜ¼ÖÈ­¸é)¿¡ Ãâ·Â	
+				System.out.write(dataArr, 0, inputLength);		// ëª¨ë‹ˆí„° (ì½˜ì†”í™”ë©´)ì— ì¶œë ¥	
 				System.out.flush();
 				
 				totalByte+=inputLength;
@@ -76,14 +76,14 @@ public class FileInputStream1_6 {
 			fist.close();
 			
 		} catch(FileNotFoundException e) {
-			System.out.println(fileName+" ÆÄÀÏÀº ¾ø½À´Ï´Ù.");
+			System.out.println(fileName+" íŒŒì¼ì€ ì—†ìŠµë‹ˆë‹¤.");
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 		
 		System.out.println("\n=======================");
-		System.out.println("ÃÑ "+totalByte+"byte");
-		System.out.println("¹İº¹È½¼ö "+cnt+"¹ø ¹İº¹ÇÔ");
+		System.out.println("ì´ "+totalByte+"byte");
+		System.out.println("ë°˜ë³µíšŸìˆ˜ "+cnt+"ë²ˆ ë°˜ë³µí•¨");
 		System.out.println("=======================");
 		
 		sc.close();
