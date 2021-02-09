@@ -933,6 +933,109 @@ from employees
 order by employee_id;
 
 
+--- *** ===== like 연산자 ===== *** ---
+select *
+from employees
+where department_id = 30;
+
+select *
+from employees
+where department_id like 30;
+
+/*
+      like 연산자와 함께 사용되어지는 % 와 _ 를 wild character 라고 부른다.
+      like 연산자와 함께 사용되어지는 % 의 뜻은 글자가 있든지(글자수와는 관계없음) 없든지 관계없다라는 말이고,
+      like 연산자와 함께 사용되어지는 _ 의 뜻은 반드시 아무글자 1개만을 뜻하는 것이다.
+*/
+
+-- employees 테이블에서 여자 1990년생과 남자 1991년생의 사원들만 사원번호, 사원명, 주민번호를 나타내세요.
+select employee_id as 사원번호,
+       first_name||' '||last_name as 사원명,
+       jubun as 주민번호
+from employees
+where jubun like '90____2%' or jubun like '91____1%';
+
+-- employees 테이블에서 first_name 컬럼의 값이 'J'로 시작하는 사원들만 사원번호, 이름, 성, 기본급여를 나타내세요.
+select employee_id as 사원번호,
+       first_name as 이름,
+       last_name as 성,
+       salary as 기본급여
+from employees
+where first_name like 'J%';
+
+-- employees 테이블에서 first_name 컬럼의 값이 'S'로 끝나는 사원들만 사원번호, 이름, 성, 기본급여를 나타내세요.
+select employee_id as 사원번호,
+       first_name as 이름,
+       last_name as 성,
+       salary as 기본급여
+from employees
+where first_name like '%s';
+
+-- employees 테이블에서 first_name 컬럼의 값 중에 'ee'라는 글자가 들어있는 사원들만 사원번호, 이름, 성, 기본급여를 나타내세요.
+select employee_id as 사원번호,
+       first_name as 이름,
+       last_name as 성,
+       salary as 기본급여
+from employees
+where first_name like '%ee%';
+
+-- employees 테이블에서 first_name 컬럼의 값 중에 'e'가 2개 이상 들어있는 사원들만 사원번호, 이름, 성, 기본급여를 나타내세요.
+select employee_id as 사원번호,
+       first_name as 이름,
+       last_name as 성,
+       salary as 기본급여
+from employees
+where first_name like '%e%e%';
+
+-- employees 테이블에서 last_name 컬럼의 값이 첫 글자는 'F'이고 두번째 글자는 아무거나 이고
+-- 세번째 글자는 소문자 'e'이며 네번째 부터는 글자가 있든지 없든지 상관없는 사원들만 사원번호, 이름, 성, 기본급여를 나타내세요.
+select employee_id as 사원번호,
+       first_name as 이름,
+       last_name as 성,
+       salary as 기본급여
+from employees
+where last_name like 'F_e%';
+
+
+  -- escape 문자
+  -- *** like 연산자와 함께 사용되어지는 % 와 _ 는 어떤 뜻을 가지고 있는 wild character 인데 
+  --     이러한 wild character 기능에서 탈출시키도록 해본다. *** --
+  create table tbl_watch
+  (watchname   Nvarchar2(10)    -- varchar2(10)은 최대 10byte까지만 허용.          '쌍용교육센터' --> 12byte  'oravle' --> 6byte
+  ,bigo        Nvarchar2(100)   -- Nvarchar2(10)은 글자수가 최대 10글자까지만 허용.  '쌍용교육센터' --> 6글자   'oravle' --> 6글자
+  );
+  
+  insert into tbl_watch(watchname, bigo)
+  values('금시계', '순금 99.99% 함유 고급시계');
+  
+  insert into tbl_watch(watchname, bigo)
+  values('은시계', '고객만족도 99.99점 획득한 고급시계');
+  
+  commit;
+  
+  select *
+  from tbl_watch;
+
+
+ -- tbl_watch 테이블에서 bigo 컬럼에 99.99% 라는 글자가 들어있는 행만 추출하세요 --
+  select *
+  from tbl_watch
+  where bigo like '%99.99\%%' escape '\';
+  -- escape 문자로 '\'을 주었으므로 '\' 다음에 나오는 % 1개는 wild character 기능에서 탈출시키므로 %는 진짜 퍼센트(%)로 인식된다.
+
+  select *
+  from tbl_watch
+  where bigo like '%99.992%%' escape '2';
+  -- escape 문자로 '2'을 주었으므로 '2' 다음에 나오는 % 1개는 wild character 기능에서 탈출시키므로 %는 진짜 퍼센트(%)로 인식된다.
+
+  select *
+  from tbl_watch
+  where bigo like '%99.99a%%' escape 'a';
+  -- escape 문자로 'a'을 주었으므로 'a' 다음에 나오는 % 1개는 wild character 기능에서 탈출시키므로 %는 진짜 퍼센트(%)로 인식된다.
+
+
+
+
 ----------------------------------------------------------------------------
     --->> 단일행 함수 <<---
     /*
@@ -1159,10 +1262,12 @@ order by employee_id;
    
    ---->> 2. 숫자함수 <<----
    
+   
    -- 2.1 mod : 나머지를 구해주는 것.
    select 5/2, mod(5,2), trunc(5/2)
    from dual;
    -- 2.5	1	2
+   
    
    -- 2.2 round : 반올림을 해주는 것.
    select 94.5467, round(94.5467), round(94.5467,0), round(94.5467,1), round(94.5467, 2),
@@ -1239,13 +1344,16 @@ order by employee_id;
           to_char(round((kor+eng+math)/3,1),'999.9') as 평균2
     from tbl_sungjuk;
     
+    
     -- 2.4 power
      select 2*2*2*2*2, power(2,5)
      from dual;
      
+     
      -- 2.5 sqrt
      select sqrt(4), sqrt(16), sqrt(2), sqrt(3) 
      from dual;
+    
     
      -- 2.6 sin, cos, tan, asin, acos, atan 
      select sin(90), cos(90), tan(90), 
@@ -1271,6 +1379,7 @@ order by employee_id;
      from dual;
      -- 1	0	-1
      
+     
      -- 2.10  *** ceil , floor ***
      -- ceil(실수) ==> 입력되어진 실수 보다 큰 최소의 정수를 나타내어준다. 
      -- ceil(정수) ==> 입력되어진 정수 그대로 나온다.
@@ -1286,71 +1395,6 @@ order by employee_id;
      
      
     
-    ---->> 5. 기타함수 <<----
-   
-    -- 5.1 case when then else end ==> !!!암기!!!
-    
-    select case 5-2
-           when 4 then '5-2=4 입니다.'
-           when 1 then '5-2=1 입니다.'
-           when 3 then '5-2=3 입니다.'
-           else '나는 수학을 몰라요ㅜㅜ'
-           end as 결과
-    from dual;
-    
-    select case
-           when 4>5 then '4는 5보다 큽니다.'
-           when 5>7 then '5는 7보다 큽니다.'
-           when 3>2 then '3는 2보다 큽니다.'
-           else '나는 수학을 몰라요ㅜㅜ'
-           end as 결과
-    from dual;
-    
-    
-    -- 5.2 decode ==> !!!암기!!!
-    select case 5-2
-           when 4 then '5-2=4입니다.'
-           when 1 then '5-2=1입니다.'
-           when 3 then '5-2=3입니다.'
-           else '나는 수학을 몰라요ㅜㅜ'
-           end as 결과1
-           ,
-           decode(5-2, 4, '5-2=4입니다.'
-                     , 1, '5-2=1입니다.'
-                     , 3, '5-2=3입니다.'
-                        , '나는 수학을 몰라요ㅜㅜ') as 결과2
-                           
-    from dual;
-    
-    
-  --------------------------------------------------------------------------------------------------
-   학번 성명 국어 영어 수학 총점 평균(소수부 첫째자리까지 나타내되 반올림) 학점(평균이 90이상 'A' ~ 60 미만이면 'F')
-   
-   select hakbun as 학번,
-          name as 이름,
-          kor as 국어, eng as 영어, math as 수학,
-          (kor+eng+math) as 총점,
-          round((kor+eng+math)/3,1) as 평균,
-          to_char(round((kor+eng+math)/3,1),'999.9') as 평균2,
-          case trunc(round((kor+eng+math)/3,1),-1)
-          when 100 then 'A'
-          when 90 then 'A'
-          when 80 then 'B'
-          when 70 then 'C'
-          when 60 then 'D'
-          else 'F'
-          end as 학점1,
-          decode(trunc(round((kor+eng+math)/3,1),-1), 100, 'A'
-                    , 90, 'A'
-                    , 80, 'B'
-                    , 70, 'C'
-                    , 60, 'D'
-                        , 'F') as 학점2
-           
-    from tbl_sungjuk;
-    
-    
-  
      
      
      
@@ -1430,6 +1474,459 @@ order by employee_id;
          , last_day(to_date('2020-02-08','yyyy-mm-dd'))
          , to_char(last_day(to_date('2020-02-08','yyyy-mm-dd')), 'yyyy-mm-dd')
     from dual;
+    
+    
+    -- 3.4 next_day(특정날짜,'일')   '일'~'토'
+    --     ==> 특정날짜로부터 다음번에 돌아오는 가장 빠른 '일'~'토'의 날짜를 알려주는 것이다.
+    select sysdate
+         , next_day(sysdate, '금')
+         , next_day(sysdate, '화')
+    from dual;
+    -- 21/02/09	    21/02/12	 21/02/16
+    
+    
+    -- 3.5 extract ==> 날짜에서 년, 월, 일을 숫자형태로 추출해주는 것이다.
+    select sysdate
+         , extract(year from sysdate), to_char(sysdate,'yyyy')
+         , extract(month from sysdate), to_char(sysdate,'mm')
+         , extract(day from sysdate), to_char(sysdate,'dd')
+    from dual;
+    -- 21/02/09	 2021	2021	2	02	9	09
+    -- 정렬이 왼쪽이라면 날짜 또는 문자, 오른쪽은 숫자
+    -- extract는 숫자, to_char는 문자
+    
+    
+    -- 3.6   to_yminterval , to_dsinterval 
+    --       to_yminterval 은 년 과 월을 나타내어 연산자가 + 이면 날짜에서 더해주는 것이고, 
+    --       to_dsinterval 은 일 시간 분 초를 나타내어 연산자가 + 이면 날짜에서 더해주는 것이다.
+    --       연산자에 - 를 쓰면 날짜를 빼주는 것이다. 
+    
+    --     현재일로부터 1년 2개월 3일 4시간 5분 6초 뒤를 나타내시오.
+    select to_char(sysdate, 'yyyy-mm-dd hh24-mi-ss') as 현재시각,
+           sysdate + to_yminterval('01-02') + to_dsinterval('003 04:05:06'),
+           to_char((sysdate + to_yminterval('01-02') + to_dsinterval('003 04:05:06')),'yyyy-mm-dd hh24-mi-ss') as "1년2개월3일4시간5분6초"
+    from dual; 
+    -- 2021-02-09 09-28-30	 22/04/12	 2022-04-12 13-33-36
+    
+    
+    
+     
+    
+     
+    ---->> 4. 변환함수 <<----
+    
+    -- 4.1 to_char() ==> 날짜를 문자형태로 변환, 숫자를 문자형태로 변환
+    
+    -- 날짜를 문자형태로 변환 --
+    select to_char(sysdate,'yyyy') as 년도
+          ,to_char(sysdate,'mm') as 월
+          ,to_char(sysdate,'dd') as 일
+          ,to_char(sysdate,'hh24') as "24시간"
+          ,to_char(sysdate,'hh am') as "12시간"
+          ,to_char(sysdate,'hh pm') as "12시간"
+          ,to_char(sysdate,'mi') as 분
+          ,to_char(sysdate,'ss') as 초
+          ,to_char(sysdate,'q') as 분기 -- 1월~3월 => 1, 4월~6월 => 2, 7월~9월 => 3, 10월~12월 => 4
+          -- 호환 때문에 day, dy 안 쓴다
+          ,to_char(sysdate,'day') as 요일명 -- 화요일(Windows), Tuesday(linux)
+          ,to_char(sysdate,'dy') as 줄인요일명 -- 화(Windows), Tue(linux)
+    from dual;
+    -- 2021	02	09	11	11 오전	11 오전	41	43	1	화요일	화
+
+    
+    select to_char(sysdate,'ddd'), to_char(sysdate,'dd'), to_char(sysdate,'d') 
+           -- sysdate의 년도 1월 1일부터(2021년 1월 1일부터) sysdate(현재는 2021년 2월 9일)까지 몇일째 인지를 알려주는 것이다.
+           -- sysdate의 월 1일부터(2021년 2월 1일부터) sysdate(현재는 2021년 2월 9일)까지 몇일째 인지를 알려주는 것이다.
+           -- sysdate의 주의 일요일부터(2021년 2월 7일부터) sysdate(현재는 2021년 2월 9일)까지 몇일째 인지를 알려주는 것이다.
+    from dual;
+    -- 040	09	3
+    
+    select to_char(sysdate,'sssss')  -- sysdate의 0시 0분 0초(현재 2021년 2월 9일 0시 0분 0초)부터 sysdate(2021년 2월 9일 오후 12시 18분 19초) 까지 흘러간 초를 알려주는 것이다.
+    from dual;
+    
+    -- 숫자를 문자형태로 변환 --
+    select 1234567890,
+           to_char(1234567890, '9,999,999,999'),
+           to_char(1234567890, '$9,999,999,999'),
+           to_char(1234567890, 'L9,999,999,999')  -- L은 그 나라의 화폐기호 이다.
+    from dual;
+    -- 1234567890	 1,234,567,890	  $1,234,567,890	     ￦1,234,567,890
+    
+    select to_char(100,'999.0'), to_char(95.7,'999.0')
+    from dual;
+    
+    
+    -- 4.2 to_date() ==> 문자를 날짜형태로 변환
+    select '2021-02-05'+1
+    from dual;
+    -- ORA-00936: missing expression
+    
+    select to_date('2021-02-05','yyyy-mm-dd')+1,
+           to_date('20210205','yyyymmdd')+1
+    from dual;
+    -- 21/02/06	21/02/06
+    
+    select to_date('2021-02-29','yyyy-mm-dd')+1
+    from dual;
+    -- ORA-01839: date not valid for month specified
+    -- 달력에 없는 날짜이므로 오류
+    
+    select to_date('2020-02-29','yyyy-mm-dd')+1
+    from dual;
+    -- 20/03/01
+    
+    
+    -- 4.3 to_number() ==> 숫자로 되어진 문자를 숫자형태로 변환
+    select 2+3, 2+'3', '3', to_number('3'),
+           2+to_number('3')
+           -- 숫자로의 형변환, 없어도 자동적으로 바뀜
+    from dual;
+    -- 5  5	 3	 3	 5
+    
+    select to_number('010')
+    from dual;
+    -- 10
+    
+    select to_number('홍길동')
+    from dual;
+    -- ORA-01722: invalid number
+    
+    
+    
+    
+    
+    ---->> 5. 기타함수 <<----
+   
+   
+    -- 5.1 case when then else end ==> !!!암기!!!
+    
+    select case 5-2
+           when 4 then '5-2=4 입니다.'
+           when 1 then '5-2=1 입니다.'
+           when 3 then '5-2=3 입니다.'
+           else '나는 수학을 몰라요ㅜㅜ'
+           end as 결과
+    from dual;
+    
+    select case
+           when 4>5 then '4는 5보다 큽니다.'
+           when 5>7 then '5는 7보다 큽니다.'
+           when 3>2 then '3는 2보다 큽니다.'
+           else '나는 수학을 몰라요ㅜㅜ'
+           end as 결과
+    from dual;
+    
+    
+    -- 5.2 decode ==> !!!암기!!!
+    select case 5-2
+           when 4 then '5-2=4입니다.'
+           when 1 then '5-2=1입니다.'
+           when 3 then '5-2=3입니다.'
+           else '나는 수학을 몰라요ㅜㅜ'
+           end as 결과1
+           ,
+           decode(5-2, 4, '5-2=4입니다.'
+                     , 1, '5-2=1입니다.'
+                     , 3, '5-2=3입니다.'
+                        , '나는 수학을 몰라요ㅜㅜ') as 결과2
+                           
+    from dual;
+    
+    
+  --------------------------------------------------------------------------------------------------
+   학번 성명 국어 영어 수학 총점 평균(소수부 첫째자리까지 나타내되 반올림) 학점(평균이 90이상 'A' ~ 60 미만이면 'F')
+   
+   select hakbun as 학번,
+          name as 이름,
+          kor as 국어, eng as 영어, math as 수학,
+          (kor+eng+math) as 총점,
+          round((kor+eng+math)/3,1) as 평균,
+          to_char(round((kor+eng+math)/3,1),'999.9') as 평균2,
+          case trunc(round((kor+eng+math)/3,1),-1)
+          when 100 then 'A'
+          when 90 then 'A'
+          when 80 then 'B'
+          when 70 then 'C'
+          when 60 then 'D'
+          else 'F'
+          end as 학점1,
+          decode(trunc(round((kor+eng+math)/3,1),-1), 100, 'A'
+                    , 90, 'A'
+                    , 80, 'B'
+                    , 70, 'C'
+                    , 60, 'D'
+                        , 'F') as 학점2
+           
+    from tbl_sungjuk;
+    
+    
+    -- 5.3 greatest, least
+    select greatest(10,90,100,80), least(10,90,100,80)
+    from dual;
+    -- 나열되어진 것들 중에서 가장 큰 값을 알려주는 것
+    -- 나열되어진 것들 중에서 가장 작은 값을 알려주는 것
+    
+    select greatest('김유신','윤봉길','허준','고수'),
+           least('김유신','윤봉길','허준','고수')
+    from dual;
+    -- 허준   고수
+  
+    
+    -- 5.4 rank 등수(석차)구하기, dense_rank 서열구하기
+    select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명
+           nvl(salary+(salary*commission_pct),salary) as 월급,
+           rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수,
+           dense_rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수
+    from employees;
+    
+    
+    select department_id as 부서번호,
+           employee_id as 사원번호,
+           first_name||' '||last_name as 사원명
+           nvl(salary+(salary*commission_pct),salary) as 월급,
+           
+           rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급전체등수,
+           dense_rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급전체서열,
+           
+           rank() over(partition by department_id order by nvl(salary+(salary*commission_pct),salary) desc) as 월급부서내등수,
+           dense_rank() over(partition by department_id order by nvl(salary+(salary*commission_pct),salary) desc) as 월급부서내서열
+    from employees
+    order by 1;
+  
+    
+    -- 5.5 lag, lead(게시판에서 특정글을 조회할 때 많이 사용한다) --
+    
+    
+  
+  
+    ------------------------------------------------------------------------  
+    ------------------------------------------------------------------------
+    
+         
+/*
+   [퀴즈]
+   employees 테이블에서 모든 사원들에 대해
+   사원번호, 사원명, 주민번호, 성별, 현재나이, 월급, 입사일자, 정년퇴직일 을 나타내세요.
+
+   여기서 정년퇴직일이라 함은 
+   해당 사원의 생월이 3월에서 8월에 태어난 사람은 
+   해당사원의 나이(한국나이)가 63세가 되는 년도의 8월 31일로 하고,
+   해당사원의 생월이 9월에서 2월에 태어난 사람은 
+   해당사원의 나이(한국나이)가 63세가 되는 년도의 2월말일(2월28일 또는 2월29일)로 한다.
+*/
+
+
+select employee_id AS 사원번호
+       , first_name || ' ' || last_name AS 사원명
+       , jubun AS 주민번호
+      
+       , case substr(jubun,7,1)
+         when '1' then '남'
+         when '3' then '남'
+         else '여'
+         end AS 성별1
+         
+       , decode(substr(jubun,7,1), '1', '남'
+                                 , '3', '남'
+                                      , '여') AS 성별2  
+                                      
+       , case 
+         when substr(jubun,7,1) in('2','4') then '여'
+         else '남'
+         end AS 성별3
+         
+       --  현재년도 - (태어난년도) + 1  AS 현재나이  
+       --  태어난년도는 주민번호에서 성별을 알수 있는 값이 '1' 또는 '2' 이라면 1900년대생이고
+       --             주민번호에서 성별을 알수 있는 값이 '3' 또는 '4' 이라면 2000년대생이다.
+       --  1900 또는 2000 + (주민번호 앞에서 2자리) 하면 태어난년도가 나올것이다.
+       , extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1 AS 현재나이  
+         
+       , nvl(salary + (salary * commission_pct), salary) AS 월급  
+       
+       , to_char(hire_date , 'yyyy-mm-dd') AS 입사일자
+       
+       -- 사원의 현재나이가 60세 이라면 3년(3*12개월)뒤 정년퇴직. add_months(현재날짜, 3*12) ==>  add_months(현재날짜, (63-60)*12)  ==>  add_months(현재날짜, (63-현재나이)*12)
+       -- 사원의 현재나이가 55세 이라면 8년(8*12개월)뒤 정년퇴직. add_months(현재날짜, 8*12) ==>  add_months(현재날짜, (63-55)*12)  ==>  add_months(현재날짜, (63-현재나이)*12)
+       -- 
+   --  , add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12)  
+       
+   --  , to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+   --           , 'yyyy') || '-08-01'  -- || '-02-01'
+                
+   --  , to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+   --           , 'yyyy') || case when substr(jubun,3,2) between '03' and '08' then '-08-01' else '-02-01' end        
+       
+   --  , last_day( to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+   --           , 'yyyy') || case when substr(jubun,3,2) between '03' and '08' then '-08-01' else '-02-01' end        
+   --   )
+         
+       , to_char( last_day( to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+                , 'yyyy') || case when substr(jubun,3,2) between '03' and '08' then '-08-01' else '-02-01' end        
+         ), 'yyyy-mm-dd') AS 정년퇴직일 
+         
+  from employees
+  order by 1;
+  
+        
+  select 63-(EXTRACT(YEAR FROM sysdate)-case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 + substr(jubun,1,2)+1)
+  from employees
+  order by 1;
+    
+    -- [퀴즈] --
+    create table tbl_loan
+    (gejanum        varchar2(10)   -- 통장번호
+    ,loanmoney      number         -- 대출금
+    ,interestrate   number(2,2)    -- 이자율   number(2,2) ==> -0.99~0.99
+    ,paymentdate    varchar2(2)    -- 이자를내는날짜 '01', '06', '16', '21', 매월말일 '00'
+    );           
+    
+    insert into tbl_loan(gejanum, loanmoney, interestrate, paymentdate)
+    values('10-1234-01', 5000, 0.03, '01');
+    
+    insert into tbl_loan(gejanum, loanmoney, interestrate, paymentdate)
+    values('10-1234-02', 5000, 0.03, '06');
+    
+    insert into tbl_loan(gejanum, loanmoney, interestrate, paymentdate)
+    values('10-1234-03', 5000, 0.03, '16');
+    
+    insert into tbl_loan(gejanum, loanmoney, interestrate, paymentdate)
+    values('10-1234-04', 5000, 0.03, '21');
+    
+    insert into tbl_loan(gejanum, loanmoney, interestrate, paymentdate)
+    values('10-1234-05', 5000, 0.03, '00');
+    
+    commit;
+    
+    select *
+    from tbl_loan;
+    
+    
+    -- 이자납부일이 '토요일','일요일'이라면 '월요일' 납부하도록 만든다.
+    
+    -- *** 해당 날짜에 대한 요일명을 알아오는 것 *** --
+    select to_char(sysdate,'day'),  -- 화요일
+           to_char(sysdate,'dy'),   -- 화
+           to_char(sysdate,'dy')    -- 3
+    from dual;
+    
+    select decode(to_char(sysdate,'d'),'1','일'
+                                       ,'2','월' 
+                                       ,'3','화'
+                                       ,'4','수'
+                                       ,'5','목'
+                                       ,'6','금'
+                                       ,'7','토') as 오늘의요일명
+    from dual;
+    
+    -- 통장번호 이자를내는날짜 이번달이자납부일 
+    select gejanum as 통장번호,
+           paymentdate,
+           to_char(sysdate,'yyyy-mm-')||paymentdate,
+           to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate)
+    from tbl_loan;
+    
+    /*
+        decode(to_char(이자납부날짜,'d'),'1',이자납부날짜+1
+                                      ,'7',이자납부날짜+2
+                                          ,이자납부날짜) as 실제이자납부날짜
+    */
+    
+    -- *** 다시!!!!!!!!!!!!!!!!!!!1
+    select gejanum as 통장번호,
+           paymentdate,
+           to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate)as 이자납부날짜,
+           to_date(to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate)),
+           decode(to_char(to_date(to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate)),'d'),'1',to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate))+1
+                                                                                                                                         ,'7',to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate))+2
+                                                                                                                                             ,to_char(sysdate,'yyyy-mm-')||decode(paymentdate,'00',to_char(last_day(sysdate),'dd'),paymentdate))) as 실제이자납부일자                                                                                                    
+    from tbl_loan;
+     
+
+    select gejanum, paymentdate
+             
+         , to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                    , paymentdate)
+                                                                    
+         , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                             , paymentdate) , 'yyyy-mm-dd') AS 이달이자납부날짜                                                         
+     /*                                                            
+         , decode(to_char(이달이자납부날짜,'d') , '1', 이달이자납부날짜+1
+                                              , '7', 이달이자납부날짜+2
+                                                   , 이달이자납부날짜) AS 실제이달이자납부일자
+     */ 
+         , decode(to_char( to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                                             , paymentdate) , 'yyyy-mm-dd') ,'d') 
+                                    , '1', to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                                                             , paymentdate) , 'yyyy-mm-dd')+1
+                                    , '7', to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                                                             , paymentdate) , 'yyyy-mm-dd')+2
+                                         , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                                                             , paymentdate) , 'yyyy-mm-dd')) AS 실제이달이자납부일자
+         
+        , to_date( to_char( add_months(sysdate, -1) , 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day( add_months(sysdate, -1) ), 'dd') 
+                                                                                            , paymentdate) , 'yyyy-mm-dd') AS 전달이자납부날짜 
+         
+        /*                                                            
+             , decode(to_char(전달이자납부날짜,'d') , '1', 전달이자납부날짜+1
+                                                  , '7', 전달이자납부날짜+2
+                                                       , 전달이자납부날짜) AS 전달이자납부일자
+        */ 
+        
+         , decode(to_char( to_date( to_char(add_months(sysdate,-1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(add_months(sysdate,-1)), 'dd') 
+                                                                                                            , paymentdate) , 'yyyy-mm-dd') ,'d') 
+                                    , '1', to_date( to_char(add_months(sysdate,-1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(add_months(sysdate,-1)), 'dd') 
+                                                                                                            , paymentdate) , 'yyyy-mm-dd')+1
+                                    , '7', to_date( to_char(add_months(sysdate,-1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(add_months(sysdate,-1)), 'dd') 
+                                                                                                            , paymentdate) , 'yyyy-mm-dd')+2
+                                         , to_date( to_char(add_months(sysdate,-1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(add_months(sysdate,-1)), 'dd') 
+                                                                                                            , paymentdate) , 'yyyy-mm-dd')) AS 실제전달이자납부일자
+    from tbl_loan;     
+    
+    
+    
+    
+    
+---- **** !!!!! 아주 중요중요 아주 !!!!! **** ----
+-- 복잡한 SQL(Structured Query Language) == 정형화된 질의어) 을 간단하게 만들어주는 것이
+-- VIEW 이다.
+-- VIEW는 테이블은 아니지만 select 되어진 결과물을 마치 테이블처럼 보는 것
+     
+-- VIEW는 2가지 종류가 있다.
+-- 첫번째로 inline view가 있고, 두번째로 stored view가 있다.
+
+select gejanum, paymentdate
+                                                                      
+     , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS currentPaymentDate
+     
+     , to_date( to_char(add_months(sysdate, -1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day( add_months(sysdate, -1) ), 'dd') 
+                                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS prevPaymentDate
+from tbl_loan; 
+
+
+select V.gejanum,
+       V.currentPaymentDate,
+       decode(to_char(V.currentPaymentDate,'d') , '1', V.currentPaymentDate+1
+                                                , '7', V.currentPaymentDate+2
+                                                     , V.currentPaymentDate) AS 실제이달이자납부일자,
+       v.prevPaymentDate,
+       decode(to_char(v.prevPaymentDate,'d') , '1', v.prevPaymentDate+1
+                                             , '7', v.prevPaymentDate+2
+                                                  , v.prevPaymentDate) AS 실제전달이자납부일자
+from
+(select gejanum, paymentdate
+                                                                      
+     , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS currentPaymentDate
+     
+     , to_date( to_char(add_months(sysdate, -1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day( add_months(sysdate, -1) ), 'dd') 
+                                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS prevPaymentDate
+ from tbl_loan)V;   -- V가 inline view 이다.
      
     
     
