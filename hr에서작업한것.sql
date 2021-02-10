@@ -1696,7 +1696,7 @@ where last_name like 'F_e%';
   
     
     -- 5.5 lag, lead(게시판에서 특정글을 조회할 때 많이 사용한다) --
-    
+    --     아래에서 한다.
     
   
   
@@ -1894,6 +1894,9 @@ select employee_id AS 사원번호
      
 -- VIEW는 2가지 종류가 있다.
 -- 첫번째로 inline view가 있고, 두번째로 stored view가 있다.
+-- inline view 는 select 구문을 괄호( )를 쳐서 별칭(예:V)을 부여한 것을 말한다.
+-- stored view 는 저장된 뷰로써 언제든지 다시 재활용이 가능한 것이다. 
+
 
 select gejanum, paymentdate
                                                                       
@@ -1907,6 +1910,7 @@ select gejanum, paymentdate
 from tbl_loan; 
 
 
+--- *** Inline View 생성하기 *** ---
 select V.gejanum,
        V.currentPaymentDate,
        decode(to_char(V.currentPaymentDate,'d') , '1', V.currentPaymentDate+1
@@ -1928,7 +1932,1268 @@ from
        AS prevPaymentDate
  from tbl_loan)V;   -- V가 inline view 이다.
      
+
+--- *** Stored View 생성하기 *** ---
+/*
+    create or replace view 뷰명  --> 뷰명으로 되어진 view가 없으면 create(생성), 있으면 replace(수정)해라.
+    as
+    select 문장;
+*/
+
+create or replace view view_loan
+as
+select V.gejanum,
+       V.currentPaymentDate,
+       decode(to_char(V.currentPaymentDate,'d') , '1', V.currentPaymentDate+1
+                                                , '7', V.currentPaymentDate+2
+                                                     , V.currentPaymentDate) AS Real_CurrentDate,
+       v.prevPaymentDate,
+       decode(to_char(v.prevPaymentDate,'d') , '1', v.prevPaymentDate+1
+                                             , '7', v.prevPaymentDate+2
+                                                  , v.prevPaymentDate) AS Real_PrevDate
+from
+(select gejanum, paymentdate
+                                                                      
+     , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS currentPaymentDate
+     
+     , to_date( to_char(add_months(sysdate, -1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day( add_months(sysdate, -1) ), 'dd') 
+                                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS prevPaymentDate
+ from tbl_loan)V;   -- V가 inline view 이다.
+-- View VIEW_LOAN이(가) 생성되었습니다.     
+    
+  select *
+  from view_loan; 
+  
+  desc view_loan;
+  /*
+    이름                 널? 유형           
+    ------------------ -- ------------ 
+    GEJANUM               VARCHAR2(10) 
+    CURRENTPAYMENTDATE    DATE         
+    REAL_CURRENTDATE      DATE         
+    PREVPAYMENTDATE       DATE         
+    REAL_PREVDATE         DATE 
+  */
+  
+  -- 현재 오라클 서버에 접속되어진 사용자(지금은 hr)가 만든 테이블 목록을 조회하겠다
+  select * 
+  from tab;
+  
+  select gejanum
+        ,currentpaymentdate
+        ,case when to_char(real_currentdate, 'mm-dd') in ('01-01','03-01','05-05','06-06','08-15','10-03','10-09','12-25')
+              then real_currentdate+1
+              else real_currentdate
+         end as RealCurrentdate
+        ,prevpaymentdate
+        ,case when to_char(real_prevdate, 'mm-dd') in ('01-01','03-01','05-05','06-06','08-15','10-03','10-09','12-25')
+              then real_prevdate+1
+              else real_prevdate
+         end as RealPrevdate
+  from view_loan;
+  
+  
+  select T.gejanum
+        ,T.currentpaymentdate
+        ,case to_char(T.RealCurrentdate,'d')
+             when '1' then T.RealCurrentdate+1
+             when '7' then T.RealCurrentdate+2
+             else T.RealCurrentdate
+         end as 실제이번달납부일자
+        ,T.prevpaymentdate
+        ,case to_char(T.RealPrevdate,'d')
+             when '1' then T.RealPrevdate+1
+             when '7' then T.RealPrevdate+2
+             else T.RealPrevdate
+         end as 실제저번달납부일자
+        ,case to_char(T.RealCurrentdate,'d')
+             when '1' then T.RealCurrentdate+1
+             when '7' then T.RealCurrentdate+2
+             else T.RealCurrentdate
+         end -
+         case to_char(T.RealPrevdate,'d')
+             when '1' then T.RealPrevdate+1
+             when '7' then T.RealPrevdate+2
+             else T.RealPrevdate
+         end as 대출일수 
+  from
+  (
+      select gejanum
+            ,currentpaymentdate
+            ,case when to_char(real_currentdate, 'mm-dd') in ('01-01','03-01','05-05','06-06','08-15','10-03','10-09','12-25')
+                  then real_currentdate+1
+                  else real_currentdate
+             end as RealCurrentdate
+            ,prevpaymentdate
+            ,case when to_char(real_prevdate, 'mm-dd') in ('01-01','03-01','05-05','06-06','08-15','10-03','10-09','12-25')
+                  then real_prevdate+1
+                  else real_prevdate
+             end as RealPrevdate
+      from view_loan
+  )T;
+  
+    
+--- *** Stored View 의 원본소스 알아보기 *** ---
+select *
+from user_views
+where view_name = 'VIEW_LOAN';
+-- 데이터값은 대문자로 작성해야 한다.
+
+select text
+from user_views
+where view_name = 'VIEW_LOAN';
+/*
+"select V.gejanum,
+       V.currentPaymentDate,
+       decode(to_char(V.currentPaymentDate,'d') , '1', V.currentPaymentDate+1
+                                                , '7', V.currentPaymentDate+2
+                                                     , V.currentPaymentDate) AS Real_CurrentDate,
+       v.prevPaymentDate,
+       decode(to_char(v.prevPaymentDate,'d') , '1', v.prevPaymentDate+1
+                                             , '7', v.prevPaymentDate+2
+                                                  , v.prevPaymentDate) AS Real_PrevDate
+from
+(select gejanum, paymentdate
+                                                                      
+     , to_date( to_char(sysdate, 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day(sysdate), 'dd') 
+                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS currentPaymentDate
+     
+     , to_date( to_char(add_months(sysdate, -1), 'yyyy-mm-') || decode( paymentdate, '00', to_char( last_day( add_months(sysdate, -1) ), 'dd') 
+                                                                                         , paymentdate) , 'yyyy-mm-dd') 
+       AS prevPaymentDate
+ from tbl_loan)V"
+*/
+
+
+--- *** Stored View를 삭제하기 *** ---
+select *
+from view_loan;
+
+drop view view_loan;
+-- View VIEW_LOAN이(가) 삭제되었습니다.
+
+select *
+from view_loan;
+-- ORA-00942: table or view does not exist
+
+/*
+   [퀴즈]
+   employees 테이블에서 모든 사원들에 대해
+   사원번호, 사원명, 주민번호, 성별, 현재나이, 월급, 입사일자, 정년퇴직일, 정년까지근무개월수 을 나타내세요.
+
+   여기서 정년퇴직일이라 함은 
+   해당 사원의 생월이 3월에서 8월에 태어난 사람은 
+   해당사원의 나이(한국나이)가 63세가 되는 년도의 8월 31일로 하고,
+   해당사원의 생월이 9월에서 2월에 태어난 사람은 
+   해당사원의 나이(한국나이)가 63세가 되는 년도의 2월말일(2월28일 또는 2월29일)로 한다.
+   
+   정년까지근무개월수 ==> 입사일자로부터 정년퇴직일가지 개월차이
+   months_between(정년퇴직일, 입사일자)
+*/
+
+select V.사원번호
+      ,V.사원명
+      ,V.주민번호
+      ,V.성별
+      ,V.현재나이
+      ,V.월급
+      ,V.입사일자
+      ,V.정년퇴직일
+      ,trunc(months_between( to_date(V.정년퇴직일,'yyyy-mm-dd'),to_date(V.입사일자,'yyyy-mm-dd'))) as 정년까지근무개월수
+      ,trunc(trunc(months_between( to_date(V.정년퇴직일,'yyyy-mm-dd'),to_date(V.입사일자,'yyyy-mm-dd'))) /12) as 정년까지근무년수
+      ,trunc(trunc(months_between( to_date(V.정년퇴직일,'yyyy-mm-dd'),to_date(V.입사일자,'yyyy-mm-dd'))) /12)*V.월급 as 정년퇴직금
+from
+(
+    select employee_id AS 사원번호
+           , first_name || ' ' || last_name AS 사원명
+           , jubun AS 주민번호        
+           , case 
+             when substr(jubun,7,1) in('2','4') then '여'
+             else '남'
+             end AS 성별
+           , extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1 AS 현재나이  
+             
+           , nvl(salary + (salary * commission_pct), salary) AS 월급  
+           
+           , to_char(hire_date , 'yyyy-mm-dd') AS 입사일자
+              
+           , to_char( last_day( to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+                    , 'yyyy') || case when substr(jubun,3,2) between '03' and '08' then '-08-01' else '-02-01' end        
+             ), 'yyyy-mm-dd') AS 정년퇴직일 
+             
+     from employees
+)V;
+
+
+-- select 절에서 v는 생략가능하다.
+-- select employee_id,사원명,주민번호,성별,현재나이,월급,입사일자,정년퇴직일 -- 오류!!
+select 사원번호,사원명,주민번호,성별,현재나이,월급,입사일자,정년퇴직일
+      ,trunc(months_between( to_date(정년퇴직일,'yyyy-mm-dd'),to_date(입사일자,'yyyy-mm-dd'))) as 정년까지근무개월수
+      ,trunc(trunc(months_between( to_date(정년퇴직일,'yyyy-mm-dd'),to_date(입사일자,'yyyy-mm-dd'))) /12) as 정년까지근무년수
+      ,trunc(trunc(months_between( to_date(정년퇴직일,'yyyy-mm-dd'),to_date(입사일자,'yyyy-mm-dd'))) /12)*V.월급 as 정년퇴직금
+from
+(
+    select employee_id AS 사원번호
+           , first_name || ' ' || last_name AS 사원명
+           , jubun AS 주민번호        
+           , case 
+             when substr(jubun,7,1) in('2','4') then '여'
+             else '남'
+             end AS 성별
+           , extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1 AS 현재나이  
+             
+           , nvl(salary + (salary * commission_pct), salary) AS 월급  
+           
+           , to_char(hire_date , 'yyyy-mm-dd') AS 입사일자
+              
+           , to_char( last_day( to_char( add_months(sysdate, (63-(extract(year from sysdate) - ( case when substr(jubun,7,1) in('1','2') then 1900 else 2000 end + substr(jubun,1,2) ) + 1))*12) 
+                    , 'yyyy') || case when substr(jubun,3,2) between '03' and '08' then '-08-01' else '-02-01' end        
+             ), 'yyyy-mm-dd') AS 정년퇴직일 
+             
+     from employees
+)V;
+
+
+create table tbl_members
+(userid    varchar2(20)
+,passwd    varchar2(20)
+,name      varchar2(20)
+,addr      varchar2(100)
+);
+
+insert into tbl_members(userid, passwd, name, addr)
+values('kimys','abcd','김유신','서울');
+
+insert into tbl_members(userid, passwd, name, addr)
+values('young2','abcd','이영이','서울');
+
+insert into tbl_members(userid, passwd, name, addr)
+values('leesa','abcd','이에리사','서울');
+
+insert into tbl_members(userid, passwd, name, addr)
+values('park','abcd','박이남','서울');
+
+insert into tbl_members(userid, passwd, name, addr)
+values('leebon','abcd','이본','서울');
+
+commit;
+
+select *
+from tbl_members;
+
+select count(*)
+from tbl_members;
+-- select 되어져 나온 결과물의 행의 개수 5개행
+
+
+select *
+from tbl_members
+where userid = 'kimys' and passwd = 'abcd';
+
+select count(*)
+from tbl_members
+where userid = 'kimys' and passwd = 'abcd';
+-- select 되어져 나온 결과물의 행의 개수 1개행
+
+
+select *
+from tbl_members
+where userid = 'kimys' and passwd = '1234';
+
+
+select count(*)
+from tbl_members
+where userid = 'kimys' and passwd = '1234';
+-- select 되어져 나온 결과물의 행의 개수 0개행
+
+
+select count(*)
+from tbl_members
+where userid = 'aflejomsa' and passwd = 'abcd';
+-- select 되어져 나온 결과물의 행의 개수 0개행
+
+
+/*
+    tbl_members 테이블에서
+    userid 및 passwd 가 모두 올바르면 '로그인성공' 을 보여주고,
+    userid 는 올바르지만 passwd 가 틀리면 '암호가 틀립니다' 을 보여주고,
+    userid 가 틀리면 '아이디가 존재하지 않습니다' 을 보여주려고 한다.
+*/
+
+select case (select count(*)
+             from tbl_members
+             where userid = 'kimys' and passwd = 'abcd')
+       when 1 then '로그인성공'
+       else (case (select count(*)
+                   from tbl_members
+                   where userid = 'kimys')
+             when 1 then '암호가 틀립니다'
+             else '아이디가 존재하지 않습니다'
+             end)
+       end as 로그인결과
+from dual;
+
+
+
+
+
+create table tbl_board         
+(boardno       number          -- 글번호
+,subject       varchar2(4000)  -- 글제목  varchar2의 최대크기는 4000byte이다. 4000 보다 크면 오류!!
+,content       varchar2(4000) -- 글내용   Nvarchar2의 최대크기는 2000byte이다. 2000 보다 크면 오류!!
+,userid        varchar2(40)    -- 글쓴이의 ID  
+,registerday   date            -- 작성일자
+,readcount     number(10)      -- 조회수               
+);
+-- ORA-00910: specified length too long for its datatype
+
+
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(1, '안녕하세요', '글쓰기 연습입니다', 'leess', sysdate, 0);
+ -- sysdate 는 현재시각을 말한다. 
+ 
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(2, '반갑습니다', '모두 취업대박 나십시오', 'eomjh', sysdate, 0);
+  
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(3, '건강하세요', '로또 1등을 기원합니다', 'leess', sysdate, 0);
+  
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(4, '기쁘고 감사함이 넘치는 좋은하루되세요 ', '늘 행복하세요', 'emojh', sysdate, 0);
+
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(5, '오늘도 좋은하루되세요', '늘 감사합니다', 'hongkd', sysdate, 0);
+
+ insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+ values(6, '좋은 하루 되시고 건강하시고 부자되시고 늘 행복하세요', '맛있는 점심 드세요', 'leess', sysdate, 0);
+
+ commit;
+ 
+ 
+ select *
+ from tbl_board;
+ 
+ 
+ -- ** tbl_board 테이블에 저장된 모든 행들을 삭제하기 ** --
+ delete from tbl_board; 
+
+ rollback;
+ 
+ select *
+ from tbl_board;
+ 
+ delete from tbl_board
+ where boardno = 3;
+ -- 1 행 이(가) 삭제되었습니다.
+ 
+ delete from tbl_board
+ where boardno in(2,5);
+ -- 2개 행 이(가) 삭제되었습니다.
+ 
+ delete from tbl_board;
+ -- 6개 행 이(가) 삭제되었습니다.
+ 
+ commit;
+ 
+ -- 위에서 insert 한 것을 다시 하세요...
+ 
+ select boardno, subject
+ from tbl_board;
+
+ 
+ -- subject 컬럼의 값의 길이가 16보다 크면 subject 컬럼의 값 중 16글자만 보여주고 뒤에 ...을 붙여서 나타내라.
+ select boardno, subject, length(subject),
+        case when length(subject) > 16
+             then substr(subject,1,16)||'...'
+             else subject
+        end as 글제목
+ from tbl_board
+ order by boardno desc;
+
+
+
+-- **** lag, lead(게시판에서 특정글을 조회할 때 많이 사용한다) **** --
+select boardno, subject, content
+from tbl_board;
+
+/*
+    ---------------------------------------------------------------------------------------------
+     이전글번호  이전글제목         글번호  글제목       글내용                다음글번호     다음글제목
+    ---------------------------------------------------------------------------------------------
+      null      null               1	안녕하세요	글쓰기 연습입니다           2	       반갑습니다
+       1	    안녕하세요          2	    반갑습니다	모두 취업대박 나십시오       3        건강하세요
+       2	    반갑습니다          3    	건강하세요	로또 1등을 기원합니다       4         기쁘고 감사함이 넘치는 좋은하루되세요 
+    .............................................................................................
+       5        오늘도 좋은하루되세요6	좋은 하루 되시고 건강하시고 부자되시고 늘 행복하세요   null    null
+*/
+
+select   lag(boardno,1) over(order by boardno asc) as 이전글번호,
+         lag(subject,1) over(order by boardno asc) as 이전글제목,
+         
+         boardno, subject, content,
+         
+         lead(boardno,1) over(order by boardno asc) as 다음글번호, 
+         lead(subject,1) over(order by boardno asc) as 다음글제목
+from tbl_board;
+
+
+
+select   lag(boardno,2) over(order by boardno asc) as 이전글번호,
+         lag(subject,2) over(order by boardno asc) as 이전글제목,
+         
+         boardno, subject, content,
+         
+         lead(boardno,2) over(order by boardno asc) as 다음글번호, 
+         lead(subject,2) over(order by boardno asc) as 다음글제목
+from tbl_board;
+
+
+
+-- 숫자가 없으면 1이 생략된 것이다.
+select   lag(boardno) over(order by boardno asc) as 이전글번호,
+      -- boardno(글번호)의 오름차순으로 정렬했을때 위쪽으로 1칸 올라가서 boardno 값을 얻어온다.
+         lag(subject) over(order by boardno asc) as 이전글제목,
+      -- boardno(글번호)의 오름차순으로 정렬했을때 위쪽으로 1칸 올라가서 subject 값을 얻어온다.
+
+         boardno, subject, content,
+         
+         lead(boardno) over(order by boardno asc) as 다음글번호, 
+      -- boardno(글번호)의 오름차순으로 정렬했을때 위쪽으로 1칸 내려가서 boardno 값을 얻어온다.
+         lead(subject) over(order by boardno asc) as 다음글제목
+      -- boardno(글번호)의 오름차순으로 정렬했을때 위쪽으로 1칸 내려가서 subject 값을 얻어온다.
+from tbl_board;
+
+
+
+-- [퀴즈]
+/*
+    ---------------------------------------------------------------------------------------------
+     이전글번호  이전글제목         글번호  글제목       글내용                다음글번호     다음글제목
+    ---------------------------------------------------------------------------------------------
+       2	    반갑습니다          3    	건강하세요	로또 1등을 기원합니다       4         기쁘고 감사함이 넘치는 좋은하루되세요 
+*/
+
+-- 틀린 해결
+select *
+from tbl_board
+where boardno = 3;
+
+select   lag(boardno) over(order by boardno asc) as 이전글번호,
+         lag(subject) over(order by boardno asc) as 이전글제목,
+
+         boardno, subject, content,
+         
+         lead(boardno) over(order by boardno asc) as 다음글번호, 
+         lead(subject) over(order by boardno asc) as 다음글제목
+from tbl_board
+where boardno=3;
+
+
+
+-- 바른해결
+select *
+from
+(
+    select   lag(boardno) over(order by boardno asc) as 이전글번호,
+             lag(subject) over(order by boardno asc) as 이전글제목,
+    
+             boardno, subject, content,
+             
+             lead(boardno) over(order by boardno asc) as 다음글번호, 
+             lead(subject) over(order by boardno asc) as 다음글제목
+    from tbl_board
+)  V
+where boardno = 3; 
+
+
+/*
+    -------------------------------------------------------------
+    글번호     글제목                          작성일자
+    -------------------------------------------------------------
+    9723      오늘은 2001년 2월 10일 입니다.    2001-02-10 14:36:40 
+    9722      오늘은 2001년 2월 9일 입니다.     2001-02-09 14:36:40 
+    .....    ............................    ....................
+    .....    ............................    ....................
+    
+    1         오늘은 2001년 1월 9일 입니다.     2001-01-09 14:36:40  
+    
+    =============================================================
+                    1 2 3 4 5 6 7 8 9 10 다음
+             
+             이전 11 12 13 14 15 16 17 18 19 11 다음
     
     
+    다음은 옛날 것이고, 이전이 가장 최신의 가까운 것이다
+*/
+
+-- 게시판에서는 아래와 같이 해야 한다.
+select *
+from
+(
+    select   lag(boardno) over(order by boardno desc) as 이전글번호,
+             lag(subject) over(order by boardno desc) as 이전글제목,
+    
+             boardno, subject, content,
+             
+             lead(boardno) over(order by boardno desc) as 다음글번호, 
+             lead(subject) over(order by boardno desc) as 다음글제목
+    from tbl_board
+)  V
+where boardno = 3; 
+
+
+
+ --[퀴즈] employees 테이블에서 월급에 대한 전체 등수가 1등부터 10등까지인 사원들만 
+ --      사원번호, 사원명, 월급, 월급등수를 나타내세요.
+ select employee_id as 사원번호,
+       first_name||' '||last_name as 사원명
+       nvl(salary+(salary*commission_pct),salary) as 월급,
+       rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수,
+       dense_rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수2
+ from employees
+ where rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) between 1 and 10;
+ -- 오류!! rank() 및 dense_rank()는 where 절에 사용이 불가하다.
+ 
+ -- 등수를 구하는 해결책은 inline view를 사용해서 구한다!!!!!
+select *
+from
+(    
+     select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명
+           nvl(salary+(salary*commission_pct),salary) as 월급,
+           rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수,
+           dense_rank() over(order by nvl(salary+(salary*commission_pct),salary) desc) as 월급등수2
+     from employees
+) V
+where 월급등수 between 1 and 10; 
+
+
+
+
+/*
+    문제 1. 
+    employees 테이블에서 커미션을 받는 사원들만 
+    사원번호, 사원명, 기본급여, 수당, 월급을 
+    사원번호로 오름차순 정렬후, 월급의 내림차순으로 정렬하여 나타내세요.
+    
+    ------------------------------------------------------
+    사원번호    사원명            기본급여 수당     월급
+    ------------------------------------------------------
+    145       John Russell       14000   5600   19600
+    146       Karen Partners       13500   4050   17550
+    147       Alberto Errazuriz   12000   3600   15600
+    148       Gerald Cambrault   11000   3300   14300
+    149       Eleni Zlotkey       10500   2100   12600
+    150       Peter Tucker       10000   3000   13000
+    151       David Bernstein       9500   2375   11875
+    152       Peter Hall           9000   2250   11250
+    153       Christopher Olsen   8000   1600   9600
+    154       Nanette Cambrault   7500   1500   9000
+    155       Oliver Tuvault       7000   1050   8050
+    156       Janette King       10000   3500   13500
+    157       Patrick Sully       9500   3325   12825
+    158       Allan McEwen       9000   3150   12150
+    159       Lindsey Smith       8000   2400   10400
+    160       Louise Doran       7500   2250   9750
+    161       Sarath Sewall       7000   1750   8750
+    162       Clara Vishney       10500   2625   13125
+    163       Danielle Greene       9500   1425   10925
+    164       Mattea Marvins       7200   720       7920
+    165       David Lee           6800   680       7480
+    166       Sundar Ande           6400   640       7040
+    167       Amit Banda           6200   620       6820
+    168       Lisa Ozer           11500   2875   14375
+    169       Harrison Bloom       10000   2000   12000
+    170       Tayler Fox           9600   1920   11520
+    171       William Smith       7400   1110   8510
+    172       Elizabeth Bates       7300   1095   8395
+    173       Sundita Kumar       6100   610       6710
+    174       Ellen Abel           11000   3300   14300
+    175       Alyssa Hutton       8800   2200   11000
+    176       Jonathon Taylor       8600   1720   10320
+    177       Jack Livingston       8400   1680   10080
+    178       Kimberely Grant       7000   1050   8050
+    179       Charles Johnson       6200   620       6820
+*/
+
+    select *
+    from employees;
     
     
+    select employee_id as 사원번호, 
+           first_name||' '||last_name as 사원명,
+           salary as 기본급여,
+           nvl(salary*commission_pct,salary) as 수당,
+           nvl(salary+(salary*commission_pct),salary) as 월급
+    from employees
+    where commission_pct is not null
+    order by 1, 5 desc;
+    
+        
+    select  employee_id AS 사원번호
+        , first_name || ' ' || last_name AS 사원명
+        , salary AS 기본급여
+        , (salary * commission_pct) AS 수당
+        , nvl(salary + (salary * commission_pct), salary) AS 월급
+    from employees
+    where commission_pct is not null 
+        and
+        commission_pct > 0
+    order by 사원번호, 월급 desc;
+
+
+
+
+
+/*
+    문제 2. 
+    employees 테이블에서 커미션이 없는 사원들중 남자직원들만 
+    부서번호, 사원명, 주민번호, 기본급여를 
+    부서번호로 오름차순 정렬후, 사원명의 오름차순으로 정렬하여 나타내세요.
+    
+    -------------------------------------------------------
+    부서번호    사원명             주민번호        기본급여
+    -------------------------------------------------------
+    30       Alexander Khoo       6110151234567   3100
+    30       Guy Himuro           7810151234567   2600
+    30       Karen Colmenares   7909151234567   2500
+    30       Shelli Baida       6009301234567   2900
+    50       Adam Fripp           7009151234567   8200
+    50       Curtis Davies       7510121234567   3100
+    50       Douglas Grant       7511171234567   2600
+    50       Irene Mikkilineni   9406251234567   2700
+    50       James Marlow       0010153234567   2500
+    50       Jean Fleaur           6510191234567   3100
+    50       Joshua Patel       7310011234567   2500
+    50       Kelly Chung           9511151234567   3800
+    50       Kevin Feeney       9710181234567   3000
+    50       Kevin Mourgos       8110191234567   5800
+    50       Ki Gee               0503253234567   2400
+    50       Laura Bissot       8507251234567   3300
+    50       Martha Sullivan       6510221234567   2500
+    50       Mozhe Atkinson       6511111234567   2800
+    50       Nandita Sarchand   8512131234567   4200
+    50       Payam Kaufling       7111011234567   7900
+    50       Peter Vargas       7710061234567   2500
+    50       Renske Ladwig       9510021234567   3600
+    50       Samuel McCain       0910183234567   3200
+    50       Sarah Bell           0510133234567   4000
+    50       Shanta Vollman       8010131234567   6500
+    50       Stephen Stiles       9610041234567   3200
+    50       Timothy Gates       8510161234567   2900
+    60       Alexander Hunold   7510151234567   9000
+    60       David Austin       6510151234567   4800
+    60       Diana Lorentz       0803153234567   4200
+    60       Valli Pataballa       6009201234567   4800
+    70       Hermann Baer       7803251234567   10000
+    90       Neena Kochhar       8510151234567   17000
+    90       Steven King           6010151234567   24000
+    100       Daniel Faviet       8810151234567   9000
+    100       Jose Manuel Urman   6610151234567   7800
+    100       Luis Popp           6710151234567   6900
+*/
+
+    select nvl(department_id, -9999) as 부서번호, 
+           first_name||' '||last_name as 사원명,
+           jubun as 주민번호,
+           salary as 기본급여
+    from employees
+    where commission_pct is null and
+          substr(jubun,7,1) is ('1','3') 
+    order by 1;
+ 
+
+    select  department_id AS 부서번호
+        , first_name || ' ' || last_name AS 사원명
+        , jubun AS 주민번호
+        , salary AS 기본급여
+    from employees
+    where (commission_pct is null 
+             or
+             commission_pct = 0
+            )
+            and
+            substr(jubun, 7, 1) in ('1','3')
+    order by 부서번호, 사원명;  
+
+
+
+
+
+
+/*
+    문제 3. 
+    employees 테이블에서 부서번호 30,50,60,80,100 번 부서에 근무하지 않는 사원들만 
+    부서번호, 사원명, 월급을 
+    부서번호로 오름차순 정렬후, 월급의 내림차순으로 정렬하여 나타내세요.
+    
+    ---------------------------------------
+    부서번호     사원명             월급
+    ---------------------------------------
+    10        Jennifer Whalen     4400
+    20        Michael Hartstein     13000
+    20        Pat Fay             6000
+    40        Susan Mavris         6500
+    70        Hermann Baer         10000
+    90        Steven King         24000
+    90        Neena Kochhar         17000
+    90        Lex De Haan         17000
+    110        Shelley Higgins     12008
+    110        William Gietz         8300
+    (null)    Kimberely Grant     8050
+*/
+
+    select nvl(department_id, -9999) as 부서번호, 
+           first_name||' '||last_name as 사원명,
+           nvl(salary+(salary*commission_pct),salary) as 월급
+    from employees
+    where nvl(department_id, -9999) not in (30,50,60,80,100)
+    order by 1, 3 desc;
+
+
+    select department_id AS 부서번호
+         , first_name || ' ' || last_name AS 사원명
+         , nvl(salary + (salary * commission_pct), salary) AS 월급
+    from employees
+    where nvl(department_id, -9999) not in(30,50,60,80,100)
+    order by 부서번호, 월급 desc;
+
+
+
+
+
+
+
+/*
+    문제 4. 
+    employees 테이블에서 부서번호가 존재하는 사원들중 월급이 8000 이상 8999 이하인 사원들만 
+    부서번호, 사원명, 월급을 
+    부서번호로 오름차순 정렬후, 월급의 내림차순으로 정렬하여 나타내세요.
+    
+    ------------------------------------------
+    부서번호        사원명            월급
+    ------------------------------------------
+    50           Adam Fripp           8200
+    50           Matthew Weiss       8000
+    80           Sarath Sewall       8750
+    80           William Smith       8510
+    80           Elizabeth Bates       8395
+    80           Oliver Tuvault       8050
+    100           John Chen           8200
+    110           William Gietz       8300
+*/
+
+    select nvl(department_id, -9999) as 부서번호, 
+           first_name||' '||last_name as 사원명,
+           nvl(salary+(salary*commission_pct),salary) as 월급
+    from employees
+    where department_id is not null and
+          nvl(salary+(salary*commission_pct),salary) between 8000 and 8999
+    order by 1, 3 desc;
+
+
+    select department_id AS 부서번호
+         , first_name || ' ' || last_name AS 사원명
+         , nvl(salary + (salary * commission_pct), salary) AS 월급
+    from employees
+    where department_id is not null
+          and
+          nvl(salary + (salary * commission_pct), salary) between 8000 and 8999
+    order by 부서번호, 월급 desc;
+
+
+
+
+
+
+
+/*
+    문제 5. 
+    employees 테이블에서 3월과 9월에 태어난 남자 사원들만 
+    사원명, 주민번호를 
+    사원명의 오름차순으로 정렬하여 나타내세요.
+    
+    ----------------------------------
+    사원명               주민번호
+    ----------------------------------
+    Adam Fripp           7009151234567
+    Diana Lorentz       0803153234567
+    Ellen Abel           1209103234567
+    Hermann Baer       7803251234567
+    Karen Colmenares    7909151234567
+    Ki Gee               0503253234567
+    Shelli Baida       6009301234567
+    Valli Pataballa       6009201234567
+*/
+
+    select first_name||' '||last_name as 사원명,
+           jubun as 주민번호
+    from employees
+    where substr(jubun,4,1) is ('3','9')
+    order by 1;
+
+
+    select first_name || ' ' || last_name AS 사원명
+         , jubun AS 주민번호
+    from employees
+    where substr(jubun,3,2) in ('09','03')
+          and
+          substr(jubun,7,1) in ('1','3')
+    order by 사원명;
+
+
+
+
+
+
+/*
+    문제 6. 
+    employees 테이블에서 부서번호 30번, 50번에 근무하는 사원들만 
+    사원명, 주민번호, 성별을 나타내세요.
+    성별은 '남' 또는 '여'라고 나타낸다.
+    
+    ----------------------------------------------------
+    부서번호    사원명             주민번호        성별
+    ----------------------------------------------------
+    30       Den Raphaely        6709152234567   여
+    30       Alexander Khoo      6110151234567   남
+    30       Shelli Baida       6009301234567   남
+    30       Sigal Tobias       6110152234568   여
+    30       Guy Himuro           7810151234567   남
+    30       Karen Colmenares   7909151234567   남
+    50       Matthew Weiss       7702152234567   여
+    50       Adam Fripp           7009151234567   남
+    50       Payam Kaufling       7111011234567   남
+    50       Shanta Vollman       8010131234567   남
+    50       Kevin Mourgos       8110191234567   남
+    50       Julia Nayer           9012132234567   여
+    50       Irene Mikkilineni   9406251234567   남
+    50       James Landry       9408252234567   여
+    50       Steven Markle       9204152234567   여
+    50       Laura Bissot       8507251234567   남
+    50       Mozhe Atkinson       6511111234567   남
+    50       James Marlow       0010153234567   남
+    50       TJ Olson           0005254234567   여
+    50       Jason Mallin       0110194234567   여
+    50       Michael Rogers       0412154234567   여
+    50       Ki Gee               0503253234567   남
+    50       Hazel Philtanker   9510012234567   여
+    50       Renske Ladwig       9510021234567   남
+    50       Stephen Stiles       9610041234567   남
+    50       John Seo           9610052234567   여
+    50       Joshua Patel       7310011234567   남
+    50       Trenna Rajs           7310092234567   여
+    50       Curtis Davies       7510121234567   남
+    50       Randall Matos       7612012234567   여
+    50       Peter Vargas       7710061234567   남
+    50       Winston Taylor       8310012234567   여
+    50       Jean Fleaur           6510191234567   남
+    50       Martha Sullivan       6510221234567   남
+    50       Girard Geoni       6510232234567   여
+    50       Nandita Sarchand   8512131234567   남
+    50       Alexis Bull           8510182234567   여
+    50       Julia Dellinger       7510192234567   여
+    50       Anthony Cabrio       8512192234567   여
+    50       Kelly Chung           9511151234567   남
+    50       Jennifer Dilly       7509302234567   여
+    50       Timothy Gates       8510161234567   남
+    50       Randall Perkins       9510192234567   여
+    50       Sarah Bell           0510133234567   남
+    50       Britney Everett       0810194234567   여
+    50       Samuel McCain       0910183234567   남
+    50       Vance Jones           1010134234567   여
+    50       Alana Walsh           9510032234567   여
+    50       Kevin Feeney       9710181234567   남
+    50       Donald OConnell       9810162234567   여
+    50       Douglas Grant       7511171234567   남
+*/
+
+    select nvl(department_id, -9999) as 부서번호, 
+           first_name||' '||last_name as 사원명,
+           jubun as 주민번호,
+           nvl(salary+(salary*commission_pct),salary) as 월급,
+           case substr(jubun,7,1)
+           when '1' then '남'
+           when '3' then '남'
+           else '여'
+           end as 성별
+    from employees
+    where nvl(department_id, -9999) in (30,50)
+    order by 1;
+
+
+
+
+
+
+
+/*
+    문제 7. 
+    employees 테이블에서 부서번호 30번, 50번에 근무하는 사원들만 
+    사원명, 주민번호, 성별을 나타내세요.
+    성별은 '남' 또는 '여'라고 나타낸다. 그리고 주민번호는 생년월일만 기재해주고 나머지는 마스킹('*')처리해서 보여준다.
+    
+    ------------------------------------------------------------
+    부서번호        사원명             주민번호            성별
+    ------------------------------------------------------------
+    30           Den Raphaely       670915*******   여
+    30           Alexander Khoo       611015*******   남
+    30           Shelli Baida       600930*******   남
+    30           Sigal Tobias       611015*******   여
+    30           Guy Himuro           781015*******   남
+    30           Karen Colmenares    790915*******   남
+    50           Matthew Weiss       770215*******   여
+    50           Adam Fripp           700915*******   남
+    50           Payam Kaufling       711101*******   남
+    50           Shanta Vollman       801013*******   남
+    50           Kevin Mourgos       811019*******   남
+    50           Julia Nayer           901213*******   여
+    50           Irene Mikkilineni   940625*******   남
+    50           James Landry       940825*******   여
+    50           Steven Markle       920415*******   여
+    50           Laura Bissot       850725*******   남
+    50           Mozhe Atkinson       651111*******   남
+    50           James Marlow       001015*******   남
+    50           TJ Olson           000525*******   여
+    50           Jason Mallin       011019*******   여
+    50           Michael Rogers       041215*******   여
+    50           Ki Gee               050325*******   남
+    50           Hazel Philtanker    951001*******   여
+    50           Renske Ladwig       951002*******   남
+    50           Stephen Stiles       961004*******   남
+    50           John Seo           961005*******   여
+    50           Joshua Patel       731001*******   남
+    50           Trenna Rajs           731009*******   여
+    50           Curtis Davies       751012*******   남
+    50           Randall Matos       761201*******   여
+    50           Peter Vargas       771006*******   남
+    50           Winston Taylor       831001*******   여
+    50           Jean Fleaur           651019*******   남
+    50           Martha Sullivan       651022*******   남
+    50           Girard Geoni       651023*******   여
+    50           Nandita Sarchand    851213*******   남
+    50           Alexis Bull           851018*******   여
+    50           Julia Dellinger       751019*******   여
+    50           Anthony Cabrio       851219*******   여
+    50           Kelly Chung           951115*******   남
+    50           Jennifer Dilly       750930*******   여
+    50           Timothy Gates       851016*******   남
+    50           Randall Perkins       951019*******   여
+    50           Sarah Bell           051013*******   남
+    50           Britney Everett       081019*******   여
+    50           Samuel McCain       091018*******   남
+    50           Vance Jones           101013*******   여
+    50           Alana Walsh           951003*******   여
+    50           Kevin Feeney       971018*******   남
+    50           Donald OConnell       981016*******   여
+    50           Douglas Grant       751117*******   남
+*/
+
+    select nvl(department_id, -9999) as 부서번호, 
+           first_name||' '||last_name as 사원명,
+           substr(jubun,1,6)||'*******' as 주민번호,
+           case substr(jubun,7,1)
+           when '1' then '남'
+           when '3' then '남'
+           else '여'
+           end as 성별
+    from employees
+    where nvl(department_id, -9999) in (30,50)
+    order by 1;
+
+
+    select department_id AS 부서번호
+         , first_name || ' ' || last_name AS 사원명
+         , rpad( substr(jubun, 1, 6), length(jubun), '*')  AS 주민번호
+     --  , rpad( substr(jubun, 1, 6), 13, '*')  AS 주민번호
+         , case when substr(jubun,7,1) in('2','4') then '여'
+           else '남'
+           end AS 성별
+    from employees
+    where department_id in (30,50)
+    order by department_id;
+
+
+
+
+
+
+/*
+    문제 8. 
+    employees 테이블에서 90번 부서에 근무하는 사원들만 아래와 같이
+    사원명, 공개연락처, 비공개연락처를 나타내세요.
+    여기서 비공개연락처란? 국번을 * 로 마스킹처리 한것을 말한다.
+    
+    ---------------------------------------------
+    사원명          공개연락처      비공개연락처
+    ---------------------------------------------
+    Steven King       515.123.4567   515.***.4567
+    Neena Kochhar   515.123.4568   515.***.4568
+    Lex De Haan       515.123.4569   515.***.4569
+*/
+
+    select first_name||' '||last_name as 사원명, 
+           phone_number as 공개연락처,
+           substr(phone_number,1,3)||'.***.'||substr(phone_number,9,3) as 비공개연락처
+    from employees
+    where nvl(department_id, -9999) in 90;
+
+
+/*
+   국번만 '*' 로 마스킹 처리한다.
+   
+   phone_number 컬럼에서 국번전까지만 발췌하고 || 국번 || 국번다음부터 끝까지 발췌한다.
+   국번만 translate 를 사용하여 '*' 로 바꾸어주면 되겠다.
+*/
+
+    select phone_number, translate(phone_number, '0123456789', '**********')
+    from employees;
+
+/*
+   국번만 발췌해와야 하는데 어떻게 할까?
+   국번만 발췌 ==> phone_number 컬럼에서 최초로 . 이 나오는 위치 그 다음부터 두번째로 . 이 나오는 위치 그 앞까지만 발췌를 해오면 된다. 
+*/
+
+   select phone_number,
+   --  substr(phone_number, 출발점, 몇글자) AS "국번만 발췌"
+   
+   --  출발점 ==>  최초로 . 이 나오는 위치 그 다음
+   --             instr(phone_number, '.', 1, 1) + 1
+   
+   --  몇글자 ==> phone_number 컬럼에서 두번째로 . 이 나오는 위치 - 1 ==> 예  7-1 = 6
+   --            phone_number 컬럼에서 첫번째로 . 이 나오는 위치     ==> 예   4
+   --           (phone_number 컬럼에서 두번째로 . 이 나오는 위치 - 1) - phone_number 컬럼에서 첫번째로 . 이 나오는 위치 ==> 예 6-4 = 2 
+   --           instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)
+   
+   --            phone_number 컬럼에서 두번째로 . 이 나오는 위치 - 1 ==> 예  8-1 = 7 
+   --            phone_number 컬럼에서 첫번째로 . 이 나오는 위치     ==> 예   4 
+   --           (phone_number 컬럼에서 두번째로 . 이 나오는 위치 - 1) - phone_number 컬럼에서 첫번째로 . 이 나오는 위치 ==> 예 7-4 = 3  
+   --           instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)
+   
+   -- substr(phone_number, 출발점, 몇글자) AS "국번만 발췌"
+      substr(phone_number, instr(phone_number, '.', 1, 1) + 1, instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)) AS "국번만 발췌"   
+   from employees;    
+
+   select phone_number as "원래전화번호",
+          substr(phone_number, 1, instr(phone_number,'.', 1)) as "국번전까지",
+
+          substr(phone_number, instr(phone_number, '.', 1, 1) + 1, instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)) as "국번",
+          translate(substr(phone_number, instr(phone_number, '.', 1, 1) + 1, instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)), '0123456789', '**********') as "마스킹",
+
+          substr(phone_number, instr(phone_number, '.', 1, 2)) as "국번다음부터 끝까지"
+   from employees;
+
+
+   select phone_number as "원래전화번호",
+          substr(phone_number, 1, instr(phone_number,'.', 1)) ||
+          translate(substr(phone_number, instr(phone_number, '.', 1, 1) + 1, instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)), '0123456789', '**********') ||
+          substr(phone_number, instr(phone_number, '.', 1, 2)) as "마스킹처리한전화번호"
+   from employees;
+
+
+    select first_name||' '||last_name as 사원명,
+           phone_number as 공개연락처,
+           substr(phone_number, 1, instr(phone_number,'.', 1)) ||
+           translate(substr(phone_number, instr(phone_number, '.', 1, 1) + 1, instr(phone_number, '.', 1, 2) - 1 - instr(phone_number, '.', 1)), '0123456789', '**********') ||
+           substr(phone_number, instr(phone_number, '.', 1, 2)) as 비공개연락처
+   from employees
+   where department_id = 90;
+
+
+
+
+
+
+/*
+    문제 9. 
+    employees 테이블에서 80번 부서에 근무하는 사원들만 아래와 같이
+    사원명, 공개연락처, 비공개연락처를 나타내세요.
+    여기서 비공개연락처란? 첫번째 국번과 마지막 개별번호를 * 로 마스킹처리 한것을 말한다.
+    
+    ---------------------------------------------------------------
+    사원명               공개연락처               비공개연락처
+    ---------------------------------------------------------------
+    John Russell       011.44.1344.429268       011.**.1344.******
+    Karen Partners       011.44.1344.467268       011.**.1344.******
+    Alberto Errazuriz   011.44.1344.429278       011.**.1344.******
+    Gerald Cambrault    011.44.1344.619268       011.**.1344.******
+    Eleni Zlotkey       011.44.1344.429018       011.**.1344.******
+    Peter Tucker       011.44.1344.129268       011.**.1344.******
+    David Bernstein       011.44.1344.345268       011.**.1344.******
+    Peter Hall           011.44.1344.478968       011.**.1344.******
+    Christopher Olsen   011.44.1344.498718       011.**.1344.******
+    Nanette Cambrault   011.44.1344.987668       011.**.1344.******
+    Oliver Tuvault       011.44.1344.486508       011.**.1344.******
+    Janette King       011.44.1345.429268       011.**.1345.******
+    Patrick Sully       011.44.1345.929268       011.**.1345.******
+    Allan McEwen       011.44.1345.829268       011.**.1345.******
+    Lindsey Smith       011.44.1345.729268       011.**.1345.******
+    Louise Doran       011.44.1345.629268       011.**.1345.******
+    Sarath Sewall       011.44.1345.529268       011.**.1345.******
+    Clara Vishney       011.44.1346.129268       011.**.1346.******
+    Danielle Greene     011.44.1346.229268       011.**.1346.******
+    Mattea Marvins       011.44.1346.329268       011.**.1346.******
+    David Lee           011.44.1346.529268       011.**.1346.******
+    Sundar Ande           011.44.1346.629268       011.**.1346.******
+    Amit Banda           011.44.1346.729268       011.**.1346.******
+    Lisa Ozer           011.44.1343.929268       011.**.1343.******
+    Harrison Bloom       011.44.1343.829268       011.**.1343.******
+    Tayler Fox           011.44.1343.729268       011.**.1343.******
+    William Smith       011.44.1343.629268       011.**.1343.******
+    Elizabeth Bates       011.44.1343.529268       011.**.1343.******
+    Sundita Kumar       011.44.1343.329268       011.**.1343.******
+    Ellen Abel           011.44.1644.429267       011.**.1644.******
+    Alyssa Hutton       011.44.1644.429266       011.**.1644.******
+    Jonathon Taylor       011.44.1644.429265       011.**.1644.******
+    Jack Livingston       011.44.1644.429264       011.**.1644.******
+    Charles Johnson       011.44.1644.429262       011.**.1644.******
+*/ 
+
+    select first_name||' '||last_name as 사원명, 
+           phone_number as 공개연락처,
+           substr(phone_number,1,3)||'.**.'||substr(phone_number,8,4)||'.******' as 비공개연락처
+    from employees
+    where nvl(department_id, -9999) in 80
+    order by 1;
+
+
+    select first_name || ' ' || last_name AS 사원명
+         , phone_number AS 공개연락처
+         , substr(phone_number,1,instr(phone_number,'.',1,1)) 
+        || lpad('*',instr(phone_number,'.',1,2)-instr(phone_number,'.',1,1)-1,'*') 
+        || substr(phone_number,instr(phone_number,'.',1,2), instr(phone_number,'.',1,3)-instr(phone_number,'.',1,2))
+        || translate( substr(phone_number,instr(phone_number,'.',1,3)), '0123456789','**********')  AS 비공개연락처
+    from employees
+    where department_id = 80;
+
+
+
+
+
+
+/*
+    문제 10. (난이도 상)
+    employees 테이블에서 80번, 90번 부서에 근무하는 사원들만 아래와 같이
+    부서번호, 사원명, 공개연락처, 비공개연락처를 나타내세요.
+    여기서 비공개연락처란? 첫번째 국번과 마지막 개별번호를 * 로 마스킹처리 한것을 말한다.
+    
+    ------------------------------------------------------------------------------
+    부서번호        사원명              공개연락처               비공개연락처
+    ------------------------------------------------------------------------------  
+    80           John Russell       011.44.1344.429268       011.**.1344.******
+    80           Karen Partners       011.44.1344.467268       011.**.1344.******
+    80           Alberto Errazuriz   011.44.1344.429278       011.**.1344.******
+    80           Gerald Cambrault    011.44.1344.619268       011.**.1344.******
+    80           Eleni Zlotkey       011.44.1344.429018       011.**.1344.******
+    80           Peter Tucker       011.44.1344.129268       011.**.1344.******
+    80           David Bernstein       011.44.1344.345268       011.**.1344.******
+    80           Peter Hall           011.44.1344.478968       011.**.1344.******
+    80           Christopher Olsen   011.44.1344.498718       011.**.1344.******
+    80           Nanette Cambrault   011.44.1344.987668       011.**.1344.******
+    80           Oliver Tuvault       011.44.1344.486508       011.**.1344.******
+    80           Janette King       011.44.1345.429268       011.**.1345.******
+    80           Patrick Sully       011.44.1345.929268       011.**.1345.******
+    80           Allan McEwen       011.44.1345.829268       011.**.1345.******
+    80           Lindsey Smith       011.44.1345.729268       011.**.1345.******
+    80           Louise Doran       011.44.1345.629268       011.**.1345.******
+    80           Sarath Sewall       011.44.1345.529268       011.**.1345.******
+    80           Clara Vishney       011.44.1346.129268       011.**.1346.******
+    80           Danielle Greene       011.44.1346.229268       011.**.1346.******
+    80           Mattea Marvins       011.44.1346.329268       011.**.1346.******
+    80           David Lee           011.44.1346.529268       011.**.1346.******
+    80           Sundar Ande           011.44.1346.629268       011.**.1346.******
+    80           Amit Banda           011.44.1346.729268       011.**.1346.******
+    80           Lisa Ozer           011.44.1343.929268       011.**.1343.******
+    80           Harrison Bloom       011.44.1343.829268       011.**.1343.******
+    80           Tayler Fox           011.44.1343.729268       011.**.1343.******
+    80           William Smith       011.44.1343.629268       011.**.1343.******
+    80           Elizabeth Bates       011.44.1343.529268       011.**.1343.******
+    80           Sundita Kumar       011.44.1343.329268       011.**.1343.******
+    80           Ellen Abel           011.44.1644.429267       011.**.1644.******
+    80           Alyssa Hutton       011.44.1644.429266       011.**.1644.******
+    80           Jonathon Taylor       011.44.1644.429265       011.**.1644.******
+    80           Jack Livingston       011.44.1644.429264       011.**.1644.******
+    80           Charles Johnson       011.44.1644.429262       011.**.1644.******
+    90           Steven King           515.123.4567       515.***.****
+    90           Neena Kochhar       515.123.4568       515.***.****
+    90           Lex De Haan           515.123.4569       515.***.****
+*/
+
+    select 부서번호, 사원명, 공개연락처,
+           Case 부서번호
+           when 80
+           then substr(공개연락처,1,3)||'.**.'||substr(공개연락처,8,4)||'.******' 
+           else substr(공개연락처,1,3)||'.***.'||substr(공개연락처,9,3)
+           end as as 비공개연락처
+    from
+    (
+        select nvl(department_id, -9999) as 부서번호,
+               first_name||' '||last_name as 사원명, 
+               phone_number as 공개연락처
+        from employees
+    ) V
+    where nvl(department_id, -9999) in (80,90)
+    order by 1;
+
+
+    select department_id AS 부서번호
+         , first_name || ' ' || last_name AS 사원명
+         , phone_number AS 공개연락처
+         , substr(phone_number, 1, instr(phone_number,'.',1,1)) 
+        || lpad('*', instr(phone_number,'.',1,2)-instr(phone_number,'.',1,1)-1, '*')
+        || case 
+           when instr(phone_number,'.',1,3) > 0 
+                then substr(phone_number, instr(phone_number,'.',1,2), instr(phone_number,'.',1,3)-instr(phone_number,'.',1,2))
+           else ''
+           end
+        || translate(substr(phone_number, instr(phone_number,'.',-1,1)), '0123456789', '**********')
+        AS 비공개연락처
+    from employees
+    where department_id in (80,90)
+    order by department_id;
+
+
+
+
+
+
+-- ==========================================================================
+
+-- **** >>>> 그룹함수(집계함수) <<<< **** --
+
+/*
+     1. sum       -- 합계
+     2. avg       -- 평균
+     3. max       -- 최대값
+     4. min       -- 최소값
+     5. count     -- select 되어서 나온 결과물의 행의 갯수 
+     6. variacne  -- 분산 
+     7. stddev    -- 표준편차
+     
+     분산    : 분산의 제곱근이 표준편차 (평균에서 떨어진 정도)
+     표준편차 : 표준편차의 제곱승이 분산 (평균과의 차액)
+     
+     >>> 주식투자 <<<
+     50 60 40 50 55 45 52 48   평균 50  편차가 적음  -- 안정투자
+     10 90 20 80 30 70 90 10   평균 50  편차가 큼    -- 투기성투자(위험을 안고서 투자함) 
+     
+     분산과 표준편차는 어떤 의사결정시 도움이 되는 지표이다.
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
