@@ -2607,7 +2607,7 @@ where 월급등수 between 1 and 10;
     order by 1;
  
 
-    select  department_id AS 부서번호
+    select department_id AS 부서번호
         , first_name || ' ' || last_name AS 사원명
         , jubun AS 주민번호
         , salary AS 기본급여
@@ -2825,6 +2825,15 @@ where 월급등수 between 1 and 10;
     where nvl(department_id, -9999) in (30,50)
     order by 1;
 
+
+    select department_id AS 부서번호
+         , first_name || ' ' || last_name AS 사원명
+         , jubun AS 주민번호
+         , case when substr(jubun,7,1) in('1','3') then '남'
+           else '여'
+           end AS 성별
+    from employees
+    where department_id in (30,50);
 
 
 
@@ -3184,16 +3193,507 @@ where 월급등수 between 1 and 10;
      분산과 표준편차는 어떤 의사결정시 도움이 되는 지표이다.
 */
 
+--- !!!! 중요중요중요
+--- 그룹함수(집계함수)에서는 null 이 있으면 무조건 null 은 제외시킨 후 연산을 한다.!!!!!
+--- 그룹함수(집계함수)를 사용하면 말 그대로 1개의 결과값만 나온다. 
+
+select sum(salary),avg(salary), max(salary), min(salary), count(salary)
+     , variance(salary), stddev(salary)
+from employees;
+
+select salary, sum(salary)
+from employees; -- 오류!! 왜냐하면 select 되어진 결과물은 사각형의 테이블모양을 띄는데
+                --       salary 컬럼에 대한 행의 개수는 107개이고, sum(salary) 의 결과값은 행의 개수가 1개이다.
+                --       그러므로 다각형 모양을 띄므로 오류이다!!
+       
+                
+select salary*commission_pct, nvl(salary*commission_pct,0)
+from employees;
+
+select sum(salary*commission_pct), sum(nvl(salary*commission_pct,0))
+from employees;
+-- 사칙연산에서 null 이 포함되면 무조건 null
+-- sum을 이용한 집계함수에서는 null 값 제외하고 더함
+-- 73690    73690
+
+
+select salary, commission_pct, department_id
+from employees;
+
+select count(salary), count(commission_pct), count(department_id)
+from employees;
+--   107	35	106
+
+
+select count(*)
+from employees;     -- 사원수
+
+
+--- employees 테이블에서 기본급여(salary)의 평균치를 구하세요.
+select sum(salary), count(salary),  
+       sum(salary)/count(salary),
+       avg(salary)
+from employees;
+-- 691416	107	
+-- 6461.831775700934579439252336448598130841	
+-- 6461.831775700934579439252336448598130841
+
+
+--- employees 테이블에서 수당(salary*commission_pct)이 null 아닌 사원들만의 수당(salary*commission_pct)의 평균치를 구하세요.
+select sum(salary*commission_pct), count(salary*commission_pct),  
+       sum(salary*commission_pct)/count(salary*commission_pct),
+       avg(salary*commission_pct)
+from employees;
+-- 73690	35	
+-- 2105.428571428571428571428571428571428571	
+-- 2105.428571428571428571428571428571428571
+
+
+--- employees 테이블에서 모든 직원들에 대해 수당(salary*commission_pct)의 평균치를 구하세요.
+select sum(salary*commission_pct), count(nvl(salary*commission_pct,0)),  
+       sum(salary*commission_pct)/count(nvl(salary*commission_pct,0)),
+       avg(nvl(salary*commission_pct,0))
+from employees;
+-- 73690	107	
+-- 688.691588785046728971962616822429906542	
+-- 688.691588785046728971962616822429906542
+
+
+--- *** employees 테이블에서 부서번호별 인원수를 나타내세요. *** ---
+select department_id as 부서번호, count(*) as 인원수
+from employees
+group by department_id  -- department_id 컬럼의 값이 같은 것끼리 그룹을 짓는다.
+order by 1;
+
+
+--- *** employees 테이블에서 부서번호별 인원수를 나타내세요. *** ---
+---     또한 모든 사원들의 총 인원수도 나타내세요. *** ---
+select department_id as 부서번호, count(*) as 인원수
+from employees
+group by rollup(department_id);
+
+-- 결과물에서 인원수가 1 이고 부서번호가 null 인 것의 부서번호 null 은 실제 부서번호 컬럼의 값이 null 인 것이다.
+-- 결과물에서 인원수가 107 이고 부서번호가 null 인 것의 부서번호 null 은 그룹을 안 지었을 때의 count(*) 값이다.
+-- 그렇다면 부서번호 컬럼의 값을 나타낼때 실제 부서번호 컬럼의 값이 null 인 것을 '인턴'이라고 나타내어주고,
+-- 그룹을 안 지었을 때의 null 은 '전체'라고 나타내어주고자 한다.
+select grouping(department_id),
+       -- department_id 컬럼의 값을 가지고 group 을 지었을 때 
+       -- grouping(department_id) 값이 0 이라면 department_id 컬럼의 값은 실제 데이터임을 알려주는 것이고,
+       -- grouping(department_id) 값이 1 이라면 department_id 컬럼의 값은 실제 데이터가 아니라 group 을 짓지 않은 전체를 뜻하는 것이다.
+       department_id as 부서번호, count(*) as 인원수
+from employees
+group by rollup(department_id);
+
+
+select decode(grouping(department_id),0,department_id
+                                       ,-9999) as 부서번호
+     , count(*) as 인원수
+from employees
+group by rollup(department_id);
+
+
+select decode(grouping(department_id),0, to_char(department_id)
+                                       , '전체') as 부서번호
+     , count(*) as 인원수
+from employees
+group by rollup(department_id);
+-- ORA-01722: invalid number
+
+
+select decode(grouping(department_id),0, nvl(to_char(department_id),'인턴')
+                                       , '전체') as 부서번호
+     , count(*) as 인원수
+from employees
+group by rollup(department_id);
+
+
+---- **** employees 테이블에서 성별 인원수를 나타내세요. **** ----
+
+------------------------
+성별        인원수
+------------------------
+남           56
+여           51
+전체         107
+------------------------
+
+-- [방법1]
+select grouping(case when substr(jubun,7,1) in ('1','3') then '남' else '여' end),
+       case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as 성별,
+       count(*) as 인원수
+from employees
+group by rollup(case when substr(jubun,7,1) in ('1','3') then '남' else '여' end);
+
+
+select decode(grouping(case when substr(jubun,7,1) in ('1','3') then '남' else '여' end)
+            ,0, case when substr(jubun,7,1) in ('1','3') then '남' else '여' end
+              , '전체') as 성별,
+       count(*) as 인원수
+from employees
+group by rollup(case when substr(jubun,7,1) in ('1','3') then '남' else '여' end);
+
+
+-- [방법2 - inline view의 사용]
+select decode(grouping(gender),0,gender,1,'전체') as 성별, count(*) as 인원수
+from
+(
+    select case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as GENDER
+    from employees
+) V
+group by rollup(gender);
+
+
+--- *** === inline view(인라인뷰) 를 with 절을 사용하여 나타낼 수 있다. === *** ---
+with V as (
+    select case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as GENDER
+    from employees
+)
+select decode(grouping(gender),0,gender,'전체') as 성별, count(*) as 인원수
+from V
+group by rollup(gender);
 
 
 
 
+---- **** employees 테이블에서 성별 인원수 및 퍼센티지를 나타내세요. **** ----
+
+--------------------------------
+성별        인원수      퍼센티지(%)
+--------------------------------
+남           56         52.3 
+여           51         47.7
+전체         107         100
+--------------------------------
+
+select round((56/107)*100,1), round((56/(select count(*) from employees))*100,1),
+       round((51/107)*100,1), round((51/(select count(*) from employees))*100,1)
+from dual;
+
+
+select decode(grouping(gender),0,gender,'전체') as 성별, count(*) as 인원수,
+       round(count(*)/(select count(*) from employees)*100,1) as "퍼센티지(%)"
+from 
+(
+    select case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as GENDER
+    from employees
+)V
+group by rollup(gender);
+
+
+with V as (
+    select case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as GENDER
+    from employees
+)
+select decode(grouping(gender),0,gender,'전체') as 성별, count(*) as 인원수,
+       round(count(*)/(select count(*) from employees)*100,1) as "퍼센티지(%)"
+from V
+group by rollup(gender);
 
 
 
+---- **** employees 테이블에서 연령대별 인원수 및 퍼센티지를 나타내세요. **** ----
+
+--------------------------------------
+ 연령대       인원수     퍼센티지(%)
+--------------------------------------
+ 10대미만
+ 10대
+ 20대
+ ....
+ 60대
+ 전체
+--------------------------------------
+
+select extract(year from sysdate) 
+       - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1 as age,
+       trunc(extract(year from sysdate) 
+       - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as 연령대
+
+from employees;
+
+
+select decode(grouping(ageline),0,to_char(ageline),1,'전체') as 연령대, 
+       count(*) as 인원수,
+       to_char(round(count(*)/(select count(*) from employees)*100,1),'999.0') as "퍼센티지(%)"
+from
+(
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline
+    from employees
+)V
+group by rollup(ageline);
 
 
 
+with V as (
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline
+    from employees
+)
+select decode(grouping(ageline),0,to_char(ageline),1,'전체') as 연령대, 
+       count(*) as 인원수,
+       round(count(*)/(select count(*) from employees)*100,1) as "퍼센티지(%)"
+from V
+group by rollup(ageline);
 
 
 
+--- *** group 을 지을때 1차로 그룹을 지은 다음에 거기서 다시 한 번 2차로 또 group 을 지을 수 있다. *** ---
+
+--------------------------------------
+ 연령대    성별    인원수     퍼센티지(%)
+--------------------------------------
+ 10대      남
+ 10대      여
+ 20대
+ ....
+ 60대
+ 전체
+--------------------------------------
+
+
+select ageline, gender,
+       count(*) as 인원수,
+       to_char(round(count(*)/(select count(*) from employees)*100,1),'999.0') as "퍼센티지(%)"
+from
+(
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline,
+           case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as gender
+    from employees
+)V
+group by ageline, gender
+order by 1,2;
+
+
+
+select ageline, gender,
+       count(*) as 인원수,
+       to_char(round(count(*)/(select count(*) from employees)*100,1),'999.0') as "퍼센티지(%)"
+from
+(
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline,
+           case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as gender
+    from employees
+)V
+group by rollup(ageline, gender);
+-- rollup 은 오름차순이 되므로 order by 를 사용하지 않는다
+
+
+select decode(grouping(ageline),0,to_char(ageline),'전체') as 연령대,
+       decode(grouping(gender),0, gender,'전체') as 성별,
+       count(*) as 인원수,
+       to_char(round(count(*)/(select count(*) from employees)*100,1),'999.0') as "퍼센티지(%)"
+from
+(
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline,
+           case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as gender
+    from employees
+)V
+group by rollup(ageline, gender);
+
+
+
+--------------------------------------
+ 부서번호  성별    인원수     퍼센티지(%)
+--------------------------------------
+ 10      남
+ 10      여
+ 10      전체
+ ....
+ 전체
+--------------------------------------
+
+
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by rollup(department_id, gender);
+
+
+ with V as (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ )
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from V 
+ group by rollup(department_id, gender);
+
+
+
+-- employees 테이블에서 부서번호별 기본급여의 합계를 나타내세요.
+-- 또한 모든 부서에 대한 기본급여의 총합계도 나타내세요.
+select decode(grouping(department_id),0,nvl(to_char(department_id),'인턴'),'전체') as 부서번호, 
+       to_char(sum(salary),'$999,999') as 급여합게
+from employees
+group by rollup(department_id);
+-- 여섯자리까지 가능, 문자타입
+-- 통화기호는 L 쓰면 그 지역의 통화기호로 나온다
+
+
+
+-- employees 테이블에서 부서번호별 기본급여의 평균를 나타내세요.
+select decode(grouping(department_id),0,nvl(to_char(department_id),'인턴'),'전체') as 부서번호, 
+       sum(salary) as 기본급여,
+       to_char(round(avg(salary),1),'$99,999.0') as 급여평균
+from employees
+group by rollup(department_id);
+
+
+
+-- employees 테이블에서 부서번호별 기본급여의 최대값 나타내세요.
+select nvl(to_char(department_id),'인턴') as 부서번호, 
+       to_char(max(salary),'$99,999') as 최대급여
+from employees
+group by department_id
+order by department_id;
+-- order by 1; 이렇게 하면 문자열의 배열로 순서가 바르지 않다.
+
+
+
+-- employees 테이블에서 부서번호별 기본급여의 최소값 나타내세요.
+select nvl(to_char(department_id),'인턴') as 부서번호, 
+       to_char(min(salary),'$99,999') as 최대급여
+from employees
+group by department_id
+order by department_id;
+
+
+
+----- >>>>> 요약값(rollup, cube, grouping sets) <<<<< ------
+  /*
+      1. rollup(a,b,c) 은 grouping sets( (a,b,c),(a,b),(a),() ) 와 같다.
+    
+            group by rollup(department_id, gender)
+         == group by grouping sets( (department_id, gender), (department_id), () )
+  
+      2. cube(a,b,c) 은 grouping sets( (a,b,c),(a,b),(b,c),(a,c),(a),(b),(c),() ) 와 같다.
+ 
+            group by cube(department_id, gender)
+         == group by grouping sets( (department_id, gender), (department_id), (gender), () )
+  */
+
+
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by rollup(department_id, gender);
+
+
+-- 위의 결과물과 똑같은 것은 아래와 같다.
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by grouping sets((department_id, gender), (department_id), ());
+ 
+
+ 
+ --- *** cuble *** ---
+
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by cube(department_id, gender);
+
+ 
+-- 위의 결과물과 똑같은 것은 아래와 같다.
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by grouping sets((department_id, gender),(department_id),(gender),());
+ 
+ 
+ 
+ select decode(grouping(department_id), 0, nvl(to_char(department_id), '인턴'), '전체') AS 부서번호
+      , decode(grouping(gender), 0, gender, '전체') AS 성별
+      , count(*) AS 인원수 
+      , to_char( round( (count(*)/(select count(*) from employees))*100, 1), '990.0') AS "퍼센티지(%)" 
+ from 
+ (
+   select department_id
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+   from employees
+ ) V 
+ group by grouping sets((department_id),(gender),())
+ order by department_id;
+ 
+ 
+ 
+ --- ========= *** having 그룹함수조건절 *** ========= ---
+ /*
+    group by 절을 사용하여 그룹함수의 값을 나타내었을때
+    그룹함수의 값이 특정 조건에 해당하는 것만 추출하고자 할 때는 where 절을 사용하는 것이 아니라
+    having 그룹함수 조건절을 사용해야 한다.
+ */
+ 
+ --- employees 테이블에서 사원이 10명 이상 근무하는 부서번호와 그 인원수를 나타내세요.
+ select department_id, count(*)
+ from employees
+ where count(*) >= 10
+ group by department_id;
+ 
+ 
+ select department_id as 부서번호, count(*) as 인원수 
+                            -- 화면에 보여줄때는 department_id(부서번호)와 count(*) 개수를 나타내어준다.
+ from employees             -- 메모리상에는 107개 행이 모두 올라간다.
+ group by department_id     -- 메모리상에서 department_id 컬럼값이 동일한 것 끼리 group을 짓는다.
+ having count(*) >= 10      -- group 을 지은 것들 중에 개수(count(*))가 10개 이상인 것만 보여라.
+ order by 1;
+ 
+ 
+-- employees 테이블에서 부서번호별로 월급의 합계를 나타내었을때 
+-- 부서번호별 월급의 합계가 50000 이상인 부서에 대해서만
+-- 부서번호, 월급의 합계를 나타내세요.
+select department_id as 부서번호, 
+       sum(nvl(salary+(salary*commission_pct),salary)) as 월급의합계
+from employees
+group by department_id
+having  sum(nvl(salary+(salary*commission_pct),salary)) >= 50000
+order by 2 desc;
+
+
+ 
+ 
+ 
+ 
