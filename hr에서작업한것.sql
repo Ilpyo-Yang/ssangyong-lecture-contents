@@ -3693,7 +3693,648 @@ having  sum(nvl(salary+(salary*commission_pct),salary)) >= 50000
 order by 2 desc;
 
 
+---- *** !!! 누적(누계)에 대해서 알아봅시다 !!! *** ----
+/*
+    sum(누적되어야 할 컬럼명) over(order by 누적되어야질 기준이 되는 컬럼명 asc[desc])
+    
+    sum(누적되어야 할 컬럼명) over(partition by 그룹화 되어질 컬럼명
+                                order by 누적되어질 기준이 되는 컬럼명 asc[desc])
+    
+*/
+
+create table tbl_panmae
+ (panmaedate  date
+ ,jepumname   varchar2(20)
+ ,panmaesu    number
+ );
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-2), '새우깡', 10);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-2)+1, '새우깡', 15); 
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-2)+2, '감자깡', 20);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-2)+3, '새우깡', 10);
+ 
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-2)+3, '새우깡', 3);
+ 
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-1), '고구마깡', 7);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-1)+1, '새우깡', 8); 
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-1)+2, '감자깡', 10);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( add_months(sysdate,-1)+3, '감자깡', 5);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate - 4, '허니버터칩', 30);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate - 3, '고구마깡', 15);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate - 2, '고구마깡', 10);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate - 1, '허니버터칩', 20);
+
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '새우깡', 10);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '새우깡', 10);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '감자깡', 5);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '허니버터칩', 15);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '고구마깡', 20);
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '감자깡', 10); 
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values( sysdate, '새우깡', 10);
+
+ commit;
+   
+ select *
+ from tbl_panmae;
+
+
+ select to_Char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') as panmaedate, panmaesu
+ from tbl_panmae
+ where jepumname = '새우깡';
  
  
+ -- *** tbl_panmae 테이블에서 새우깡에 대한 일별판매량과 일별누적판매량을 나타내세요. *** --
+ -----------------------------------------
+ 판매일자       일별판매량       일별누적판매량
+ -----------------------------------------
+ 2020-12-16      10              10
+ 2020-12-17      15              25
+ 2020-12-19      13              38
+ 2021-01-17       8              46
+ 2021-02-16      30              76
+ -----------------------------------------
+
+ select to_char(panmaedate,'yyyy-mm-dd') as 판매일자, 
+        sum(panmaesu) as 일별판매량, 
+        sum(sum(panmaesu)) over(order by to_char(panmaedate,'yyyy-mm-dd') asc) as 일별누적판매량
+ from tbl_panmae
+ where jepumname = '감자깡'
+ group by to_char(panmaedate,'yyyy-mm-dd')
+ order by 1;
+
+
+
+ -- *** tbl_panmae 테이블에서 모든 제품에 대한 일별판매량과 일별누적판매량을 나타내세요. *** --
+  ------------------------------------------------------
+ 제품명    판매일자       일별판매량       일별누적판매량
+ -------------------------------------------------------
+ 감자깡   2020-12-18      20              20
+ .....  ............   ......          .....
+ 새우깡   2020-12-16      10              10
+         2020-12-17      15              25
+         2020-12-19      13              38
+         2021-01-17       8              46
+         2021-02-16      30              76
+ .....  ............   ......          .....
+ --------------------------------------------------------
+
+
+ select jepumname as 제품명, 
+        to_char(panmaedate,'yyyy-mm-dd') as 판매일자, 
+        sum(panmaesu) as 일별판매량, 
+        sum(sum(panmaesu)) over(partition by jepumname
+                                order by to_char(panmaedate,'yyyy-mm-dd') asc) as 일별누적판매량
+ from tbl_panmae
+ group by jepumname, to_char(panmaedate,'yyyy-mm-dd');
+
+/*
+    감자깡	    2020-12-18	20	20
+    감자깡	    2021-01-18	10	30
+    감자깡	    2021-01-19	5	35
+    감자깡	    2021-02-16	15	50
+    고구마깡	    2021-01-16	7	7
+    고구마깡	    2021-02-13	15	22
+    고구마깡	    2021-02-14	10	32
+    고구마깡	    2021-02-16	20	52
+    새우깡	    2020-12-16	10	10
+    새우깡	    2020-12-17	15	25
+    새우깡	    2020-12-19	13	38
+    새우깡	    2021-01-17	8	46
+    새우깡	    2021-02-16	30	76
+    허니버터칩	2021-02-12	30	30
+    허니버터칩	2021-02-15	20	50
+*/
+    
+
+----------------------------------------------------------------------------
+--- *** 아래처럼 나오도록 하세요 *** ---
+
+-------------------------------------------------------
+ 전체사원수  10대  20대  30대  40대  50대  60대
+-------------------------------------------------------
+ 107        16   19    21    21   16    14
+
+
+-- [방법1]
+-- 오라클 11g 이전에는 아래와 같이 구했다.
+-- 조건에 맞으면 1 주고 다 더하기, sum 활용
+select count(ageline) as 전체사원수,
+       sum(decode(ageline,10,1)) as "10대",
+       sum(decode(ageline,20,1)) as "20대",
+       sum(decode(ageline,30,1)) as "30대",
+       sum(decode(ageline,40,1)) as "40대",
+       sum(decode(ageline,50,1)) as "50대",
+       sum(decode(ageline,60,1)) as "60대"       
+from
+(
+     select trunc(extract(year from sysdate) - ( case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2) +1 ), -1) as ageline
+     from employees
+) V;
+
+
+-- [방법2] 
+-- **** PIVOT **** --
+-- ==> Oracle 11g부터 제공하는 것으로써, 행을 열로 변환하고자 할 때 사용하는 방법으로서 기존의 GROUP BY 와 집계함수(MAX, SUM 등), DECODE 나 CASE 를 사용하는 방법 대신 좀 더 간결하게 해준다.
+--      1. PIVOT 절은 그룹함수가 적용될 컬럼을 정의하는 것으로서 마치 GROUP BY가 들어간 쿼리에서 SELECT SUM(SALARY), AVG(SALARY), COUNT(SALARY) 구절과 같다.
+--      2. PIVOT FOR 절은 피봇의 기준의 되는 컬럼을 정의하는 것으로서 마치 GROUP BY 절에 뒤따르는 컬럼과 같은 역할로 이해하면 된다.
+--         SELECT 절의 SUM(SALARY), AVG(SALARY), COUNT(SALARY) 가 PIVOT 절의 역할이라면, GROUP BY DEPARTMENT_ID 는 PIVOT FOR의 역할이다.
+--      3. PIVOT IN 절은 PIVOT FOR 절에서 정의한 컬럼에서 필터링을 정의하는 것으로서 마치 SQL 중 WHERE DEPARTMENT_ID IN(10, 20)은 PIVOT IN 절의 역할이다.
+--         또한 PIVOT IN 절은 Subquery 는 포함 할 수 없으나 Alias 정의는 가능하다.
+
+select ageline as 연령대, 
+       count(ageline) as 인원수
+from
+(
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline
+    from employees
+)V
+group by ageline
+order by 1;
+
+
+-----------------------------------
+ 10대  20대  30대  40대  50대  60대
+-----------------------------------
+  16   19    21    21   16    14
+
+with V as (
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline
+    from employees
+)
+select *
+from V
+PIVOT( COUNT(ageline) --   16   19    21    21   16    14   이러한 값들을 의미한다.
+       FOR ageline --> V 의 ageline에서 보여지는 행들의 값들이 열로 들어온다는 의미이다.
+       IN(10, 20, 30, 40, 50, 60) --> 열로 보여지는 것을 선택해주는 것이다.
+      );
+
+
+with V as (
+    select trunc(extract(year from sysdate) 
+           - (case when substr(jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(jubun,1,2))+1, -1) as ageline
+    from employees
+)
+select *
+from V
+PIVOT( COUNT(ageline) --   16   19    21    21   16    14   이러한 값들을 의미한다.
+       FOR ageline --> V 의 ageline에서 보여지는 행들의 값들이 열로 들어온다는 의미이다.
+       IN(10 as "10대", 20 as "20대", 30 as "30대", 40 as "40대", 50 as "50대", 60 as "60대")
+       -- as "10대" 는 별칭이다.
+      );
+      
+      
+
+select department_id as 부서번호, 
+       count(*) as 인원수
+from employees
+group by department_id
+order by 1;
+
+----------------------------------------------------------
+10번부서 20번부서 30번부서 ......... 100번부서 110번부서 부서없음
+----------------------------------------------------------
+   1        2       6   ........    6       2        1
+
+-- [방법1]  
+select  sum(decode(department_id,10,1)) as "10번부서",
+        sum(decode(department_id,20,1)) as "20번부서",
+        sum(decode(department_id,30,1)) as "30번부서",
+        sum(decode(department_id,40,1)) as "40번부서",
+        sum(decode(department_id,50,1)) as "50번부서",
+        sum(decode(department_id,60,1)) as "60번부서",
+        sum(decode(department_id,70,1)) as "70번부서",
+        sum(decode(department_id,80,1)) as "80번부서",
+        sum(decode(department_id,90,1)) as "90번부서",
+        sum(decode(department_id,100,1)) as "100번부서",
+        sum(decode(department_id,110,1)) as "110번부서",
+        sum(decode(nvl(department_id,-999),-999,1)) as "부서없음"
+from employees;
+  
+
+-- [방법2]
+select sum(case department_id when 10 then 1 end) AS "10번부서"
+    , sum(case department_id when 20 then 1 end) AS "20번부서"
+    , sum(case department_id when 30 then 1 end) AS "30번부서"
+    , sum(case department_id when 40 then 1 end) AS "40번부서"
+    , sum(case department_id when 50 then 1 end) AS "50번부서"
+    , sum(case department_id when 60 then 1 end) AS "60번부서"
+    , sum(case department_id when 70 then 1 end) AS "70번부서"
+    , sum(case department_id when 80 then 1 end) AS "80번부서"
+    , sum(case department_id when 90 then 1 end) AS "90번부서"
+    , sum(case department_id when 100 then 1 end) AS "100번부서"
+    , sum(case department_id when 110 then 1 end) AS "110번부서"
+    , sum(case nvl(department_id, -9999) when -9999 then 1 end) AS "부서없음"
+from employees;   
+       
+
+-- [방법3]  
+with V as (select nvl(department_id,-999) as department_id
+           from employees)
+select *
+from V
+pivot(count(department_id) 
+      for department_id 
+      in(10 as "10번부서", 20 as "20번부서", 30 as "30번부서", 40 as "40번부서", 50 as "50번부서", 60 as "60번부서", 
+         70 as "70번부서", 80 as "80번부서", 90 as "90번부서", 100 as "100번부서", 110 as "110번부서", -999 as "부서없음"));
+
+
+
+--- employees 테이블에서 job_id 별, 성별 기본급여의 평균을 나타내세요.
+with V as (select job_id, case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as gender, salary
+           from employees)
+select job_id as 직종ID, 
+       gender as 성별, 
+       to_char(trunc(avg(salary)),'99,999') as 기본급여평균
+from V
+group by job_id, gender
+order by 1, 2; 
+
+
+
+select job_id as 직종ID, trunc(avg(salary)) as 기본급여평균
+from employees
+group by job_id
+order by 1;
+
+
+-- ** 아래와 같이 나오도록 하세요 ** --
+----------------------------------------------------------------------------------------------------------------
+ 직종ID       남자기본급여평균  여자기본급여평균   기본급여평균     남자기본급여평균-기본급여평균     여자기본급여평균-기본급여평균
+----------------------------------------------------------------------------------------------------------------
+ .....       ............  ............     .........
+FI_ACCOUNT      7900           7950           7920              7900-7920                   7950-7920
+IT_PROG         5700           6000           5760
+ .....       ............  ............     .........
  
- 
+select job_id as 직종ID, 
+      trunc(avg(decode(gender,'남',salary))) as 남자기본급여평균,
+      -- gender 값이 남자이면 salary 를 주고, 그 외에는 null 값을 준다.
+      trunc(avg(decode(gender,'여',salary))) as 여자기본급여평균,
+      trunc(avg(salary)) as 기본급여평균
+from
+(
+    select job_id, 
+           case when substr(jubun,7,1) in ('1','3') then '남' else '여' end as gender, 
+           salary
+    from employees
+) V     -- 필요한 것만 사용할 수 있도록 inline view로 작성한다.
+group by job_id
+order by 1;
+
+/*
+      trunc(avg(decode(gender,'남',salary,0))) as 남자기본급여평균
+      남자이면 salary를 여자는 0 값이 주어지므로 평균값이 달라진다.
+      
+      남         100         100     100
+      남          80          80      80
+      여         100         NULL      0
+      남자평균     90          90      60
+*/
+
+
+  select job_id AS 직종ID
+       , nvl( to_char( trunc( avg( decode(GENDER,'남',salary) ) ), '99,999' ) , ' ') AS 남자기본급여평균
+       , nvl( to_char( trunc( avg( decode(GENDER,'여',salary) ) ), '99,999' ) , ' ') AS 여자기본급여평균
+       , to_char( trunc( avg( salary ) ), '99,999') AS 기본급여평균
+  from 
+  (
+    select job_id 
+         , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+         , salary
+    from employees
+  ) V 
+  group by job_id
+  order by 1;
+
+
+--- *** 위의 것을 POVOT을 사용하여 구해봅니다. *** ---
+with v as (
+    select job_id 
+         , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS GENDER
+         , salary
+    from employees
+)
+select job_id as 직종ID,
+       nvl(to_char(trunc(manSalAvg),'99,999'),' ') as 남자기본급여평균,
+       nvl(to_char(trunc(womanSalAvg),'99,999'),' ') as 여자기본급여평균
+from V
+pivot (avg(salary) -- 보여질 데이터 값을 정의한다.
+       for gender -- 남, 여 로 보여지는 행의 값이 컬럼으로 보여지게 한다.
+       in('남' as manSalAvg,'여' as womanSalAvg)
+)
+order by 1;
+
+
+--- *** UNPIVOT *** ---
+/*
+    UNPIVOT 은 컬럼명을 행의 데이터값으로 변경하고자할 때 사용하는 것으로서,
+    열을 행으로 변경하고자 하는 컬럼명과 데이터 영역을 선정해야 한다.    
+*/
+
+
+select first_name || ' ' || last_name as fullname,
+       salary,
+       salary*commission_pct as commission
+from employees
+order by 1;
+
+
+--- 위의 결과물을 아래와 같이 보이고자 한다. ---
+/*
+    ----------------------------------------------
+    fullname            colum_name    data_value  
+    ----------------------------------------------
+    ........             ........     .........
+    Alberto Errazuriz     salary        12000
+    Alberto Errazuriz     commission     3600
+    ........             ........     .........
+    Allan McEwen          salary         9000
+    Allan McEwen          commission     3150
+    ........             ........     .........
+*/
+
+with V as(
+    select first_name || ' ' || last_name as fullname,
+           salary,
+           salary*commission_pct as commission
+    from employees
+)
+select fullname as 사원명, colum_name as 컬럼명, to_char(data_value,'99,999') as 데이터값 
+from V
+UNPIVOT(data_value       -- 데이터영역의 "컬럼명"을 지정해주는 것
+        FOR(colum_name)  -- 컬럼 영역의 "컬럼명"을 지정해주는 것
+        IN(salary, commission)
+)
+order by 1;
+
+
+
+------------------------------------------------------------------------------
+    ---- !!!!! 중요   JOIN 은 면접에 가시면 무조건 물어봅니다. 중요 !!!!! ---- 
+------------------------------------------------------------------------------
+
+                 ------ ==== **** JOIN **** ==== -------
+/*
+    JOIN(조인)은 테이블(뷰)과 테이블(뷰)을 합치는 것을 말하는데 
+    행(ROW)과 행(ROW)을 합치는 것이 아니라, 컬럼(COLUMN)과 컬럼(COLUMN)을 합치는 것을 말한다.
+    위에서 말한 행(ROW)과 행(ROW)을 합치는 것은 UNION 연산자를 사용하는 것이다.
+    
+    -- 질문 : INNER JOIN 과 OUTER JOIN 의 차이점에 대해서 말해보세요.
+    -- 면접질문 : JOIN 과 UNION 의 차이점에 대해서 말해보세요. 
+    
+    A = {1, 2, 3}  원소가 3개
+    B = {a, b}     원소가 2개
+    
+    A ⊙ B = { (1,a), (1,b)
+              ,(2,a), (2,b)
+              ,(3,a), (3,b) } 
+    
+    데카르트곱(수학) ==> 원소의 곱 : 3*2 = 6개(모든 경우의 수)
+    --> 수학에서 말하는 데카르트곱을 데이터베이스에서는 Catersian Product 라고 부른다. 
+    
+    JOIN => SQL 1992 CODE 방식 --> 테이블(뷰)과 테이블(뷰) 사이에 콤마(,)를 찍어주는 것.
+                                  데이터베이스 밴더(회사) 제품마다 문법이 조금씩 다르다.
+                                   
+    JOIN => SQL 1999 CODE 방식(ANSI) --> 테이블(뷰)과 테이블(뷰) 사이에 JOIN 이라는 단어를 넣어주는 것.
+                                         ANSI(표준화) SQL 
+*/
+
+select *
+from employees; -- 107개 행
+
+select count(*)
+from employees;
+
+select *
+from departments;
+
+select count(*)
+from departments;   -- 27개 행
+
+select *
+from employees, departments;    -- SQL 1992 CODE 방식, Catersian Product
+
+select count(*)
+from employees, departments;    -- SQL 1992 CODE 방식
+                                -- 2889개 행
+
+select 107*27   -- 2889
+from dual;
+
+
+select *
+from employees CROSS JOIN departments;    -- SQL 1999 CODE 방식(ANSI), Catersian Product
+
+select count(*)
+from employees CROSS JOIN departments;    -- SQL 1999 CODE 방식
+                                          -- 2889개 행
+
+
+-- 1. cross join 은 프로야구를 예를 들면 10개팀이 있는데 
+--    각 1팀당 경기를 몇번해야 하는지 구할때 쓰인다. 1팀당 모든 팀과 경기를 펼쳐야 한다.
+-- 2. cross join 은 그룹함수로 나온 1개의 행을 가지고 어떤 데이터 값을 얻으려고 할때 사용된다.
+
+-- [cross join 사용예]
+-- 사원번호  사원명  부서번호  기본급여  전체사원의평균급여  평균급여와의차액 --
+-- 위와 같이 나오도록 구하세요...
+
+-- 사원번호  사원명  부서번호  기본급여
+select employee_id as 사원번호,
+        first_name || ' ' || last_name as 사원명,
+        department_id as 부서번호,
+        salary as 기본급여
+from employees;  -- 107개 행
+
+-- 전체사원의평균급여  
+select trunc(avg(salary)) as 전체사원의평균급여  -- 6461
+from employees; -- 1개 행
+
+-- 사원번호  사원명  부서번호  기본급여  (+)  전체사원의평균급여
+select A.employee_id as 사원번호, 
+       A.full_name as 사원명,
+       A.department_id as 부서번호, 
+       A.salary as 기본급여,
+       B.avg_sal as 전체사원의평균급여,
+       A.salary - B.avg_sal as 평균급여와의차이
+from 
+(
+    select employee_id, first_name || ' ' || last_name as full_name,
+            department_id, salary
+    from employees
+) A --  107개 행
+CROSS JOIN
+(
+    select trunc(avg(salary)) as AVG_SAL  -- 6461
+    from employees
+) B -- 1개 행
+order by 1;
+
+
+--- *** EQUI JOIN [SQL 1992 CODE 방식] *** ---
+-- department_id 값이 같은 것만 매칭을 할 때
+  
+/*
+    [EQUI JOIN 예]
+    부서번호 부서명 사원번호 사원명 기본급여
+    을 나타내세요.
+*/
+
+  부서번호        부서명           사원번호 사원명 기본급여
+-- #####        ------          ====================
+  departments   departments         employees
+  employees
+  
+  select *
+  from employees, departments   -- SQL 1992 CODE 방식
+  where employees.department_id = departments.department_id     -- 조인조건절
+  order by employee_id;
+  -- 106개 행
+  -- null은 비교를 할 수 없다. 부서가 배정된 사람만 나온다.  
+  
+  
+  -- 테이블 별칭 사용
+  select *
+  from employees E, departments D   -- SQL 1992 CODE 방식
+  where E.department_id = D.department_id     -- 조인조건절
+  order by E.employee_id;       --  106개행
+  
+  
+  -- 테이블명에 별칭을 주면 반드시 별칭을 사용해야지 테이블명을 사용하면 오류가 발생한다.
+  select *
+  from employees E, departments D   -- SQL 1992 CODE 방식
+  where employees.department_id = departments.department_id     -- 조인조건절
+  order by E.employee_id;
+  -- ORA-00904: "DEPARTMENTS"."DEPARTMENT_ID": invalid identifier
+  -- 오류!! 별칭을 주는 순간 조인조건절에서 별칭을 사용해야 한다.
+  
+  
+  
+  select  department_id as 부서번호,     -- ORA-00918: column ambiguously defined
+          department_name as 부서명,
+          employee_id as 사원번호,
+          first_name||' '||last_name as 사원명,
+          salary as 기본급여
+  from employees E, departments D   -- SQL 1992 CODE 방식
+  where E.department_id = D.department_id     -- 조인조건절
+  order by E.employee_id;
+  
+  
+  select  E.department_id as 부서번호,     -- department_id 컬럼은 employees 테이블과 departments 테이블 양쪽에 모두 존재하므로 반드시 테이블의 소속을 밝혀주어야 한다.
+          department_name as 부서명,       -- department_name 컬럼은 employees 테이블에만 존재하므로 테이블 소속을 생략하더라도 괜찮다. 나머지 이하 동일함.
+          employee_id as 사원번호,
+          first_name||' '||last_name as 사원명,
+          salary as 기본급여
+  from employees E, departments D             -- SQL 1992 CODE 방식
+  where E.department_id = D.department_id     -- 조인조건절
+  order by 1,3;
+  
+  
+  -- *** 부서번호가 null인(없는) '킨벨리 그랜트' 도 출력하고자 한다. *** -- 
+  select *
+  from employees;   --  107개 행
+  
+  select *
+  from departments; --  27개 행
+  
+  select *
+  from employees E, departments D                -- SQL 1992 CODE 방식
+  where E.department_id = D.department_id(+)     -- 조인조건절
+  order by E.employee_id;                        -- 107개행
+  /*
+      조인조건절에서 (+) 가 없는 별칭 테이블인 E 즉, employees 테이블의 모든 행(107개행)들을
+      출력한 다음에 where E.department_id = D.department_id 조건에 만족하는 행들을 참조해서
+      짝짓기에 들어간다. 그러면 employees 테이블의 *킴벨리그랜트*는 E.department_id 값이 NULL 이므로
+      E.department_id = D.department_id 조건에 만족하는 행이 없으므로 departments 테이블에 해당하느 모든 컬럼은 NULL 이 나온다.
+  */
+  
+  -- ms와 오라클의 문법이 다르기 때문에 1992 code 대신 1999 code를 사용하는 것이 바람직하다.
+  -- 이하는 ms에서 위와 같은 효과를 주는 문법
+  /*
+      select *
+      from employees E, departments D                -- SQL 1992 CODE 방식
+      where E.department_id =* D.department_id       -- 조인조건절
+      order by E.employee_id;                        -- 107개행
+  */
+  
+  select *
+  from employees E, departments D                -- SQL 1992 CODE 방식
+  where E.department_id(+) = D.department_id     -- 조인조건절
+  order by E.employee_id;                        -- 122개행
+  /*
+      조인조건절에서 (+) 가 없는 별칭 테이블인 D 즉, departments 테이블의 모든 행(27개행)들을
+      출력한 다음에 where E.department_id = D.department_id 조건에 만족하는 행들을 참조해서
+      짝짓기에 들어간다. 
+      그러면 employees 테이블의 존재하지 않고 departments 테이블에만 존재하는 부서번호 120번부터 270번 부서는
+      where NULL = D.department_id 와 같이 되므로 
+      departments 테이블에 해당하는 모든 컬럼은 NULL 이 나온다.
+      
+      departments 테이블의 department_id가 270번까지 있고,
+      employees 테이블의 department_id가 110번까지 있다.
+  */
+  
+  select  E.department_id as 부서번호,     -- department_id 컬럼은 employees 테이블과 departments 테이블 양쪽에 모두 존재하므로 반드시 테이블의 소속을 밝혀주어야 한다.
+          department_name as 부서명,       -- department_name 컬럼은 employees 테이블에만 존재하므로 테이블 소속을 생략하더라도 괜찮다. 나머지 이하 동일함.
+          employee_id as 사원번호,
+          first_name||' '||last_name as 사원명,
+          salary as 기본급여
+  from employees E, departments D             -- SQL 1992 CODE 방식
+  where E.department_id = D.department_id(+)  -- 조인조건절
+  order by 1,3;                               -- 107개행
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
