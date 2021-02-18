@@ -4746,14 +4746,14 @@ order by 1;
   
   
   select E1.employee_id as 사원번호, E1.first_name||' '||E1.last_name as 사원명, E1.email as 이메일
-       , E1.salary as 급여, E2.employee_id as 직속상관번호, E2.first_name||' '||E1.last_name as 직속상관명
+       , E1.salary as 급여, E2.employee_id as 직속상관번호, E2.first_name||' '||E2.last_name as 직속상관명
   from employees E1, employees E2          -- SQL 1992 CODE
   where E1.manager_id = E2.employee_id(+)  -- 107 개행
   order by 1;
   
   
   select E1.employee_id as 사원번호, E1.first_name||' '||E1.last_name as 사원명, E1.email as 이메일
-       , E1.salary as 급여, E2.employee_id as 직속상관번호, E2.first_name||' '||E1.last_name as 직속상관명
+       , E1.salary as 급여, E2.employee_id as 직속상관번호, E2.first_name||' '||E2.last_name as 직속상관명
   from employees E1 LEFT JOIN employees E2          -- SQL 1999 CODE
   ON E1.manager_id = E2.employee_id(+)              -- 107 개행
   order by 1;
@@ -4807,6 +4807,7 @@ order by 1;
      그리스로마신화       김성빈      1700
      로빈슨크루소         한서연       800
      로빈슨크루소         조연재       500
+     -------------------------------------
   
   -- select 되어진 결과 행이 동일한 값을 가질 경우 중복된 행들을 모두 보여주지 않고 
   -- 중복된 행들은 1번만 보이도록 하려면 select 바로 다음에 distinct 를 쓰면 된다.
@@ -4940,12 +4941,11 @@ order by 1;
    ----------------------------------------------------------------------------------------------------------
    부서번호   부서명   부서주소  부서장성명  사원번호  사원명  연봉  연봉소득세액  부서내연봉평균차액   부서내연봉등수
   ---------------------------------------------------------------------------------------------------------- 
-  
  
-  select D.department_id as 부서번호, 
+  select V.department_id as 부서번호, 
          D.department_name as 부서명, 
          L.city||' '||L.street_address as 부서주소,
-         V.full_name as 부서장성명, 
+         D.full_name as 부서장성명, 
          V.employee_id as 사원번호, 
          V.full_name as 사원명,
          V.yr_salary as 연봉, 
@@ -4953,7 +4953,6 @@ order by 1;
          V.yr_salary - V2.yr_avg_salary as 부서내연봉평균차액,
          rank() over(partition by V.department_id order by V.yr_salary desc) as 부서내연봉등수
   from 
-  
   (
    select department_id, employee_id, first_name||' '||last_name as full_name, 
           nvl(salary+(salary*commission_pct), salary)*12 as yr_salary
@@ -4969,8 +4968,13 @@ order by 1;
   ) V2
   on nvl(V.department_id,-999) = nvl(V2.department_id,-999)
   
-  left join departments D
-  on V.department_id = D.department_id
+  left join 
+  (
+  select dept.department_id, department_name, location_id, em.first_name||' '||em.last_name as full_name
+  from departments dept join employees em
+  on dept.manager_id = em.employee_id
+  ) D
+  on nvl(V2.department_id,-999) = nvl(D.department_id,-999)
   
   left join locations L
   on D.location_id = L.location_id
@@ -4981,3 +4985,871 @@ order by 1;
   order by 1,10;
   
 
+  
+ ----- **** SET Operator(SET 연산자, 집합연산자) **** -----
+ ---- *** UNION / UNION ALL / INTERSECT / MINUS *** ---- 
+ -- 면접시 JOIN 과 UNION 의 차이점에 대해서 말해보세요~~!! 
+ -- JOIN 은 컬럼과 컬럼을 UNION 은 행과 행을 합친 결과를 보여줌
+ 
+ 
+/*
+    ==>  UNION 은 테이블(뷰)과 테이블(뷰)을 합쳐서 보여주는 것으로써,
+         이것은 행(ROW)과 행(ROW)을 합친 결과를 보여주는 것이다.
+    
+        A = { a, x, b, e, g }
+              -     -
+        B = { c, d, a, b, y, k, m}    
+                    -  -    
+        A ∪ B = {a, b, c, d, e, g, k, m, x, y}  ==> UNION   -- 항상 오름차순 정렬되어 나옴            
+                                                 {a, b, c, d, e, g, k, m, x, y}
+    
+                                                 / UNION ALL   -- 정렬없음
+                                                 {a, x, b, e, g, c, d, a, b, y, k, m} 
+    
+        A ∩ B = {a,b}  ==> INTERSECT
+                           {a,b}
+    
+        A - B = {x,e,g} ==> MINUS           -- 집합 A에만 존재
+                            {x,e,g}
+    
+        B - A = {c,d,y,k,m} ==> MINUS       -- 집합 B에만 존재
+                               {c,d,y,k,m}
+   
+*/
+
+select *
+from tbl_panmae;
+
+-- 현재가 2021년 2월이므로 2달전은 2020년 12월이다.
+-- 2020년 12월 판매되어진 정보는 tbl_panmae_202012 이라는 테이블을 생성하여 이 테이블 속으로 데이터를 옮기고자 한다.
+-- 이렇게 하려면 먼저 2020년 12월에 판매되어진 정보를 추출해야 한다.
+select to_char(add_months(sysdate,-2),'yymm')   -- 202012
+from dual;
+
+create table tbl_panmae_202012
+as
+select *
+from tbl_panmae
+-- where to_char(panmaedate,'yymm') = '2012';
+where to_char(panmaedate,'yyyymm') = to_char(add_months(sysdate,-2),'yyyymm');
+
+select *
+from tbl_panmae_202012;
+
+
+-- 현재가 2021년 2월이므로 1달전은 2021년 1월이다.
+-- 2021년 1월 판매되어진 정보는 tbl_panmae_202101 이라는 테이블을 생성하여 이 테이블 속으로 데이터를 옮기고자 한다.
+-- 이렇게 하려면 먼저 2021년 1월에 판매되어진 정보를 추출해야 한다.
+select to_char(add_months(sysdate,-1),'yymm')   -- 202101
+from dual;
+
+create table tbl_panmae_202101
+as
+select *
+from tbl_panmae
+where to_char(panmaedate,'yyyymm') = to_char(add_months(sysdate,-1),'yyyymm');
+
+select *
+from tbl_panmae_202101;
+
+select *
+from tbl_panmae;
+
+-- tbl_panmae 테이블에서 이번달에 판매되어진 것이 아닌 것들만 추출하세요.
+select *
+from tbl_panmae
+where to_char(panmaedate,'yyyymm') != to_char(sysdate,'yyyymm');
+
+select *
+from tbl_panmae
+where to_char(panmaedate,'yyyymm') < to_char(sysdate,'yyyymm');
+-- 날짜도 크기 비교가 가능하다
+
+
+-- tbl_panmae_202012 테이블 및 tbl_panmae_202101 테이블 속에 데이터를 이관 시켜두었으므로
+-- tbl_panmae 테이블에서 이번달에 판매되어진 것이 아닌 것들은 삭제해야 한다.
+-- tbl_panmae 테이블에서 이번달에 판매되어진 것이 아닌 것들은 삭제하세요.
+delete from tbl_panmae
+where to_char(panmaedate,'yyyymm') != to_char(sysdate,'yyyymm');
+-- 9개 행 이(가) 삭제되었습니다.
+
+commit; 
+
+select *
+from tbl_panmae;    -- tbl_panmae 테이블에는 이번달(2021년 2월)에 판매되어진 정보만 들어있다.
+
+
+-- 최근 3개월간 판매되어진 정보를 가지고 제품별 판매량의 합계를 추출하세요.
+select *
+from tbl_panmae_202012;    -- 2달 전
+
+select *
+from tbl_panmae_202101;    -- 1달 전
+
+select *
+from tbl_panmae;    -- 이번달
+
+
+select *
+from tbl_panmae_202012
+UNION
+select *
+from tbl_panmae_202101
+UNION
+select *
+from tbl_panmae;
+
+
+
+select *
+from tbl_panmae_202101
+UNION
+select *
+from tbl_panmae_202012
+UNION
+select *
+from tbl_panmae;
+-- UNION 을 하면 항상 첫번째 컬럼(지금은 panmaedate)을 기준으로 오름차순으로 정렬되어 나온다.
+-- 그래서 2020년 12월 데이터부터 먼저 나온다.
+
+-- 최근 3년간 판매되어진 정보를 가지고 제품별 판매량의 합계를 추출하세요.
+select jepumname as 제품명, sum(panmaesu) as 판매량합계
+from
+(
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+) V
+group by jepumname
+order by 2 desc;
+/*
+    ----------------
+    제품명     판매량
+    ----------------
+    새우깡	    76
+    고구마깡	    52
+    감자깡	    50
+    허니버터칩	65
+*/
+
+with V as (
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+)
+select jepumname as 제품명, sum(panmaesu)
+from V
+group by jepumname
+order by 2 desc;
+
+
+-- [퀴즈] 아래와 같이 나오도록 하세요...
+-- 최근 3개월동안 판매되어진 정보를 가지고 제품명, 판매년월, 판매량의 합계 를 나타내세요.
+    -----------------------------------
+    제품명     판매년월     판매량의합계
+    -----------------------------------
+    감자깡     2020-12         10
+    감자깡     2021-01         25
+    감자깡     2021-02         15
+    감자깡                     50
+    새우깡     2020-12         20
+    새우깡     2021-01         10
+    새우깡     2021-02         30
+    새우깡                     60
+    .....    .........       ....
+    전체                      153
+    ---------------------------------
+
+select decode(grouping(jepumname),0,jepumname,'전체') as 제품명
+     , decode(grouping(to_char(panmaedate,'yyyy-mm')),0,to_char(panmaedate,'yyyy-mm'),' ') as 판매년월
+     , sum(panmaesu)
+from
+(
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+) V
+group by rollup(jepumname, to_char(panmaedate,'yyyy-mm'));
+-- 전체 그룹 짓고 뒤애서부터 없어지면서 그룹짓는다.
+
+-- 또는
+with V as (
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+)
+select decode(grouping(jepumname),0,jepumname,1,'전체') as 제품명, decode(grouping(to_char(panmaedate,'yyyy-mm')),0,to_char(panmaedate,'yyyy-mm'),1,' ') as 판매일자, sum(panmaesu) as 판매량
+from V
+group by rollup(jepumname,to_char(panmaedate,'yyyy-mm'));
+
+
+
+-- [퀴즈] 아래와 같이 나오도록 하세요...
+-- 최근 3개월동안 판매되어진 정보를 가지고 제품명, 판매년월, 판매량의합계, 퍼센티지(%) 를 나타내세요.
+    ------------------------------------------------
+    제품명     판매년월     판매량의합계     퍼센티지(%)
+    ------------------------------------------------
+    감자깡     2020-12         10           7.9
+    감자깡     2021-01         25           5.9 
+    감자깡     2021-02         15           5.9
+    감자깡                     50          19.8
+    새우깡     2020-12         38          15.0          
+    새우깡     2021-01          8           3.2
+    새우깡     2021-02         30          11.9
+    새우깡                     76          30.0
+    .....    .........       ....        ......
+    전체                      153         100.0
+    -----------------------------------------------
+
+select decode(grouping(jepumname),0,jepumname,'전체') as 제품명
+     , decode(grouping(to_char(panmaedate,'yyyy-mm')),0,to_char(panmaedate,'yyyy-mm'),' ') as 판매년월
+     , sum(panmaesu) as 판매량의합계
+     , to_char( round( sum(panmaesu)/(select sum(T.panmaesu) from (
+                                                            select *
+                                                            from tbl_panmae_202012
+                                                            UNION
+                                                            select *
+                                                            from tbl_panmae_202101
+                                                            UNION
+                                                            select *
+                                                            from tbl_panmae
+                                                            ) T ) *100 , 1 ),'999.0') as "퍼센티지(%)"
+from
+(
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+) V
+group by rollup(jepumname, to_char(panmaedate,'yyyy-mm'));
+
+
+-- 또는
+with V as (
+    select *
+    from tbl_panmae_202012
+    UNION
+    select *
+    from tbl_panmae_202101
+    UNION
+    select *
+    from tbl_panmae
+)
+select decode(grouping(jepumname),0,jepumname,1,'전체') as 제품명, decode(grouping(to_char(panmaedate,'yyyy-mm')),0,to_char(panmaedate,'yyyy-mm'),1,' ') as 판매일자, sum(panmaesu) as 판매량,
+       to_char(round(sum(panmaesu)/(select sum(panmaesu) from V)*100,1),'999.0') as "퍼센티지(%)"
+from V
+group by rollup(jepumname,to_char(panmaedate,'yyyy-mm'));
+
+
+        ----- **** INTERSECT(교집합) / MINUS(차집합) **** -----
+ insert into tbl_panmae_202012(panmaedate, jepumname, panmaesu)
+ values('2021-02-01', '쵸코파이', 10);
+
+ insert into tbl_panmae_202101(panmaedate, jepumname, panmaesu)
+ values(to_date('2021-02-01','yyyy-mm-dd'), '쵸코파이', 10);
+ -- 원래는 형변환해야 하는게 원칙인데 자동형변환된다.
+
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values(to_date('2021-02-01','yyyy-mm-dd'), '쵸코파이', 10);
+
+ commit;
+ 
+ select *
+ from tbl_panmae_202012
+ INTERSECT
+ select *
+ from tbl_panmae_202101 
+ INTERSECT
+ select *
+ from tbl_panmae;
+
+
+ select *
+ from tbl_panmae_202012
+ MINUS
+ select *
+ from tbl_panmae_202101;
+ 
+ 
+ select *
+ from tbl_panmae_202101
+ MINUS
+ select *
+ from tbl_panmae_202012;
+
+
+    --- *** UNION 과 UNION All 의 차이점 *** ---
+select *
+from tbl_panmae_202101
+UNION
+select *
+from tbl_panmae_202012
+UNION
+select *
+from tbl_panmae;
+-- UNION 을 하면 항상 첫번째 컬럼(지금은 panmaedate)을 기준으로 오름차순으로 정렬되어 나온다.
+-- 그래서 2020년 12월 데이터부터 먼저 나온다.
+-- UNION 을 하면 중복된 행이 있을 경우(지금은 쵸코파이) 중복되게 안나오고 한 번만 나온다.
+-- 그래서 쵸코파이는 1번만 나오게 된다.
+
+
+select jepumname, panmaedate, panmaesu
+from tbl_panmae_202101
+UNION
+select panmaesu, jepumname, panmaedate
+from tbl_panmae_202012
+UNION
+select panmaesu, jepumname, panmaedate
+from tbl_panmae;
+-- ORA-01790: expression must have same datatype as corresponding expression
+
+select jepumname, panmaedate, panmaesu
+from tbl_panmae_202101
+UNION
+select panmaesu, jepumname
+from tbl_panmae_202012
+UNION
+select panmaesu, jepumname, panmaedate
+from tbl_panmae;
+-- ORA-01789: query block has incorrect number of result columns
+
+select jepumname as 제품명, panmaedate, panmaesu
+from tbl_panmae_202101
+UNION
+select jepumname as 제품이름, panmaedate as 판매일자, panmaesu
+from tbl_panmae_202012
+UNION
+select jepumname, panmaedate, panmaesu
+from tbl_panmae;
+-- UNION 을 하면 항상 첫번째 컬럼(지금은 jepumname)을 기준으로 오름차순으로 정렬되어 나온다.
+-- 그래서 감자깡부터 먼저 나온다.
+-- UNION 을 하면 중복된 행이 있을 경우(지금은 쵸코파이) 중복되게 안나오고 한 번만 나온다.
+-- 그래서 쵸코파이는 1번만 나오게 된다.
+-- 별칭(alias)은 첫번째 나타나는 select 절에서만 쓰여지고 나머지 두번째 이후부터는 적용이 안된다.
+
+
+select *
+from tbl_panmae_202101
+UNION ALL
+select *
+from tbl_panmae_202012
+UNION ALL
+select *
+from tbl_panmae;
+-- UNION ALL을 하면 정렬없이 그대로 나온다.
+-- 그래서 UNION ALL을 하면 중복된 행이 있을 경우(지금은 쵸코파이) 중복된 채로 그대로 나온다.
+-- 그래서 쵸코파이는 3번만 나오게 된다.
+
+
+select jepumname as 제품명, panmaedate, panmaesu
+from tbl_panmae_202101
+UNION ALL
+select jepumname as 제품이름, panmaedate as 판매일자, panmaesu
+from tbl_panmae_202012
+UNION ALL
+select jepumname, panmaedate, panmaesu
+from tbl_panmae;
+-- 별칭(alias)은 첫번째 나타나는 select 절에서만 쓰여지고 나머지 두번째 이후부터는 적용이 안된다.
+
+
+-- UNION 과 UNION ALL 중에 결과값을 보여주는 속도는 UNION ALL 이 더 빠르다.
+-- 왜냐하면 행의 중복제거도 없고 오름차순 정렬도 없기 때문이다.
+
+
+ insert into tbl_panmae_202012(panmaedate, jepumname, panmaesu)
+ values('2021-02-01', '쵸코파이', 20);
+
+ insert into tbl_panmae_202101(panmaedate, jepumname, panmaesu)
+ values(to_date('2021-02-02','yyyy-mm-dd'), '쵸코파이', 10);
+ 
+ insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+ values(to_date('2021-02-03','yyyy-mm-dd'), '쵸코파이', 30);
+
+ commit;
+
+ select *
+ from tbl_panmae_202101
+ INTERSECT
+ select *
+ from tbl_panmae_202012
+ INTERSECT
+ select *
+ from tbl_panmae;
+ --> 결과값 21/02/01 쵸코파이 10
+ 
+ --- *** tbl_panmae_202012 과 tbl_panmae_202101 과 tbl_panmae 에서 
+ --      동일한 데이터를 가지는 행을 백업한 이후에 삭제하세요.  *** ---
+ 
+ -- 동일한 데이터를 가지는 행을 백업하기
+ create table tbl_panmae_intersect
+ as
+ select *
+ from tbl_panmae_202101
+ INTERSECT
+ select *
+ from tbl_panmae_202012
+ INTERSECT
+ select *
+ from tbl_panmae;
+ -- Table TBL_PANMAE_INTERSECT이(가) 생성되었습니다.
+ 
+ select *
+ from tbl_panmae_intersect;
+
+ select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+ from tbl_panmae_202101
+ INTERSECT
+ select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+ from tbl_panmae_202012
+ INTERSECT
+ select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+ from tbl_panmae;
+ -- 2021-02-01 00:00:00쵸코파이10
+             
+ select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+ from tbl_panmae_202012;
+
+
+-- ***********************************
+-- delete 3개 잘못됨!!! 나중에 코드받아서 복붙할 것
+-- ***********************************
+
+ delete from tbl_panmae_202012
+ where to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaedu
+        IN(
+             select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+             from tbl_panmae_202012
+             INTERSECT
+             select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+             from tbl_panmae_202101
+             INTERSECT
+             select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+             from tbl_panmae
+        );
+  
+ delete from tbl_panmae_202101
+ where to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaedu
+        IN(
+             select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+             from tbl_panmae_202101
+             INTERSECT
+             select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+             from tbl_panmae
+        );
+      
+ delete from tbl_panmae
+ where to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaedu
+        IN( select to_char(panmaedate,'yyyy-mm-dd hh24:mi:ss')||jepumname|| panmaesu
+            from tbl_panmae_intersect );
+
+ rollback;
+ 
+ select *
+ from tbl_panmae_202012;
+
+
+         ----- ==== **** SUB Query **** ==== ------
+/*
+    -- SUB Query(서브쿼리)란?
+    select 문속에 또 다른 select 문이 포함되어져 있을때 포함되어진 select 문을 
+    SUB Query(서브쿼리)라고 부른다.
+
+    select ....
+    from ......  ==> Main Query(메인쿼리 == 외부쿼리)
+    where ... in (select...
+                  from ....) ==> SUB Query(서브쿼리 == 내부쿼리)
+*/
+
+/*
+    employees 테이블에서 기본급여가 제일많은 사원과 
+    기본급여가 제일적은 사원의 정보를   사원번호, 사원명, 기본급여로 나타내세요...
+*/
+
+select employee_id as 사원번호, first_name||' '||last_name as 사원명, salary as 기본급여
+from employees
+where salary = (select max(salary) from employees) or
+      salary = (select min(salary) from employees);
+
+/*
+    ---------------------------
+    사원번호 사원명       기본급여
+    ---------------------------
+    100 	Steven King	24000
+    132	    TJ Olson	2100
+*/
+
+
+
+/*
+   employees 테이블에서 부서번호가 60, 80번 부서에 근무하는 사원들중에
+   월급이 50번 부서 직원들의 '평균월급' 보다 많은 사원들만 
+   부서번호, 사원번호, 사원명, 월급을 나타내세요....
+*/
+
+
+select department
+from employees
+where department_id in(60,80) and
+      nvl(salary + (salary * commission_pct), salary) > (50번 부서 직원들의 '평균월급');
+      
+50번 부서 직원들의 '평균월급' 
+=> select AVG(nvl(salary + (salary * commission_pct), salary))  
+   from employees where department_id = 50;
+ 
+ 
+select department_id AS 부서번호
+     , employee_id AS 사원번호
+     , first_name || ' ' || last_name AS 사원명
+     , nvl(salary + (salary * commission_pct), salary) AS 월급  
+from employees
+where department_id in(60,80) and
+      nvl(salary + (salary * commission_pct), salary) > ( select AVG(nvl(salary + (salary * commission_pct), salary))  
+                                                          from employees where department_id = 50 )   
+order by 1 , 4;  
+
+
+
+        --- *** ==== ANY, ALL ==== *** ---
+    /*
+        Sub Query 절에서 사용되어지는 ANY 는 OR 와 흡사하고, =ANY 는 in 과 동일 
+        Sub Query 절에서 사용되어지는 ALL 은 AND 와 흡사하다. 
+    */
+    
+    -- employees 테이블에서 salary가 30번 부서에 근무하는 사원들의 salary 와 동일한 사원들만 추출하세요
+    -- 단, 30번 부서에 근무하는 사원은 제외하세요!
+    select salary
+    from employees
+    where department_id = 30;
+    /*
+        11000
+        3100
+        2900
+        2800
+        2600
+        2500
+    */
+
+    desc employees;
+    
+    select *
+    from employees
+    where nvl(department_id,-999) != 30 and
+          select salary in (11000,3100,2900,2800,2600,2500);
+    -- where 절 작성시 미리 desc 를 보고 null 값을 허용하는지 확인할 것!!!
+
+    select *
+    from employees
+    where nvl(department_id,-999) != 30 and
+          salary in (select salary from employees where department_id = 30);
+
+    select department_id as 부서번호,
+            first_name||' '||last_name as 사원명,
+            salary as 기본급여
+    from employees
+    where nvl(department_id,-999) != 30 and
+          salary =ANY (select salary from employees where department_id = 30)
+    order by 1;
+
+
+    /*
+        기본급여(salary)가 제일 많은 사원을 제외한 나머지 모든 사원들만
+        사원번호, 사원명, 기본급여(salary)를 나타내세요..
+    */
+    
+    from employees
+    where salary < (employees 테이블에서 salary 의 최대값);
+
+    from employees
+    where salary != (employees 테이블에서 salary 의 최대값);
+
+    employees 테이블에서 salary 의 최대값
+    => select max(salary) from employees;   -- 24000
+    
+    from employees
+    where salary >=ALL (select salary from employees)
+    -- 24000           ( 10500, 11500, 6100, 6200, 4100, 2900, 2800, 24000 )
+    
+    -- 24000 >= 10500 참 and 
+    -- 24000 >= 11500 참 and 
+    -- 24000 >=  6100 참 and 
+    -- 24000 >=  6200 참 and 
+    -- 24000 >=  4100 참 and 
+    -- .............. 참 and 
+    -- 24000 >= 24000 참
+
+    -- 11500           ( 10500, 11500, 6100, 6200, 4100, 2900, 2800, 24000 )
+
+    -- 11500 >= 10500 참 and 
+    -- 11500 >= 11500 참 and 
+    -- 11500 >=  6100 참 and 
+    -- 11500 >=  6200 참 and 
+    -- 11500 >=  4100 참 and 
+    -- .............. 참 and 
+    -- 11500 >= 24000 거짓
+    
+    select max(salary) from employees;
+    -- 또는
+    select salary
+    from employees
+    where salary >= ALL ( select salary from employees);
+    
+    
+    --- ALL 을 사용시 조심해야할 경우
+    select salary * commission_pct  from employees;   -- NULL 값이 나오는 것이 있다.
+   
+    select MAX(salary * commission_pct) from employees;    -- 5600
+
+    select salary  * commission_pct
+    from employees
+    where salary  * commission_pct >= ALL ( select salary  * commission_pct from employees);
+    -- 5600 >= (2625, 2875, 610, 620, NULL, 5600, ...... )
+    -- 5600 >= 2625    참 and
+    -- 5600 >= 2875    참 and
+    -- 5600 >= 610     참 and    
+    -- 5600 >= 620     참 and
+    -- 5600 >= NULL    비교를 할 수 없다.
+    -- 5600 >= 5600     참 and
+    
+    -- [해결책] ALL 를 사용하여 나온는 결과물에는 NULL 이 나오지 않도록 해야만 한다.
+    select salary  * commission_pct
+    from employees
+    where salary  * commission_pct >= ALL ( select salary  * commission_pct 
+                                            from employees
+                                            where salary  * commission_pct IS NOT NULL );
+    -- 5600    
+    
+    
+    --    기본급여(salary)가 제일 많은 사원을 제외한 나머지 모든 사원들만
+    --    사원번호, 사원명, 기본급여(salary)를 나타내세요..
+    select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary as 기본급여           
+    from employees
+    where salary < (select max(salary) from employees) -- 24000
+    order by 3 desc;
+    
+    -- 또는
+     select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary as 기본급여           
+    from employees
+    where not salary >= ALL (select salary 
+                        from employees
+                        where salary is not null) -- 24000
+    order by 3 desc;
+    -- 1등을 뺀 나머지는 not 을 활용한다.
+    
+    
+    
+    --    기본급여(salary)가 제일 적은 사원을 제외한 나머지 모든 사원들만
+    --    사원번호, 사원명, 기본급여(salary)를 나타내세요..
+    select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary as 기본급여           
+    from employees
+    where salary > (select min(salary) from employees) -- 2100
+    order by 3;
+    
+    -- 또는
+     select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary as 기본급여           
+    from employees
+    where not salary <= ALL (select salary 
+                        from employees
+                        where salary is not null) -- 2100
+    order by 3;
+    -- 1등을 뺀 나머지는 not 을 활용한다.
+    
+    
+    
+    --    수당(salary*commission_pct)가 제일많은 사원을 제외한 나머지 모든 사원들만
+    --    사원번호, 사원명, 수당(salary*commission_pct)를 나타내세요..
+    select first_name, salary
+    from employees
+    where salary in (6100, 6200, null, 4100)
+    order by 2 asc;
+    
+    select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary*commission_pct as 수당 
+    from employees
+    where salary*commission_pct < ANY (select salary*commission_pct from employees) -- NULL 포함
+    order by 3 desc;
+    /*
+        salary*commission_pct < (2625    2875    610     620      NULL      5600    .....)  
+            
+            2875    <   2625  거짓 OR
+            2875    <   2875  거짓 OR
+            2875    <    610  거짓 OR
+            2875    <    620  거짓 OR
+            2875    <   NULL  연산불가 OR
+            2875    <   5600  참
+            
+            5600    <   2625  거짓 OR
+            5600    <   2875  거짓 OR
+            5600    <    610  거짓 OR
+            5600    <    620  거짓 OR
+            5600    <   NULL  연산불가 OR
+            5600    <   5600  거짓
+    */
+
+
+    --    수당(salary*commission_pct)가 제일적은 사원을 제외한 나머지 모든 사원들만
+    --    사원번호, 사원명, 수당(salary*commission_pct)를 나타내세요..
+    select employee_id as 사원번호,
+           first_name||' '||last_name as 사원명,
+           salary*commission_pct as 수당 
+    from employees
+    where salary*commission_pct > ANY (select salary*commission_pct from employees) -- NULL 포함
+    order by 3;
+   
+   
+   
+   ------- ==== *** Pairwise Sub Query *** ==== --------  
+    /*
+       employees 테이블에서 
+       부서번호별로 salary 가 최대인 사원과
+       부서번호별로 salary 가 최소인 사원의 정보를
+       부서번호, 사원번호, 사원명, 기본급여를 나타내세요...
+    */
+    
+    select department_id, salary
+    from employees
+    order by 1, 2;
+    
+    /*                               결과물
+    -----------------------         -----------------------
+    department_id   salary          department_id   salary
+    -----------------------         -----------------------
+        ..          ....                 ..          ....
+        30	        2500                 30	         2500
+        30	        2600                 30         11000
+        30	        2800                 ..          ....
+        30      	2900                 50          2100
+        30	        3100                 50          8200
+        30	       11000                 ..          ....
+        ..          ....                 80          6100
+        50	        2100                 80         14000
+        50      	2200
+        50	        2200
+        50	        2400
+        50      	2400
+        50      	2500
+        50      	2500
+        50       	2500
+        50        	2500
+        50      	2500
+        50      	2600
+        50       	2600
+        50      	2600
+        ..          ....
+        50	        8000
+        50	        8200
+        ..          ....
+    */
+    
+    select department_id, salary
+    from employees
+    where (department_id, salary) IN ((30,2500),(30,11000),(50,2100),(50,8200),(80,6100),(80,14000));
+    
+    select nvl(department_id,-9999) as 부서번호, employee_id as 사원번호, first_name||' '||last_name as 사원명,
+           salary as 기본급여
+    from employees
+    where (nvl(department_id,-9999), salary) IN (select nvl(department_id,-9999), min(salary)
+                                                from employees
+                                                group by department_id
+                                                UNION
+                                                select nvl(department_id,-9999), max(salary)
+                                                from employees
+                                                group by department_id  
+                                    )
+    order by 1,4;
+    
+    
+    /*
+       employees 테이블에서 
+       부서번호별로 salary 가 최대인 사원과
+       부서번호별로 salary 가 최소인 사원의 제외한 나머지 사원들의 정보를
+       부서번호, 사원번호, 사원명, 기본급여를 나타내세요...
+    */
+   
+    select department_id, salary
+    from employees
+    where (department_id, salary) NOT IN ((30,2500),(30,11000),(50,2100),(50,8200),(80,6100),(80,14000));
+    
+    select department_id as 부서번호, employee_id as 사원번호, first_name||' '||last_name as 사원명,
+           salary as 기본급여
+    from employees
+    where (nvl(department_id,-9999), salary) NOT IN (  select nvl(department_id,-9999), min(salary)
+                                                        from employees
+                                                        group by department_id
+                                                        UNION
+                                                        select nvl(department_id,-9999), max(salary)
+                                                        from employees
+                                                        group by department_id  
+                                                    )
+    order by 1,4;
+    
+    
+    
+    
+   /*
+      tbl_authorbook 테이블에서 공저(도서명은 동일하지만 작가명이 다른 도서)로 지어진
+      도서정보를 나타내세요 (Sub Query 을 사용해서 풀이)
+   */
+   ----------------------------------------
+     도서명             작가명      로얄티
+   ----------------------------------------
+     그리스로마신화       김다님      1200
+     그리스로마신화       김성경      1300
+     그리스로마신화       김성빈      1700
+     로빈슨크루소         한서연       800
+     로빈슨크루소         조연재       500
+   ----------------------------------------
+    
+    select *
+    from tbl_authorbook;
+    
+    select bookname
+    from tbl_authorbook
+    group by bookname
+    having count(*)>1;
+    
+    select bookname as 도서명, authorname as 작가명, loyalty as 로얄티
+    from tbl_authorbook
+    where bookname in ( select bookname
+                        from tbl_authorbook
+                        group by bookname
+                        having count(*)>1 );
+    
+    
+    
+    
+    
+    
+    
