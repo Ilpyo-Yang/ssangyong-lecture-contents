@@ -2424,9 +2424,9 @@ where boardno = 3;
     1         오늘은 2001년 1월 9일 입니다.     2001-01-09 14:36:40  
     
     =============================================================
-                    1 2 3 4 5 6 7 8 9 10 다음
+                    1 2 3 4 5 6 7 8 9 10 다음          ==> "페이지바(Page Bar)"라고 부른다.
              
-             이전 11 12 13 14 15 16 17 18 19 11 다음
+             이전 11 12 13 14 15 16 17 18 19 11 다음    ==> "페이지바(Page Bar)"라고 부른다.
     
     
     다음은 옛날 것이고, 이전이 가장 최신의 가까운 것이다
@@ -5850,6 +5850,791 @@ order by 1 , 4;
     
     
     
+      
+  
+  
+  
+  
+  
+   ------- ==== *** 상관서브쿼리(== 서브상관쿼리) *** ==== -------- 
+   /*
+      상관서브쿼리 이라함은 Main Query(== 외부쿼리)에서 사용된 테이블(뷰)에 존재하는 컬럼이
+      Sub Query(== 내부쿼리)의 조건절(where절, having절)에 사용되어질때를 
+      상관서브쿼리(== 서브상관쿼리)라고 부른다.
+   */
+   
+   
+   -- employees 테이블에서 기본급여에 대해 전체 등수 및 부서 내 등수를 구하세요..
+   -- 첫번째 방법은 rank() 함수를 사용하여 구해본다.
+   -- (오라클에서만)
+   select department_id as 부서번호
+        , employee_id as 사원번호
+        , salary as 기본급여
+        , rank() over(order by salary desc) as 전체등수
+        , rank() over(partition by department_id order by salary desc) as 부서내등수
+   from employees
+   order by 1,3;
+   
+   
+   -- employees 테이블에서 기본급여에 대해 전체 등수 및 부서 내 등수를 구하세요..
+   -- 두번째 방법은 count(*)를 이용하여 상관서브쿼리를 사용하여 구해본다.
+   -- (호환성 적용)
+   select salary
+   from employees;
+   
+   select salary
+   from employees;  -- 24000
+   
+   select count(salary) +1
+   from employees
+   where salary > 10500;    -- 14
+   
+   
+   select count(salary) +1
+   from employees
+   where salary > 24000;    -- 1
+   
+   
+   select department_id as 부서번호
+        , employee_id as 사원번호
+        , salary as 기본급여
+        , (select count(salary)+1
+           from employees 
+           where salary > E.salary) as 전체등수
+           --    컬럼      데이터값(기본급여)
+        , (select count(salary)+1
+           from employees
+           where department_id = E.department_id and
+                 salary > E.salary) as 부서내등수
+   from employees E
+   order by 1, 3 desc;
+   
+   
+   ---- !!! 꼭 알아두시길 바랍니다. !!! ----
+   ---- === *** 상관서브쿼리(서브상관쿼리)를 사용한 UPDATE 처리하기 *** === ----
+   ---- 회사에 가셔서 delete 또는 update를 할 때 먼저 반드시 해당 테이블을 백업해두시고 하시길 바랍니다.
+   ---- 실수하면 복구하기 위한 것이다.
+   
+   --- *** 서브쿼리를 사용하여 테이블을 생성하는 것 *** ---
+   create table tbl_employees_backup
+   as
+   select *
+   from employees;
+   -- Table TBL_EMPLOYEES_BACKUP이(가) 생성되었습니다.
+   
+   select *
+   from tbl_employees_backup;
+   
+   update employees set first_name = '순신', last_name = '이';
+   -- 107개 행 이(가) 업데이트되었습니다.
+   
+   commit;  -- 커밋 완료.
+   
+   select *
+   from employees;
+   
+   
+   -- tbl_employees_backup 테이블의 데이터를 읽어다가 employees 테이블의 데이터를 수정한다.
+   -- 단, 전제조건은 employees 테이블의 행 중에 고유한 값을 가지는 컬럼이 존재해야 한다.
+   -- employees 테이블에는 고유한 값을 가지는 컬럼은 employee_id 컬럼이다.
+   
+   update employees E set first_name = (select first_name
+                                        from tbl_employees_backup
+                                        where employee_id = E.employee_id)
+                         , last_name = (select last_name
+                                        from tbl_employees_backup
+                                        where employee_id = E.employee_id);
+   -- 107개 행 이(가) 업데이트되었습니다.
+   -- 서브쿼리 조건절에 메인쿼리 컬럼을 이용
+   
+   /*
+        employees 테이블의
+        107개 행을 수정(변경)작업에 들어간다.
+        
+                EMPLOYEES 테이블                                        TBL_EMPLOYEES_BACKUP 테이블
+               --------------------------------------------           --------------------------------------------
+                employee_id     first_name      last_name               employee_id     first_name      last_name
+               --------------------------------------------           --------------------------------------------
+        1번째     162              순신             이                       162             Clara	     Vishney
+        2번째     168              순신             이                       168             Lisa           Ozer
+        3번째     173              순신             이                       173            Sundita	      Kumar
+        ....     ....             ....             ..                      ....           ........        .....
+        107번째   206              순신             이                       206            William	      Gietz
+   */
+   
+   
+   select *
+   from employees;
+   
+   rollback;
+  
+   commit;  -- 커밋 완료.
+  
+  -- 내 PC 가 백업용이다?!!!!!!!!!!!!!!!
+  
+  update employees set first_name = '일표', last_name = '양'
+  where employee_id = 100;
+  -- 1 행 이(가) 업데이트되었습니다.
+  commit;   -- 커밋 완료.
+  
+  select *
+  from employees
+  order by employee_id;
+  -- 100	일표	양	SKING	515.123.4567	03/06/17	AD_PRES	24000			90	6010151234567
+  -- 원격지에 있는 나한테 들어온다.
+  
+  --- **** 데이터베이스 링크 만들기 **** ---
+  1. 탐색기에서 C:\oraclexe\app\oracle\product\11.2.0\server\network\ADMIN 에 간다.
+  2. tnsnames.ora 파일을 메모장으로 연다.
+  3. TEACHER =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = 211.238.142.72)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = XE)
+        )
+      ) 
+      을 추가한다.
+      HOST = 211.238.142.72 이 연결하고자 하는 원격지 오라클서버의 IP 주소이다.
+      그런데 전제조건은 원격지 오라클서버(HOST = 211.238.142.72)의 방화벽에서 포트번호 1521을 허용으로 만들어주어야 한다.
+      TEACHER를 'Net Service Name 네트서비스네임(넷서비스명)' 이라고 부른다.
+      
+  4. 명령프롬포트를 열어서 원격지 오라클서버(HOST = 211.238.142.72)에 연결이 가능한지 테스트를 한다.
+     C:\Users\ilpyo>tnsping TEACHER 5
+     Used TNSNAMES adapter to resolve the alias
+     Attempting to contact (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 211.238.142.72)(PORT = 1521)) (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = XE)))
+     OK (40 msec)
+     OK (0 msec)
+     OK (30 msec)
+     OK (10 msec)
+     OK (20 msec)
+     
+   5. 데이터베이스 링크 만들기
+   create database link teacherServer
+   connect to hr identified by cclass   -- 이 때 HR 과 암호 cclass 는 연결하고자 하는 원격오라클서버(211.238.142.72)의 계정명과 암호이다.
+   using 'TEACHER';     -- TEACHER 는 Net Service Name 네트서비스네임(넷서비스명) 이다.
+   -- Database link TEACHERSERVER이(가) 생성되었습니다.
+  
+   drop database link teacherServer;
+   -- Database link TEACHERSERVER이(가) 삭제되었습니다.
+   
+   select *
+   from employees   -- 로컬서버
+   order by employee_id;
     
+   select *
+   from employees@teacherServer   -- 원격지서버의 테이블 @다음에 teacherServer는 데이터베이스링크이름이다.
+   order by employee_id;
+   -- 100	영학	서	SKING	515.123.4567	03/06/17	AD_PRES	24000			90	6010151234567
+   
     
-    
+   --- *** 생성되어진 데이터베이스링크를 조회해봅니다. *** ---
+   select *
+   from dict
+   where lower(table_name) like '%links%';
+
+   select *
+   from user_db_links;
+   /*
+         ---------------------------------------------------------------
+         DB_LINK            USERNAME     PASSWORD    HOST      CREATED
+         ---------------------------------------------------------------
+         TEACHERSERVER	    HR		                 TEACHER   21/02/19
+                                                     넷서비스명
+   */
+   
+   desc employees;
+   
+   update employees set commission_pct = null, jubun = null;
+   -- 107개 행 이(가) 업데이트되었습니다.
+   
+   commit;  -- 커밋 완료.
+   
+   select *
+   from employees
+   order by employee_id;
+   
+   select *
+   from employees@TEACHERSERVER
+   order by employee_id;
+   
+   
+   -- 백업테이블이 원격지에 있는 경우
+   update employees E set commission_pct = (select commission_pct
+                                            from employees@TEACHERSERVER
+                                            where employee_id = E.employee_id)
+                         , jubun = (select jubun
+                                    from employees@TEACHERSERVER
+                                    where employee_id = E.employee_id);
+   -- 107개 행 이(가) 업데이트되었습니다.
+   
+   commit;    -- 커밋 완료.
+   
+   
+   
+   ---- *** Sub Query 절을 사용하여 테이블을 생성할 수 있다. *** ----
+   --- employees 테이블에서 부서번호 10번과 30번에 근무하는 직원들만 뽑아서 그 직원들만 보이도록
+   --  tbl_employees_sub1 라는 테이블을 생성하세요...
+   create table tbl_employees_sub1
+   as
+   select *
+   from employees
+   where department_id in (10,30)
+   order by department_id, employee_id;
+   -- Table TBL_EMPLOYEES_SUB1이(가) 생성되었습니다.
+   
+   
+   
+   select *
+   from tbl_employees_sub1
+   order by department_id, employee_id;
+
+   
+   -- employees 테이블에서 데이터 없이 테이블구조만 동일하도록
+   --  tbl_employees_sub2 라는 테이블을 생성하세요...
+   create table tbl_employees_sub2
+   as
+   select *
+   from employees
+   where 1=2;
+
+   -- 또는
+   create table tbl_employees_sub2
+   as
+   select *
+   from employees;
+   -- Table TBL_EMPLOYEES_SUB2이(가) 생성되었습니다.
+   
+   delete from tbl_employees_sub2; 
+   -- 107개 행 이(가) 삭제되었습니다.
+   
+   select *
+   from tbl_employees_sub2;
+   
+   desc tbl_employees_sub2;
+   
+   select count(*)
+   from tbl_employees_sub2;
+   -- 0   
+   
+   
+   --- *** Sub Query 절을 사용하여 데이터를 입력할 수 있다. *** ---
+   --- tbl_employees_sub2 테이블 속에 employees 테이블에 있는 여자인 사원들만 모두 입력하겠다.
+   insert into tbl_employees_sub2
+   select *
+   from employees
+   where substr(jubun,7,1) in ('2','4');
+   -- 51개 행 이(가) 삽입되었습니다.
+   
+   select count(*)
+   from tbl_employees_sub2;
+   -- 51
+
+   
+   --- *** Sub Query 절을 사용하여 데이터를 수정할 수 있다. *** ---
+   --- tbl_employees_sub2 테이블에서 부서번호 30번과 50번의 근무하는 사원들에 대해 
+   --- salary 를 employees 테이블의 평균 salary와 같도록 변경하시고
+   --- commission-pct 는 employees 테이블의 최대 commission_pct와 같도록 변경하세요.
+   update tbl_employees_sub2 set salary = (select trunc(avg(salary)) from employees),           -- 6461
+                                 commission_pct = (select max(commission_pct) from employees)   -- 0.4
+   where department_id in (30,50);
+   -- 24개 행 이(가) 업데이트되었습니다.
+   
+   commit;
+   
+   select *
+   from tbl_employees_sub2
+   order by department_id;
+   
+   select count(*)
+   from tbl_employees_sub2;      -- 51
+   
+   
+   --- *** Sub Query 절을 사용하여 데이터를 삭제할 수 있다. *** ---
+   --- tbl_employees_sub2 에서 salary 가 employees 테이블의 50번에 근무하는 사원 중 최대 salary 보다 적은 사원들만 삭제하세요.
+   delete from tbl_employees_sub2
+   where salary < (select max(salary)   --8200
+                   from employees
+                   where department_id = 50);
+   -- 35개 행 이(가) 삭제되었습니다.
+   
+   commit;
+   
+   select *
+   from tbl_employees_sub2;      
+   
+   select count(*)
+   from tbl_employees_sub2;      -- 16
+   
+   
+   
+   
+   
+   ------ *** Pseudo(의사, 유사, 모조) Column *** -------
+   --- 의사컬럼은 rowid 와 rownum 이 있다.
+   --- 1. rowid
+   --     rowid 는 오라클이 내부적으로 사용하기 위해 만든 행에 대한 id 값으로서 
+   --     오라클 전제내에서 고유한 값을 가진다.
+  
+   create table tbl_heowon
+  (userid    varchar2(10) 
+  ,name      varchar2(20)
+  ,address   varchar2(100)
+  );
+  -- Table TBL_HEOWON이(가) 생성되었습니다.
+
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   
+   
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   
+   
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   
+   commit;
+   
+   select *
+   from tbl_heowon;
+   
+   delete from tbl_heowon;
+   
+   rollback;
+   
+   select ROWID userid, name, address
+   from tbl_heowon;
+   
+   
+   -- ROWID 구조?!!!!!!!!!!!!!!!!!
+   select ROWID userid, name, address
+   from tbl_heowon
+   where rowid in ('AAAFCLAAEAAAAHGAAA', 'AAAFCLAAEAAAAHGAAB', 'AAAFCLAAEAAAAHGAAC');
+   -- 문자열이므로 ' ' 해주어야 한다.
+   
+   /*
+        -----------------------------------
+        USERID              NAME    ADDRESS
+        -----------------------------------
+        AAAFCLAAEAAAAHGAAA	이순신	서울
+        AAAFCLAAEAAAAHGAAB	엄정화	인천
+        AAAFCLAAEAAAAHGAAC	강감찬	수원
+   */
+   
+   
+   delete from tbl_heowon
+   where ROWID > 'AAAFCLAAEAAAAHGAAC';
+   -- 6개 행 이(가) 삭제되었습니다.
+   
+   commit;
+   
+   select *
+   from tbl_heowon;
+   
+   delete from tbl_heowon;
+   
+   commit;
+
+
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+   insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+   insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+   
+   commit;
+   
+   select ROWID userid, name, address
+   from tbl_heowon;
+
+   delete from tbl_heowon
+   where ROWID NOT IN ('AAAFCLAAEAAAAHGAAA','AAAFCLAAEAAAAHGAAE','AAAFCLAAEAAAAHGAAF');
+   -- 6개 행 이(가) 삭제되었습니다.
+
+   commit;
+   
+   select *
+   from tbl_heowon;
+
+   
+   --- 2. rownum (!!!!!!!!!! 게시판에서 아주 많이 사용됩니다. !!!!!!!!!)
+   select boardno as 글번호
+        , subject as 글제목
+        , userid as 글쓴이
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as 작성일자
+   from tbl_board;
+   
+   ----------------------------------------------------------------------------------------
+   번호   글번호     글제목                                        글쓴이   작성일자
+   ----------------------------------------------------------------------------------------
+    1      6	   좋은 하루 되시고 건강하시고 부자되시고 늘 행복하세요	leess	2021-02-10 12:01:40 
+    2      5	   오늘도 좋은하루되세요	                        hongkd	2021-02-10 12:01:33
+    3      4	   기쁘고 감사함이 넘치는 좋은하루되세요 	            emojh	2021-02-10 12:01:27
+    4      3	   건강하세요	                                    leess	2021-02-10 12:01:21
+    5      2	   반갑습니다	                                    eomjh	2021-02-10 12:01:15
+    6      1	   안녕하세요	                                    leess	2021-02-10 12:01:09
+   
+   
+   select ROWNUM    -- ROWNUM(행번호)은 기본적으로 insert 되어진 순서대로 나온다.
+        , boardno as 글번호
+        , subject as 글제목
+        , userid as 글쓴이
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as 작성일자
+   from tbl_board;
+   
+   select ROWNUM AS RNO, boardno, subject, userid, registerday
+   from
+   (
+   select boardno 
+        , subject 
+        , userid 
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+   from tbl_board
+   order by boardno desc
+   )V;
+   
+   --- 또는 ROWNUM 을 사용하지 않고 ROW_NUMBER() 함수를 사용해서 나타낼 수 있다.
+   select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+        , boardno 
+        , subject 
+        , userid 
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+   from tbl_board;
+   
+   
+   insert into tbl_board(boardno, subject, content, userid, registerday, readcount)
+   values(7, '오늘은 즐거운 금요일','기분좋은 금요일 보내세요~~~~','leess',sysdate,0);
+   
+   commit;
+   
+   
+   /*
+        한 페이지당 2개씩 보여주고자 한다.
+        
+        1페이지 ==> rownum : 1 ~ 2   /  boardno : 7 ~ 6
+        2페이지 ==> rownum : 3 ~ 4   /  boardno : 5 ~ 4
+        3페이지 ==> rownum : 5 ~ 6   /  boardno : 2 ~ 3
+        4페이지 ==> rownum : 7 ~ 8   /  boardno : 1
+   */
+   
+   ----------------------------------------------------------------------------------------
+   번호   글번호     글제목                                        글쓴이    작성일자
+   ----------------------------------------------------------------------------------------
+    1      7       오늘은 즐거운 금요일                             leess   2021-02-19 14:21:06
+    2      6	   좋은 하루 되시고 건강하시고 부자되시고 늘 행복하세요	leess	2021-02-10 12:01:40 
+    3      5	   오늘도 좋은하루되세요	                        hongkd	2021-02-10 12:01:33
+    4      4	   기쁘고 감사함이 넘치는 좋은하루되세요 	            emojh	2021-02-10 12:01:27
+    5      3	   건강하세요	                                    leess	2021-02-10 12:01:21
+    6      2	   반갑습니다	                                    eomjh	2021-02-10 12:01:15
+    7      1	   안녕하세요	                                    leess	2021-02-10 12:01:09
+   ----------------------------------------------------------------------------------------    
+        1   2   3   4   ==> 페이지바 
+
+
+-- 1페이지 ==> rownum : 1 ~ 2   /  boardno : 7 ~ 6
+   select ROWNUM AS RNO, boardno, subject, userid, registerday
+   from
+   (
+   select boardno 
+        , subject 
+        , userid 
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+   from tbl_board
+   order by boardno desc
+   )V
+   where rownum between 5 and 6;    -- ROWNUM 은 where 절에 바로 쓸 수가 없다!!!
+                                    -- 그래서 ROWNUM 을 가지는 컬럼의 별칭을 만든 후 Inline View 를 사용해야만 된다 !!!!!!
+                                    
+   -- [올바른 SQL 문]
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROWNUM AS RNO, boardno, subject, userid, registerday
+       from
+       (
+       select boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+       order by boardno desc
+       )V
+   )T
+   where RNO between 1 and 2;
+   
+   
+-- 2페이지 ==> rownum : 3 ~ 4   /  boardno : 5 ~ 4
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROWNUM AS RNO, boardno, subject, userid, registerday
+       from
+       (
+       select boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+       order by boardno desc
+       )V
+   )T
+   where RNO between 3 and 4;
+
+
+-- 3페이지 ==> rownum : 5 ~ 6   /  boardno : 2 ~ 3
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROWNUM AS RNO, boardno, subject, userid, registerday
+       from
+       (
+       select boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+       order by boardno desc
+       )V
+   )T
+   where RNO between 5 and 6;
+   
+
+-- 4페이지 ==> rownum : 7 ~ 8   /  boardno : 1
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROWNUM AS RNO, boardno, subject, userid, registerday
+       from
+       (
+       select boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+       order by boardno desc
+       )V
+   )T
+   where RNO between 7 and 8;
+   
+        
+   --- 또는 ROWNUM 을 사용하지 않고 ROW_NUMBER() 함수를 사용하여 페이징 처리를 해봅니다. ---
+
+   -- 1페이지 ==> ROW_NUMBER() : 1 ~ 2   /  boardno : 7 ~ 6
+   select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+        , boardno 
+        , subject 
+        , userid 
+        , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+   from tbl_board
+   where row_number() over(order by boardno desc) between 1 and 2;
+   -- 오류!! row_number()over(order by boardno desc) 는 where 절에 바로 쓸 수가 없다!!!
+   -- 그러므로 이것 또한 inline view 를 사용해야 한다.
+   
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+            , boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+   )V
+   where RNO between 1 and 2;   -- 1페이지
+        
+        
+   -- 2페이지 ==> ROW_NUMBER() : 3 ~ 4   /  boardno : 5 ~ 4
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+            , boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+   )V
+   where RNO between 3 and 4;   -- 2페이지
+   
+   
+   -- 3페이지 ==> ROW_NUMBER() : 5 ~ 6   /  boardno : 3 ~ 2
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+            , boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+   )V
+   where RNO between 5 and 6;   -- 3페이지
+
+
+   -- 4페이지 ==> ROW_NUMBER() : 7 ~ 8   /  boardno : 1 
+   select boardno, subject, userid, registerday
+   from
+   (
+       select ROW_NUMBER() OVER(ORDER BY boardno desc) as RNO
+            , boardno 
+            , subject 
+            , userid 
+            , to_char(registerday,'yyyy-mm-dd hh24:mi:ss') as registerday
+       from tbl_board
+   )V
+   where RNO between 7 and 8;   -- 4페이지     
+        
+   
+      
+   -------- **** 데이터 조작어(DML == Data Manuplation Language) **** ---------
+   --- DML 문은 기본적으로 수동 commit 이다.
+   --- 즉, DML 문을 수행한 다음에는 바로 디스크(파일)에 적용되지 않고 commit 해야만 적용된다.
+   --- 그래서 DML 문을 수행한 다음에 디스크(파일)에 적용치 않고자 한다라면 rollback 하면 된다.
+        
+   1. insert --> 데이터 입력
+   2. update --> 데이터 수정
+   3. delete --> 데이터 삭제
+   4. merge  --> 데이터 병합 (주로 회사 규모가 큰 경우에 사용됨)
+        
+   insert 는 문법이
+   insert into 테이블명(컬럼명1,컬럼명2,...) values(값1,값2,...);
+   
+   ※ Unconditional insert all (==> 조건이 없는 insert)
+    [문법] insert all 
+           into 테이블명1(컬럼명1, 컬럼명2, ....)
+           values(값1, 값2, .....)
+           into 테이블명2(컬럼명3, 컬럼명4, ....)
+           values(값3, 값4, .....)
+           SUB Query문;    
+   
+   create table tbl_emp1
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(6)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+   
+   drop table tbl_emp1 purge;
+   
+   create table tbl_emp1_backup
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(6)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+   
+   drop table tbl_emp1_backup purge;
+   
+  
+   insert all 
+   into tbl_emp1(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal+9, gender||'자', manager_id, department_id, department_name)    -- 넣어줄 컬럼명을 넣어준다. 수정가능!
+   into tbl_emp1_backup(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal+8, gender||'자', manager_id, department_id, department_name)     
+   
+   select employee_id
+        , first_name || ' ' || last_name AS ename 
+        , nvl(salary + (salary * commission_pct), salary) AS month_sal
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS gender
+        , E.manager_id
+        , E.department_id
+        , department_name
+   from employees E left join departments D 
+   on E.department_id = D.department_id
+   order by E.department_id asc, employee_id asc; 
+   -- 214개 행 이(가) 삽입되었습니다.
+   -- 107+107 => 214     
+   
+   select *
+   from tbl_emp1;  
+   
+   select *
+   from tbl_emp1_backup; 
+   
+   rollback;
+   
+   commit;
+   
+   
+   
+   
+   ※ Conditional insert all (==> 조건이 있는 insert)
+   조건(where절)에 일치하는 행들만 특정 테이블로 찾아가서 insert 하도록 하는 것이다.
+   
+   create table tbl_emp_dept30
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+
+   create table tbl_emp_dept50
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+
+   create table tbl_emp_dept80
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+   
+   
+   insert all 
+   when department_id = 30 then
+   into tbl_emp_dept30(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, msal, gender, manager_id, department_id, department_name)
+   when department_id = 50 then
+   into tbl_emp_dept50(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, msal, gender, manager_id, department_id, department_name)
+   when department_id = 80 then
+   into tbl_emp_dept80(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, msal, gender, manager_id, department_id, department_name)
+   select employee_id
+        , first_name || ' ' || last_name AS ename 
+        , nvl(salary + (salary * commission_pct), salary) AS msal
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS gender
+        , E.manager_id
+        , E.department_id
+        , department_name
+   from employees E left join departments D 
+   on E.department_id = D.department_id
+   where E.department_id in (30,50,80)
+   order by E.department_id, employee_id;
+   
+   commit;
+   
+   select *
+   from tbl_emp_dept30;
+   
+   select *
+   from tbl_emp_dept50;
+   
+   select *
+   from tbl_emp_dept80;
