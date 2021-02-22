@@ -6638,3 +6638,723 @@ order by 1 , 4;
    
    select *
    from tbl_emp_dept80;
+   
+   
+   
+   
+   
+   --- === *** merge(병합) *** === ---
+   -- (insert와 merge의 짬뽕)
+   -- 어떤 2개 이상의 테이블에 존재하는 데이터를 다른 테이블 한 곳으로 모으는 것(병합)이다.
+   -- 예를 들면 지점서버에 tbl_reservation_yangilpyo 테이블과 
+   -- 본점서버에 tbl_reservation_merge 테이블이 있다라면
+   -- 어떤 데이터가 tbl_reservation_yangilpyo 테이블에만 데이터가 존재하고 
+   -- tbl_reservation_merge 테이블에는 존재하지 않는 경우라면 그 데이터를
+   -- tbl_reservation_merge 테이블에 insert 해주고,
+   -- 만약 어떤 데이터가 tbl_reservation_yangilpyo 테이블에도 존재하고 
+   -- tbl_reservation_merge 테이블에는 존재하는 경우라면
+   -- tbl_reservation_yangilpyo 테이블에 존재하는 데이터를 tbl_reservation_merge 테이블로
+   -- update 해주는 것이 merge 이다.
+   
+   -- 1. 본점 DB 서버와 연결이 가능하도로고 DB 링크를 생성한다.
+  1. 탐색기에서 C:\oraclexe\app\oracle\product\11.2.0\server\network\ADMIN 에 간다.
+  2. tnsnames.ora 파일을 메모장으로 연다.
+  3. BONJUM =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = 211.238.142.72)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = XE)
+        )
+      ) 
+      을 추가한다.
+     
+     create database link bonjumlink
+     connect to hr identified by cclass
+     using 'BONJUM';
+     -- Database link BONJUMLINK이(가) 생성되었습니다.
+     
+     create table tbl_reservation_yangilpyo
+     (rsvno         varchar2(20)   -- 예약고유번호
+     ,memberid      varchar2(20)   -- 회원ID
+     ,ticketCnt     number         -- 티켓개수
+     ,constraint    PK_tbl_reservation_yangilpyo primary key(rsvno)
+     );
+     -- a password identifier longer than 30 bytes was specified.
+      
+     drop table tbl_reservation_yangilpyo purge;
+     
+     insert into tbl_reservation_yangilpyo(rsvno, memberid, ticketCnt)
+     values('양일표001','양일표',3);
+     -- 1 행 이(가) 삽입되었습니다.
+
+     commit;
+     
+    -- 아래는 본점 DB서버(쌤PC) 에서만 하는 것이다. -- 
+     create table tbl_reservation_merge
+     (rsvno         varchar2(20)   -- 예약고유번호
+     ,memberid      varchar2(20)   -- 회원ID
+     ,ticketCnt     number         -- 티켓개수
+     ,constraint    PK_tbl_reservation_merge primary key(rsvno)
+     );
+     
+     select *
+     from tbl_reservation_merge;    -- 쌤이 하는 것
+     
+     select *
+     from tbl_reservation_yangilpyo@bonjumlink;  -- 여러분들이 하는 것
+     
+     select *
+     from tbl_reservation_yangilpyo;
+     
+     -- 아래는 여러분들이 하는 것입니다.
+     merge into tbl_reservation_yangilpyo@bonjumlink R
+     using tbl_reservation_yangilpyo L
+     on (L.rsvno = R.rsvno)
+     when matched then 
+        update set R.memberid = L.memberid
+                 , R.ticketCnt = L.ticketCnt
+     when not matched then
+     insert(rsvno, memberid, ticketCnt) values(L.rsvno, L.memberid, L.ticketCnt);
+        
+    commit;    
+     
+    select *
+    from tbl_reservation_yangilpyo@bonjumlink;
+      
+    update tbl_reservaion_yangilpyo set memberid = 'YangIP', ticketCnt = 337
+    where rsvno = '양일표001';
+    
+     merge into tbl_reservation_yangilpyo@bonjumlink R
+     using tbl_reservation_yangilpyo L
+     on (L.rsvno = R.rsvno)
+     when matched then 
+        update set R.memberid = L.memberid
+                 , R.ticketCnt = L.ticketCnt
+     when not matched then
+     insert(rsvno, memberid, ticketCnt) values(L.rsvno, L.memberid, L.ticketCnt);
+     
+     commit; 
+     
+     select *
+     from tbl_reservation_yangilpyo@bonjumlink;
+     
+     insert into tbl_reservation_yangilpyo(rsvno, memberid, ticketCnt)
+     values('양일표002','일표',55);
+     -- 1 행 이(가) 삽입되었습니다.
+
+     commit;
+     
+     merge into tbl_reservation_yangilpyo@bonjumlink R
+     using tbl_reservation_yangilpyo L
+     on (L.rsvno = R.rsvno)
+     when matched then 
+        update set R.memberid = L.memberid
+                 , R.ticketCnt = L.ticketCnt
+     when not matched then
+     insert(rsvno, memberid, ticketCnt) values(L.rsvno, L.memberid, L.ticketCnt);
+     
+     commit; 
+     
+     
+
+     
+   -------- **** 데이터 질의어(DQL == Data Query Language) **** ---------
+   --> DQL 문은 select 를 말한다.
+   
+   
+   -------- **** 트랜잭션 제어어(TCL == Transaction Control Language) **** ---------
+   --> TCL 은 commit, rollback을 말한다.
+   
+   
+   -- *** Transaction(트랜잭션) 처리 *** --
+   --> Transaction(트랜잭션)이라 함은 관련된 일련의 DML로 이루어진 한꾸러미(한세트)를 말한다.
+   -->  Transaction(트랜잭션)이라 함은 데이터베이스의 상태를 변환시키기 위해서 논리적 기능을 수행하는 하나의 작업단위를 말한다.
+   /*
+        예> 네이버카페(다음카페)에서 활동
+            글쓰기(insert)를 1번 하면 내 포인트 점수가 10점이 올라가고(update),
+            댓글쓰기(insert)를 1번 하면 내 포인트 점수가 5점이 올라가도록 한다(update)
+            
+            위와같이 정의된 네이버카페(다음카페)에서 활동은 insert 와 update 가 한꾸러미(한세트)로 이루어져 있는 것이다.
+            이와같이 서로 다른 DML문이 1개의 작업을 이룰때 Transaction(트랜잭션) 처리라고 부른다.
+            
+            Transaction(트랜잭션) 처리에서 가장 중요한 것은
+            모든 DML 문이 성공해야만 최종적으로 모두 commit을 해주고,
+            DML문 중에 1개라도 실패하면 모두 rollback을 해주어야 한다는 것이다.
+            
+            예를 들면 네이버카페(다음카페)에서 글쓰기(insert)가 성공했다라면
+            그 이후에 내 포인트 점수가 10점이 올라가고(update) 작업을 해주고, update 작업이 성공했다라면
+            commit 을 해준다. 만약에 글쓰기(insert) 또는 10점이 올라가는(update) 작업이 실패했다라면 rollback을 해준다.
+            이러한 실습은 자바에서 하겠습니다.
+   */
+   
+   
+   --- *** ROLLBACK TO SAVEPOINT *** ---
+   --- *** 특정 시점까지 rollback을 할 수 있습니다. *** ---
+   select *
+   from employees
+   where department_id = 50;
+   
+   update employees set first_name = '몰라'
+   where department_id = 50;
+   -- 45개 행 이(가) 업데이트되었습니다.
+
+   SAVEPOINT point_1;
+   -- Savepoint이(가) 생성되었습니다.
+
+   delete from employees
+   where department_id is null;
+   -- 1 행 이(가) 삭제되었습니다.
+   
+   select *
+   from employees
+   where department_id = 50;
+   -- 전부다 몰라로 나온다.
+
+   select *
+   from employees
+   where department_id is null;
+   -- 행이 없다.
+   
+   rollback to savepoint point_1;
+   -- 롤백 완료
+   -- savepoint point_1; 이 선언되어진 이후로 실행된 DML 문을 rollback 시킨다.
+   /*
+        그러므로 
+         delete from employees
+         where department_id is null; 만 롤백시킨다.
+   */
+   
+   select *
+   from employees
+   where department_id is null;
+   -- 행이 나온다.
+   -- 178	Kimberely	Grant	KGRANT	011.44.1644.429263	07/05/24	SA_REP	7000	0.15	149		9810132234567
+   
+   select *
+   from employees
+   where department_id = 50;
+   -- 전부다 몰라로 나온다.
+
+   rollback;    -- commit; 한 이후로 수행되어진 모든 DML문을 롤백시킨다.
+   
+   select *
+   from employees
+   where department_id = 50;
+   -- first_name 값이 원상복구됨.
+
+   
+   --- *** 데이터 정의어(DDL == Data Defination Language) *** ---
+   ==> DDL: create, drop, alter, truncate
+   --> 여기서 중요한 것은 DDL 문을 실행을 하면 자동적으로 commit; 이 되어진다.
+   -- 즉 auto commit 되어진다.
+   
+   select *
+   from employees
+   where employee_id = 100;
+   -- salary ==> 24000
+   -- email  ==> SKING
+   
+   update employees set salary = 43245, email = 'adfaeab' 
+   where employee_id = 100;
+   -- 1 행 이(가) 업데이트되었습니다.
+
+   create table tbl_insi
+   (no  number
+   ,name    varchar2(20)
+   );   
+   -- Table TBL_INSI이(가) 생성되었습니다.
+   
+   -- DDL 문을 실행을 하면 자동적으로 commit; 이 되어진다.
+   
+   select *
+   from employees
+   where employee_id = 100;
+   
+   rollback;
+   
+   select *
+   from employees
+   where employee_id = 100;
+   -- DDL 문(create)을 실행을 하면 자동적으로 commit; 이 되었기 때문에 rollback 안 됨.
+   
+   -- [퀴즈] --
+   -- TBL_EMPLOYEES_BACKUP 테이블을 이용하여 employee_id 가 100번이 행의 데이터를 복구하세요.
+   select *
+   from tab;
+   
+   select *
+   from TBL_EMPLOYEES_BACKUP;
+   
+   update employees set salary = (select salary
+                                  from tbl_employees_backup
+                                  where employee_id = 100)
+                        , email = (select email
+                                   from tbl_employees_backup
+                                   where employee_id = 100)
+   where employee_id = 100;
+   -- 1 행 이(가) 업데이트되었습니다.
+
+   commit;
+   
+   select *
+   from employees
+   where employee_id = 100;
+   
+   
+   
+   --- *** TRUNCATE table 테이블명; *** ---
+   --> TRUNCATE table 테이블명; 을 실행하면 테이블명에 존재하던 모든 행(row)들을 삭제해주고,
+   -- 테이블명에 해당하는 테이블은 완전 초기화가 되어진다.
+   -- 중요한 사실은 TRUNCATE table 테이블명; 은 DDL 문이므로 auto commit; 되어지므로 rollback 이 불가하다.
+   
+   -- delete from 테이블명; 을 실행하면 이것 또한 테이블명에 존재하던 모든 행(row)들을 삭제해주고,
+   -- 이것은 DML문 이므로 rollback 이 가능하다.
+   
+   create table tbl_emp_copy1
+   as
+   select * from employees;
+   
+   select *
+   from tbl_emp_copy1;
+   
+   delete from tbl_emp_copy1;
+   
+   select count(*)
+   from tbl_emp_copy1;  -- 0
+   
+   rollback;
+   
+   select count(*)
+   from tbl_emp_copy1;  -- 107
+   
+   truncate table tbl_emp_copy1;
+   -- Table TBL_EMP_COPY1이(가) 잘렸습니다.
+   
+   select *
+   from tbl_emp_copy1;
+   
+   select count(*)
+   from tbl_emp_copy1;  -- 0
+
+   rollback;
+   -- auto commit 이 되어졌으므로 rollback 해봐야 소용없다.
+   
+   select count(*)
+   from tbl_emp_copy1;  -- 0
+   
+   
+   
+   
+   -------- **** 데이터 제어어(DCL == Data Control Language) **** ---------
+   ==> DCL: grant(권한부여하기), revoke(권한회수하기)
+   --> 여기서 중요한 것은 DCL 문을 실행하면 자동적으로 commit; 되어진다.
+   -- 즉 auto commit 되어진다.
+   
+   --- SYS 또는 SYSTEM 에서 아래와 같은 작업을 한다. ---
+   show user;
+   -- USER이(가) "SYS"입니다.
+    
+   -- orauser1 이라는 오라클 일반사용자 계정을 생성합니다.
+   -- 암호는 cclass 라고 하겠습니다.
+   create user orauser1 identified by cclass default tablespace users;
+   -- User ORAUSER1이(가) 생성되었습니다.
+
+   show user;
+   -- USER이(가) "HR"입니다.
+   
+   create user orauser1 identified by cclass default tablespace users;
+   -- 01031. 00000 -  "insufficient privileges"
+
+   -- 생성되어진 오라클 일반사용자 계정인 orauser1 에게 오라클서버에 접속되어지고
+   -- 접속되어진 후 테이블 등을 생성할 수 있도록 권한을 부여해준다.
+   grant connect, resource, unlimited tablespace to orauser1;
+   -- Grant을(를) 성공했습니다
+   
+   
+   show user;
+   -- USER이(가) "HR"입니다.
+      
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자가 select 할 수 있도록 권한을 부여해주겠다.
+   grant select on employees to orauser1;
+   -- Grant을(를) 성공했습니다.
+   
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자가 update 할 수 있도록 권한을 부여해주겠다.
+   grant update on employees to orauser1;
+   -- Grant을(를) 성공했습니다.
+   
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자 delete 할 수 있도록 권한을 부여해주겠다.
+   grant delete on employees to orauser1;
+   -- Grant을(를) 성공했습니다.
+   
+   
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자에게 주었던 delete 권한을 회수하겠다.
+   revoke delete on employees from orauser1;
+   -- Revoke을(를) 성공했습니다.
+
+
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자에게 주었던 update 권한을 회수하겠다.
+   revoke update on employees from orauser1;
+   -- Revoke을(를) 성공했습니다.
+
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자에게 주었던 select 권한을 회수하겠다.
+   revoke select on employees from orauser1;
+   -- Grant을(를) 성공했습니다.
+   
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자가 select, update, delete 할 수 있도록 권한을 부여해주겠다.
+   grant select,update,delete on employees to orauser1;
+   -- Grant을(를) 성공했습니다.
+   
+   
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자에게 주었던 select, update, delete 권한을 회수하겠다.
+   revoke select,update,delete on employees from orauser1;
+   -- Revoke을(를) 성공했습니다.
+   
+   update employees set last_name = '몰라';
+   -- 107개 행 이(가) 업데이트되었습니다.
+
+
+   -- hr이 자신의 소유인 employees 테이블에 orauser1 사용자가 select 할 수 있도록 권한을 부여해주겠다.
+   grant select on employees to orauser1;
+   -- Grant을(를) 성공했습니다.
+
+   rollback;    -- 위에서 DCL문인 grant를 했기 때문에 auto commit; 되어지므로 롤백해봐야 소용없다!!
+   
+   select * 
+   from employees;
+   
+   -- 몰라 복구하기
+   update employees E set last_name = (select last_name
+                                       from tbl_employees_backup
+                                       where employee_id = E.employee_id);
+                                  
+   select * 
+   from employees;   
+   
+   commit;
+   
+   /*
+        DML(Data Manuplation Language): 데이터 조작어 ==> insert, update, delete, merger
+                                      : 수동 commit 이므로 rollback 이 가능하다.
+        DDL(Data Definition Language): 데이터 정의어 ==> create, drop, alter, truncate
+                                      : 자동 commit(Auto Commit) 이므로 rollback 이 불가능하다.
+        DCL(Data Control Language): 데이터 제어어 ==> grant, revoke
+                                      : 자동 commit(Auto Commit) 이므로 rollback 이 불가능하다.
+        TCL(Transaction Control Language): 트랜잭션 제어어 ==> commit, rollback
+        DQL(Data Query Language): 데이터 질의어 ==> select
+   */
+                                  
+   
+   
+                ---- *** === 시퀀스(sequence) === ** ----
+   -- 시퀀스(sequence)란? 쉽게 생각하면 은행에서 발급해주는 대기번호표와 비슷한 것이다.
+   -- 시퀀스(sequence)는 숫자로 이루어져 있으며 매번 정해진 증가치만큼 숫자가 증가되어지는 것이다.
+   
+   /*
+   create sequence seq_yeyakno
+   start with 1     -- 첫번째 출발은 1부터 한다.
+   increment by 1   -- 증가치 값    2 3 4 5 6 ....
+   maxvalue 5       -- 최대값이 5 이다.
+   -- nomaxvalue    -- 최대값이 없는 무제한. 계속 증가시키겠다는 말이다.
+   minvalue 2       -- 최소값이 2 이다. cycle 이 있을때만 minvalue 에 주어진 값이 사용된다. 
+                    --                nocycle 일 경우에는 minvalue에 주어는 값이 사용되지 않는다.
+                    -- minvalue 숫자 에 해당하는 값은 start with 숫자 에 해당하는 숫자 값과 같든지 
+                    -- 아니면 start with 숫자에 해당하는 숫자보다 작아야 한다.
+                    
+   -- nominvalue    -- 최소값이 없다.
+   cycle            -- 반복을 한다.
+   -- no cycle      -- 반복이 없는 직진.
+   nocache;
+   */
+   
+   create sequence seq_yeyakno_1
+   start with 1     -- 첫번째 출발은 1부터 한다.
+   increment by 1   -- 증가치 값    2 3 4 5 6 ....
+   maxvalue 5       -- 최대값이 5 이다.
+   minvalue 2       -- 최소값이 2 이다. cycle 이 있을때만 minvalue 에 주어진 값이 사용된다. 
+   cycle            -- 반복을 한다.
+   nocache;
+   -- 04006. 00000 -  "START WITH cannot be less than MINVALUE"
+
+   create sequence seq_yeyakno_1
+   start with 2     -- 첫번째 출발은 1부터 한다.
+   increment by 1   -- 증가치 값    2 3 4 5 6 ....
+   maxvalue 5       -- 최대값이 5 이다.
+   minvalue 1       -- 최소값이 2 이다. cycle 이 있을때만 minvalue 에 주어진 값이 사용된다. 
+   cycle            -- 반복을 한다.
+   nocache;
+   -- Sequence SEQ_YEYAKNO_1이(가) 생성되었습니다.
+
+   create table tbl_board_test_1
+   (boardno     number
+   ,subject     varchar2(100)
+   ,registerdate    date default sysdate    -- registerdate 컬럼에 default를 주든지, 
+                                            -- 아니면 값을 안넣어주면 default 로 지정되어진 sysdate 가 들어온다.
+   );
+   -- Table TBL_BOARD_TEST_1이(가) 생성되었습니다.
+
+   insert into tbl_board_test_1(boardno, subject, registerdate)
+   values(seq_yeyakno_1.nextval,'첫번째 입니다',sysdate);
+   -- 1 행 이(가) 삽입되었습니다.
+   --     seq_yeyakno_1 시퀀스의 start 값이 2 이었다.
+   
+   insert into tbl_board_test_1(boardno, subject, registerdate)
+   values(seq_yeyakno_1.nextval,'두번째 입니다',default);
+   --     seq_yeyakno_1 의 increment 값이 1 이었다.
+   
+   insert into tbl_board_test_1(boardno, subject)
+   values(seq_yeyakno_1.nextval,'세번째 입니다');
+   --     seq_yeyakno_1 의 increment 값이 1 이었다.
+   
+   insert into tbl_board_test_1(boardno, subject)
+   values(seq_yeyakno_1.nextval,'네번째 입니다');
+   --     seq_yeyakno_1 의 increment 값이 1 이었다.
+   --     seq_yeyakno_1 의 maxvalue 값이 5 이었고, cycle 이었다. 즉, 반복을 한다.
+   
+   insert into tbl_board_test_1(boardno, subject)
+   values(seq_yeyakno_1.nextval,'다섯번째 입니다');
+   --     seq_yeyakno_1 의 minvalue 값이 1 이었고, cycle 이었으므로
+   --     maxvalue 값이 사용되어진 다음에 들어오는 시퀀스값은 minvalue 값이 1이 들어온다.
+    
+   insert into tbl_board_test_1(boardno, subject)
+   values(seq_yeyakno_1.nextval,'여섯번째 입니다');
+   --     seq_yeyakno_1 의 increment 값이 1 이었다.
+   
+   commit;
+   
+   -- seq_yeyakno_1 의 값의 사용은
+   -- 2(start) 3 4 5(maxvalue) 1(minvalue) 2 3 4 5 1 2 3 4 5 1 2 3 4 5 .........
+   -- 와 같이 사용된다.
+   
+   select boardno, subject, to_char(registerdate, 'yyyy-mm-dd hh24:mi:ss') as registerdate
+   from tbl_board_test_1;
+   
+   
+   create sequence seq_yeyakno_2
+   start with 1     -- 첫번째 출발은 1부터 한다.
+   increment by 1   -- 증가치 값    2 3 4 5 6 ....
+   nomaxvalue       -- 최대값이 없는 무제한. 계속 증가시키겠다는 말이다.
+   nominvalue       -- 최소값이 없다. 
+   nocycle          -- 반복을 한다.
+   nocache;
+   -- Sequence SEQ_YEYAKNO_2이(가) 생성되었습니다.
+
+   create table tbl_board_test_2
+   (boardno     number
+   ,subject     varchar2(100)
+   ,registerdate    date default sysdate    
+   );
+   -- Table TBL_BOARD_TEST_2이(가) 생성되었습니다.
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'첫번째 입니다');
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'두번째 입니다');
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'세번째 입니다');
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'네번째 입니다');
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'다섯번째 입니다');
+
+   insert into tbl_board_test_2(boardno, subject)
+   values(seq_yeyakno_2.nextval,'여섯번째 입니다');
+
+   commit;
+   
+   select boardno, subject, to_char(registerdate, 'yyyy-mm-dd hh24:mi:ss') as registerdate
+   from tbl_board_test_2;
+   
+   --- *** 생성되어진 시퀀스(sequence)를 조회해봅니다. *** ---
+   select *     -- last_number 컬럼에 보여지는 숫자는 다음번에 들어올 시퀀스 값을 미리 보여주는 것이다.
+   from user_sequences;
+   
+   -- 시퀀스 seq_yeyakno_2 에서 마지막으로 사용되어진 값을 알아보려고 한다.
+   select seq_yeyakno_1.currval 
+   from dual;       -- 6
+   
+   -- 시퀀스 seq_yeyakno_1 에서 마지막으로 사용되어진 값을 알아보려고 한다.
+   select seq_yeyakno_1.currval 
+   from dual;       -- 2
+   
+   -- *** 시퀀스(sequence) 삭제하기 *** --
+   drop sequence seq_yeyakno_1;
+   -- Sequence SEQ_YEYAKNO_1이(가) 삭제되었습니다.
+
+   select *
+   from user_sequences;
+   
+   
+--- === *** 시노님(Synonym, 동의어) *** === ---
+select *
+from orauser1.tbl_emp;
+
+-- orauser1.tbl_emp 이름을 emp 라는 이름을 사용하도록 해보겠다.
+-- 이러한 경우에 시노님(Synonym, 동의어)을 사용하면 해결된다.
+
+create or replace synonym emp for orauser1.tbl_emp;
+--                        emp 가 시노님(Synonym, 동의어)이고 for 다음에 나오는 orauser1.tbl_emp 이 원래이름이다.
+-- Synonym EMP이(가) 생성되었습니다.
+
+select *
+from emp;
+
+
+-- *** 생성되어진 시노님(Synonym, 동의어)을 조회해본다.
+select *
+from user_synonyms;
+/*
+    ---------------------------------------------------
+    SYNONYM_NAME    TABLE_OWNER    TABLE_NAME   DB_LINK
+    ---------------------------------------------------
+    EMP	            ORAUSER1	   TBL_EMP	
+*/
+   
+---- *** 시노님(Synonym, 동의어) 삭제하기 *** ----
+drop synonym EMP;   
+-- Synonym EMP이(가) 삭제되었습니다.
+
+select *
+from user_synonyms;
+
+
+
+-----------------------------------------------------------------------
+---- === 제약조건(Constraint)을 사용하여 테이블을 생성해 보겠습니다. === ----
+-----------------------------------------------------------------------
+/*
+    >>>> 제약조건(Constraint)의 종류 <<<<
+    
+    1. Primary Key (기본키, 대표식별자) 제약 [P]     
+       -- 하나의 테이블당 오로지 1개만 생성할 수 있다.
+       -- 어떤 컬럼에 Primary Key(기본키, 대표식별자) 제약을 주면 그 컬럼에는 자동적으로 NOT NULL 이 주어지면서 동시에 그 컬럼에는 중복된 값은 들어올 수 없고 오로지 고유한 값만 들어오게 되어진다.
+    2. Unique 제약 [U]   
+       -- 하나의 테이블당 여러 개를 생성할 수 있다.                                   
+       -- 어떤 컬럼에 Unique 제약을 주면 그 컬럼에는 NULL 을 허용할 수 있으며, 그 컬럼에는 중복된 값은 들어올 수 없고 오로지 고유한 값만 들어오게 되어진다.
+    3. Foreign Key(외래키) 제약 [R]      
+       -- 하나의 테이블당 여러 개를 생성할 수 있다.                                   
+       -- Foreign Key(외래키) 제약에 의해 참조(Reference) 받는 컬럼은 반드시 NOT NULL 이어야 하고, 중복된 값을 허락하지 않는 고유한 값만 가지는 컬럼이어야 한다.
+    4. Check 제약 [C]    
+       -- 하나의 테이블당 여러 개를 생성할 수 있다.                                   
+       -- insert(입력) 또는 update(수정) 시 어떤 컬럼에 입력되거나 수정되는 데이터 값을 아무거나 허락하는 것이 아니라 조건에 맞는 데이터 값만 넣고자 할 경우에 사용되는 것이다.
+    5. NOT NULL 제약 [C]
+       -- 하나의 테이블당 어러 개를 생성할 수 있다.
+       -- 특정 컬럼에 NOT NULL 제약을 주면 그 컬럼에는 반드시 데이터값을 주어야 한다는 말이다.   
+*/
+
+  ---- *** "고객" 테이블을 생성해보겠습니다. *** ----
+  drop table tbl_gogek purge;
+  
+  create table tbl_gogek 
+  (gogekId     varchar2(30)  
+  ,gogekName   varchar2(30) not null 
+  ,gogekPhone  varchar2(50) -- null   null을 허용함.
+  ,gogekEmail  varchar2(50) not null 
+  ,constraint  PK_tbl_gogek_gogekid  primary key(gogekid)   -- gogekid 컬럼에 Primary Key(기본키) 제약을 준것이다. 
+  ,constraint  UQ_tbl_gogek_gogekPhone unique(gogekPhone)   -- gogekPhone 컬럼에 Unique 제약을 준것이다. 
+-- ,constraint  PK_tbl_gogek_gogekEmail primary key(gogekEmail) -- ORA-02260: table can have only one primary key
+                                                                -- primary key 는 테이블당 오로지 1개만 생성할 수 있으므로 오류
+  ,constraint  UQ_tbl_gogek_gogekEmail unique(gogekEmail)   -- gogekEmail 컬럼에 Unique 제약을 준것이다. 
+  );
+  
+  --- 어떤 컬럼에 not null 제약을 주고, 이어서 unique 제약을 준 컬럼을 "후보식별자"라고 부른다.
+  --- 일반적으로 사람의 정보를 담아두는 "회원" 테이블과 같은 경우에는 반드시 "후보식별자"를 주도록 한다.
+  
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values(null, null, null, null);
+  -- ORA-01400: cannot insert NULL into ("HR"."TBL_GOGEK"."GOGEKID")
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('leess', null, null, null);
+  -- ORA-01400: cannot insert NULL into ("HR"."TBL_GOGEK"."GOGEKNAME")
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('leess', '이순신', null, null);
+  -- ORA-01400: cannot insert NULL into ("HR"."TBL_GOGEK"."GOGEKEMAIL")
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('leess', '이순신', null, 'leess@gmail.com');
+  -- 1 행 이(가) 삽입되었습니다.
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('leess', '엄정화', null, 'leess@gmail.com');
+  -- ORA-00001: unique constraint (HR.PK_TBL_GOGEK_GOGEKID) violated
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('eomjh', '엄정화', null, null);
+  -- ORA-01400: cannot insert NULL into ("HR"."TBL_GOGEK"."GOGEKEMAIL")
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('eomjh', '엄정화', null, 'leess@gmail.com');
+  -- ORA-00001: unique constraint (HR.UQ_TBL_GOGEK_GOGEKEMAIL) violated
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('eomjh', '엄정화', null, 'eomjh@gmail.com');
+  -- 1 행 이(가) 삽입되었습니다.
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('hongkd', '홍길동', '010-2345-6789', 'hongkd@gmail.com');
+  -- 1 행 이(가) 삽입되었습니다.
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('youks', '유관순', '010-2345-6789', 'youks@gmail.com');
+  -- ORA-00001: unique constraint (HR.UQ_TBL_GOGEK_GOGEKPHONE) violated
+  
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('youks', '유관순', '010-9876-2345', 'youks@gmail.com');
+  -- 1 행 이(가) 삽입되었습니다.
+
+  insert into tbl_gogek(gogekid, gogekName, gogekPhone, gogekEmail) values('hongkd99', '홍길동', '010-9876-2451', 'hongkd99@gmail.com');
+  -- 1 행 이(가) 삽입되었습니다.
+  
+  commit;
+
+  
+  select *
+  from tbl_gogek;
+  
+  
+  ---- *** 고객들의 예약을 받아주는 "예약" 테이블을 생성해보겠습니다. *** ----
+  -- 어떤 1명의 고객은(예:hongkd 홍길동)은 예약을 1번도 안할 수도 있고,
+  -- 예약을 딱 1번만 할 수 있고, 예약을 여러번 할 수도 있다.
+
+  drop table tbl_yeyak purge;
+  
+  create table tbl_yeyak
+  (yeyakno  number  --> 예약번호. 예약번호의 값은 NOT NULL 이면서 고유해야 한다.
+                    /*
+                        예약번호는 사용자가 수동적으로 입력치 않고 자동적으로 들어와야 한다.
+                        그리고 예약번호는 매번 그 숫자가 증가 되어지면서 고유해야 한다.
+                        이렇게 되려면 sequence 를 사용하면 된다.
+                    */
+  ,fk_gogekid    varchar2(30) not null   -- 고객아이디(tbl_gogek 테이블의 대표식별자인 gogekid 컬럼의 값을 참조해서 tbl_gogek 테이블에 존재하는 gogekid 컬럼의 값만 들어와야 한다.)
+  -- ,constraint PK_tbl_gogek_gogekid primary key(yeyakno)
+  -- 제약조건명은 PK_tbl_gogek_gogekid 은 고유해야 한다.
+  -- ORA-02264: name already used by an existing constraint
+  -- Specify a unique constraint name for the constraint.
+  ,constraint PK_tbl_yeyak_gogekno primary key(yeyakno)
+  ,constraint FK_tbl_yeyak_gogekid foreign key(fk_gogekid) references tbl_gogek(gogekid)    
+  -- tbl_yeyak 테이블의 fk_gogekid 컬럼에는 foreign key 제약을 만들었는데
+  -- 그 뜻은 tbl_yeeak 테이블의 fk_gogekid 컬럼에 입력되는 값은 반드시 tbl_gogek 테이블의 gogekid 컬럼에 존재하는 값들만 입력이 가능한 것이지
+  -- tbl_gogek 테이블의 gogekid 컬럼에 존재하지 않는 값은 tbl_yeyak 테이블의 fk_gogekid 컬럼에 입력될 수가 없다!!! 라는 것이다.
+  
+  -- 또한 중요한 사실은 참조를 받는 테이블인 tbl_gogek 의 컬럼은 식별자 컬럼이어야 한다. 일반적으로 대표식별자(Primary key)로 사용되는 컬럼으로 지정한다.
+  --   ,constraint FK_tbl_yeyak_gogekid foreign key(fk_gogekid) references tbl_gogek(gogekname)    
+  -- ORA-02270: no matching unique or primary key for this column-list
+  );
+  -- Table TBL_YEYAK이(가) 생성되었습니다.
+  
+  
+  insert into tbl_yeyak(yeyakno, fk_gogekid) values(1,'kangkc');
+  -- ORA-02291: integrity constraint (HR.FK_TBL_YEYAK_GOGEKID) violated - parent key not found
+
+  insert into tbl_yeyak(yeyakno, fk_gogekid) values(1,'youks');
+  -- 1 행 이(가) 삽입되었습니다.
+
+  select *
+  from tbl_yeyak;
+
+  select *
+  from tbl_yeyak Y JOIN tbl_gogek G
+  on Y.fk_gogekid = G.gogekid;
+
+
