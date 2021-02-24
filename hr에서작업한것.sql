@@ -8207,9 +8207,1597 @@ order by 1 , 4;
   
              ---- ===== *** INDEX(인덱스, 색인) *** ===== ----
 
+
+
+
         ---- ===== *** 데이터사전(Data dictionary) *** ===== ----
 
+
+
+----------------------------------------------------------------------------------------------
         ---- ===== *** PL/SQL(Procedure Language/Structured Query Language) *** ===== ----
+
+    --- *** PL/SQL 구문에서 변수의 사용법 *** ---
+    EXECUTE pcd_empInfo(101);
+    /*
+        <결과물>
+        ----------------------------------
+        사원번호    사원명     성별    월급
+        ----------------------------------
+          101      .....    ....    ..... 
+    */
+    
+    EXECUTE pcd_empInfo(103);
+    /*
+        <결과물>
+        ----------------------------------
+        사원번호    사원명     성별    월급
+        ----------------------------------
+          103      .....    ....    ..... 
+    */
+    
+    select lpad('*',20,'-'), rpad('*',20,'-'),
+           lpad('오',20,'라'), rpad('오',20,'라'),
+           lpad('-',20,'-'), rpad('=',20,'='),
+    from dual;
+    
+    CREATE OR REPLACE PROCEDURE pcd_empInfo
+    (p_employeeid IN NUMBER)    -- in 은 입력모드를 말한다. out은 출력모드(자바와 함께)도 있다.
+                                -- number(3)와 같이 자리수를 넣어주면 오류이다.
+    IS
+      -- 변수의 선언부
+      v_employee_id    number(5);      -- 자리수를 사용해야 한다.
+      v_ename          varchar2(50);   -- 자리수를 사용해야 한다.
+      v_gender         varchar2(10);
+      v_monthsal       varchar2(20);
+    BEGIN
+      -- 실행부
+      select employee_id, first_name||' '||last_name,
+             case when substr(jubun,7,1) in ('1','3') then '남' else '여' end,
+             to_char(nvl(salary+salary*commission_pct,salary),'$9,999,999')
+             INTO 
+             v_employee_id, v_ename, v_gender, v_monthsal
+      from employees
+      where employee_id = p_employeeid;
+      
+      dbms_output.put_line(lpad('-',40,'-'));      
+      dbms_output.put_line('사원번호    사원명     성별      월급');
+      -- 자바에서 system.out.println()과 유사
+      dbms_output.put_line(lpad('-',40,'-'));
+
+      dbms_output.put_line(v_employee_id|| v_ename|| v_gender|| v_monthsal );
+    
+    END pcd_empInfo;
+    
+    
+    
+  create or replace procedure pcd_empInfo 
+  (p_employeeid IN number) 
+  is
+ 
+    v_employee_id   number(5);     
+    v_ename         varchar2(50);  
+    v_gender        varchar2(10);  
+    v_monthsal      varchar2(15);
+    
+  begin
+    
+    select employee_id, first_name || ' ' || last_name,
+           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999')
+           INTO 
+           v_employee_id, v_ename, v_gender, v_monthsal
+    from employees
+    where employee_id = p_employeeid;
+    
+    dbms_output.put_line( lpad('-',40,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급'); 
+    dbms_output.put_line( lpad('-',40,'-') ); 
+    
+    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal);
+  end pcd_empInfo;
+  
+  /*
+        SQL Developer 의 메뉴의 보기를 클릭하여 DBMS 출력을 클릭해주어야 한다.
+        이어서 하단부에 나오는 DBMS 출력 부분의 녹색 + 기호를 클릭하여 local_HR 로 연결을 해준다.
+  */
+  
+    EXECUTE pcd_empInfo(101);
+    /*
+        ----------------------------------------
+        사원번호   사원명   성별   월급
+        ----------------------------------------
+        101 Neena Kochhar 남     $17,000
+    */
+
+    EXECUTE pcd_empInfo(103);
+
+
+
+    
+  create or replace procedure pcd_empInfo 
+  (p_employeeid IN number) 
+  is
+ 
+    v_employee_id   number(5);     
+    v_ename         varchar2(50);  
+    v_gender        varchar2(10);  
+    v_monthsal      varchar2(15);
+    v_age           number(3);
+  begin
+    
+    select employee_id, first_name || ' ' || last_name,
+           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+           extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1           
+           INTO 
+           v_employee_id, v_ename, v_gender, v_monthsal,v_age
+    from employees
+    where employee_id = p_employeeid;
+    
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    
+    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+  end pcd_empInfo;
+  
+  
+-- CMD ===================================================================================  
+SQL>  create or replace procedure pcd_empInfo
+  2    (p_employeeid IN number)
+  3    is
+  4
+  5      v_employee_id   number(5);
+  6      v_ename         varchar2(50);
+  7      v_gender        varchar2(10);
+  8      v_monthsal      varchar2(15);
+  9
+ 10    begin
+ 11
+ 12      select employee_id, first_name || ' ' || last_name,
+ 13             case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end,
+ 14             to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999')
+ 15             extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1
+ 16             INTO
+ 17             v_employee_id, v_ename, v_gender, v_monthsal,v_age
+ 18      from employees
+ 19      where employee_id = p_employeeid;
+ 20
+ 21      dbms_output.put_line( lpad('-',50,'-') );
+ 22      dbms_output.put_line('사원번호   사원명   성별   월급    나이');
+ 23      dbms_output.put_line( lpad('-',50,'-') );
+ 24
+ 25      dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+ 26    end pcd_empInfo;
+ 27
+ 28  /
+
+Warning: Procedure created with compilation errors.
+
+SQL> show errors
+Errors for PROCEDURE PCD_EMPINFO:
+
+LINE/COL ERROR
+-------- -----------------------------------------------------------------
+12/5     PL/SQL: SQL Statement ignored
+15/19    PL/SQL: ORA-00923: FROM keyword not found where expected
+SQL>
+
+-- CMD 2=====================================================================================
+SQL>   create or replace procedure pcd_empInfo
+  2    (p_employeeid IN number)
+  3    is
+  4
+  5      v_employee_id   number(5);
+  6      v_ename         varchar2(50);
+  7      v_gender        varchar2(10);
+  8      v_monthsal      varchar2(15);
+  9
+ 10    begin
+ 11
+ 12      select employee_id, first_name || ' ' || last_name,
+ 13             case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end,
+ 14             to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+ 15             extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1
+ 16             INTO
+ 17             v_employee_id, v_ename, v_gender, v_monthsal,v_age
+ 18      from employees
+ 19      where employee_id = p_employeeid;
+ 20
+ 21      dbms_output.put_line( lpad('-',50,'-') );
+ 22      dbms_output.put_line('사원번호   사원명   성별   월급    나이');
+ 23      dbms_output.put_line( lpad('-',50,'-') );
+ 24
+ 25      dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+ 26    end pcd_empInfo;
+ 27  /
+
+Warning: Procedure created with compilation errors.
+
+SQL> show errors
+Errors for PROCEDURE PCD_EMPINFO:
+
+LINE/COL ERROR
+-------- -----------------------------------------------------------------
+12/5     PL/SQL: SQL Statement ignored
+17/57    PLS-00201: identifier 'V_AGE' must be declared
+18/5     PL/SQL: ORA-00904: : invalid identifier
+25/5     PL/SQL: Statement ignored
+25/107   PLS-00201: identifier 'V_AGE' must be declared
+SQL>
+
+
+-- CMD 3==================================================================================
+Procedure created.
+
+SQL> EXECUTE pcd_empInfo(101);
+
+PL/SQL procedure successfully completed.
+
+-- 오류 잡기에 명령 프롬프트가 더 낫다!
+
+/*
+    --------------------------------------------------
+    사원번호   사원명   성별   월급    나이
+    --------------------------------------------------
+    101 Neena Kochhar 남     $17,000 37
+*/
+
+
+
+-------------------------------------------------------------------------------------
+                --- *** 생성되어진 프로시저의 소스를 조회해봅시다. *** ---
+select line, text
+from user_source
+where type='PROCEDURE' and name = 'PCD_EMPINFO';
+
+/*
+1	"PROCEDURE pcd_empInfo
+"
+2	"    (p_employeeid IN NUMBER)    -- in 은 입력모드를 말한다. out은 출력모드(자바와 함께)도 있다.
+"
+3	"                                -- number(3)와 같이 자리수를 넣어주면 오류이다.
+"
+4	"    IS
+"
+5	"      -- 변수의 선언부
+"
+6	"      v_employee_id    number(5);      -- 자리수를 사용해야 한다.
+"
+7	"      v_ename          varchar2(50);   -- 자리수를 사용해야 한다.
+"
+8	"      v_gender         varchar2(10);
+"
+9	"      v_monthsal       varchar2(20);
+"
+10	"    BEGIN
+"
+11	"      -- 실행부
+"
+12	"      select employee_id, first_name||' '||last_name,
+"
+13	"             case when substr(jubun,7,1) in ('1','3') then '남' else '여' end,
+"
+14	"             to_char(nvl(salary+salary*commission_pct,salary),'$9,999,999')
+"
+15	"             INTO 
+"
+16	"             v_employee_id, v_ename, v_gender, v_monthsal
+"
+17	"      from employees
+"
+18	"      where employee_id = p_employeeid;
+"
+19	"
+"
+20	"      dbms_output.put_line(lpad('-',40,'-'));      
+"
+21	"      dbms_output.put_line('사원번호    사원명     성별      월급');
+"
+22	"      -- 자바에서 system.out.println()과 유사
+"
+23	"      dbms_output.put_line(lpad('-',40,'-'));
+"
+24	"
+"
+25	"      dbms_output.put_line(v_employee_id|| v_ename|| v_gender|| v_monthsal );
+"
+26	"
+"
+27	"    END pcd_empInfo;
+"
+28	"
+"
+29	"
+"
+30	"
+"
+31	"  create or replace procedure pcd_empInfo 
+"
+32	"  (p_employeeid IN number) 
+"
+33	"  is
+"
+34	"
+"
+35	"    v_employee_id   number(5);     
+"
+36	"    v_ename         varchar2(50);  
+"
+37	"    v_gender        varchar2(10);  
+"
+38	"    v_monthsal      varchar2(15);
+"
+39	"
+"
+40	"  begin
+"
+41	"
+"
+42	"    select employee_id, first_name || ' ' || last_name,
+"
+43	"           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+"
+44	"           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999')
+"
+45	"           INTO 
+"
+46	"           v_employee_id, v_ename, v_gender, v_monthsal
+"
+47	"    from employees
+"
+48	"    where employee_id = p_employeeid;
+"
+49	"
+"
+50	"    dbms_output.put_line( lpad('-',40,'-') ); 
+"
+51	"    dbms_output.put_line('사원번호   사원명   성별   월급'); 
+"
+52	"    dbms_output.put_line( lpad('-',40,'-') ); 
+"
+53	"
+"
+54	"    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal);
+"
+55	"  end pcd_empInfo;
+"
+56	"
+"
+57	"  /*
+"
+58	"        SQL Developer 의 메뉴의 보기를 클릭하여 DBMS 출력을 클릭해주어야 한다.
+"
+59	"        이어서 하단부에 나오는 DBMS 출력 부분의 녹색 + 기호를 클릭하여 local_HR 로 연결을 해준다.
+"
+60	"  */
+"
+61	"
+"
+62	"    EXECUTE pcd_empInfo(101);
+"
+63	"    /*
+"
+64	"        ----------------------------------------
+"
+65	"        사원번호   사원명   성별   월급
+"
+66	"        ----------------------------------------
+"
+67	"        101 Neena Kochhar 남     $17,000
+"
+68	"    */
+"
+69	"
+"
+70	"    EXECUTE pcd_empInfo(103);
+"
+71	"
+"
+72	"
+"
+73	"
+"
+74	"
+"
+75	"  create or replace procedure pcd_empInfo 
+"
+76	"  (p_employeeid IN number) 
+"
+77	"  is
+"
+78	"
+"
+79	"    v_employee_id   number(5);     
+"
+80	"    v_ename         varchar2(50);  
+"
+81	"    v_gender        varchar2(10);  
+"
+82	"    v_monthsal      varchar2(15);
+"
+83	"    v_age           number(3);
+"
+84	"  begin
+"
+85	"
+"
+86	"    select employee_id, first_name || ' ' || last_name,
+"
+87	"           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+"
+88	"           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+"
+89	"           extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1           
+"
+90	"           INTO 
+"
+91	"           v_employee_id, v_ename, v_gender, v_monthsal,v_age
+"
+92	"    from employees
+"
+93	"    where employee_id = p_employeeid;
+"
+94	"
+"
+95	"    dbms_output.put_line( lpad('-',50,'-') ); 
+"
+96	"    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+"
+97	"    dbms_output.put_line( lpad('-',50,'-') ); 
+"
+98	"
+"
+99	"    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+"
+100	"  end pcd_empInfo;
+"
+101	"
+"
+102	"
+"
+103	"-- CMD ===================================================================================  
+"
+104	"SQL>  create or replace procedure pcd_empInfo
+"
+105	"  2    (p_employeeid IN number)
+"
+106	"  3    is
+"
+107	"  4
+"
+108	"  5      v_employee_id   number(5);
+"
+109	"  6      v_ename         varchar2(50);
+"
+110	"  7      v_gender        varchar2(10);
+"
+111	"  8      v_monthsal      varchar2(15);
+"
+112	"  9
+"
+113	" 10    begin
+"
+114	" 11
+"
+115	" 12      select employee_id, first_name || ' ' || last_name,
+"
+116	" 13             case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end,
+"
+117	" 14             to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999')
+"
+118	" 15             extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1
+"
+119	" 16             INTO
+"
+120	" 17             v_employee_id, v_ename, v_gender, v_monthsal,v_age
+"
+121	" 18      from employees
+"
+122	" 19      where employee_id = p_employeeid;
+"
+123	" 20
+"
+124	" 21      dbms_output.put_line( lpad('-',50,'-') );
+"
+125	" 22      dbms_output.put_line('사원번호   사원명   성별   월급    나이');
+"
+126	" 23      dbms_output.put_line( lpad('-',50,'-') );
+"
+127	" 24
+"
+128	" 25      dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+"
+129	" 26    end pcd_empInfo;
+"
+130	" 27
+"
+131	" 28  /
+"
+132	"
+"
+133	"Warning: Procedure created with compilation errors.
+"
+134	"
+"
+135	"SQL> show errors
+"
+136	"Errors for PROCEDURE PCD_EMPINFO:
+"
+137	"
+"
+138	"LINE/COL ERROR
+"
+139	"-------- -----------------------------------------------------------------
+"
+140	"12/5     PL/SQL: SQL Statement ignored
+"
+141	"15/19    PL/SQL: ORA-00923: FROM keyword not found where expected
+"
+142	"SQL>
+"
+143	"
+"
+144	"-- CMD 2=====================================================================================
+"
+145	"SQL>   create or replace procedure pcd_empInfo
+"
+146	"  2    (p_employeeid IN number)
+"
+147	"  3    is
+"
+148	"  4
+"
+149	"  5      v_employee_id   number(5);
+"
+150	"  6      v_ename         varchar2(50);
+"
+151	"  7      v_gender        varchar2(10);
+"
+152	"  8      v_monthsal      varchar2(15);
+"
+153	"  9
+"
+154	" 10    begin
+"
+155	" 11
+"
+156	" 12      select employee_id, first_name || ' ' || last_name,
+"
+157	" 13             case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end,
+"
+158	" 14             to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+"
+159	" 15             extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1
+"
+160	" 16             INTO
+"
+161	" 17             v_employee_id, v_ename, v_gender, v_monthsal,v_age
+"
+162	" 18      from employees
+"
+163	" 19      where employee_id = p_employeeid;
+"
+164	" 20
+"
+165	" 21      dbms_output.put_line( lpad('-',50,'-') );
+"
+166	" 22      dbms_output.put_line('사원번호   사원명   성별   월급    나이');
+"
+167	" 23      dbms_output.put_line( lpad('-',50,'-') );
+"
+168	" 24
+"
+169	" 25      dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+"
+170	" 26    end pcd_empInfo;
+"
+171	" 27  /
+"
+172	"
+"
+173	"Warning: Procedure created with compilation errors.
+"
+174	"
+"
+175	"SQL> show errors
+"
+176	"Errors for PROCEDURE PCD_EMPINFO:
+"
+177	"
+"
+178	"LINE/COL ERROR
+"
+179	"-------- -----------------------------------------------------------------
+"
+180	"12/5     PL/SQL: SQL Statement ignored
+"
+181	"17/57    PLS-00201: identifier 'V_AGE' must be declared
+"
+182	"18/5     PL/SQL: ORA-00904: : invalid identifier
+"
+183	"25/5     PL/SQL: Statement ignored
+"
+184	"25/107   PLS-00201: identifier 'V_AGE' must be declared
+"
+185	"SQL>
+"
+186	"
+"
+187	"
+"
+188	"-- CMD 3==================================================================================
+"
+189	"Procedure created.
+"
+190	"
+"
+191	"SQL> EXECUTE pcd_empInfo(101);
+"
+192	"
+"
+193	"PL/SQL procedure successfully completed.
+"
+194	"
+"
+195	"-- 오류 잡기에 명령 프롬프트가 더 낫다!
+"
+196	"
+"
+197	"/*
+"
+198	"    --------------------------------------------------
+"
+199	"    사원번호   사원명   성별   월급    나이
+"
+200	"    --------------------------------------------------
+"
+201	"    101 Neena Kochhar 남     $17,000 37
+"
+202	"*/
+"
+203	"
+"
+204	"--- 생성되어진 프로시저를 조회해봅시다.
+"
+205	"select line, text
+"
+206	"from user_source
+"
+207	"where type='PROCEDURE' and name = 'PCD_EMPINFO';
+"
+208	"
+"
+209	"
+"
+*/
+
+CREATE OR REPLACE PROCEDURE pcd_empInfo
+    (p_employeeid IN NUMBER)    -- in 은 입력모드를 말한다. out은 출력모드(자바와 함께)도 있다.
+                                -- number(3)와 같이 자리수를 넣어주면 오류이다.
+    IS
+      -- 변수의 선언부
+      v_employee_id    number(5);      -- 자리수를 사용해야 한다.
+      v_ename          varchar2(50);   -- 자리수를 사용해야 한다.
+      v_gender         varchar2(10);
+      v_monthsal       varchar2(20);
+    BEGIN
+      -- 실행부
+      select employee_id, first_name||' '||last_name,
+             case when substr(jubun,7,1) in ('1','3') then '남' else '여' end,
+             to_char(nvl(salary+salary*commission_pct,salary),'$9,999,999')
+             INTO 
+             v_employee_id, v_ename, v_gender, v_monthsal
+      from employees
+      where employee_id = p_employeeid;
+      
+      dbms_output.put_line(lpad('-',40,'-'));      
+      dbms_output.put_line('사원번호    사원명     성별      월급');
+      -- 자바에서 system.out.println()과 유사
+      dbms_output.put_line(lpad('-',40,'-'));
+
+      dbms_output.put_line(v_employee_id|| v_ename|| v_gender|| v_monthsal );
+    
+    END pcd_empInfo;
+    
+    
+    
+  create or replace procedure pcd_empInfo 
+  (p_employeeid IN number) 
+  is
+ 
+    v_employee_id   number(5);     
+    v_ename         varchar2(50);  
+    v_gender        varchar2(10);  
+    v_monthsal      varchar2(15);
+    
+  begin
+    
+    select employee_id, first_name || ' ' || last_name,
+           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999')
+           INTO 
+           v_employee_id, v_ename, v_gender, v_monthsal
+    from employees
+    where employee_id = p_employeeid;
+    
+    dbms_output.put_line( lpad('-',40,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급'); 
+    dbms_output.put_line( lpad('-',40,'-') ); 
+    
+    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal);
+  end pcd_empInfo;
+  
+  /*
+        SQL Developer 의 메뉴의 보기를 클릭하여 DBMS 출력을 클릭해주어야 한다.
+        이어서 하단부에 나오는 DBMS 출력 부분의 녹색 + 기호를 클릭하여 local_HR 로 연결을 해준다.
+  */
+  
+    EXECUTE pcd_empInfo(101);
+    /*
+        ----------------------------------------
+        사원번호   사원명   성별   월급
+        ----------------------------------------
+        101 Neena Kochhar 남     $17,000
+    */
+
+    EXECUTE pcd_empInfo(103);
+
+
+
+    
+  create or replace procedure pcd_empInfo_2 
+  (p_employeeid IN employees.employee_id%type)   
+  -- p_employeeid 변수의 타입은 employees 테이블에 있는 employee_id 컬럼의 값과 같다.
+  is
+ 
+    v_employee_id   employees.employee_id%type;     
+    v_ename         varchar2(50);  
+    v_gender        varchar2(10);  
+    v_monthsal      varchar2(15);
+    v_age           number(3);
+  begin
+    
+    select employee_id, first_name || ' ' || last_name,
+           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+           extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1           
+           INTO 
+           v_employee_id, v_ename, v_gender, v_monthsal,v_age
+    from employees
+    where employee_id = p_employeeid;
+    
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    
+    dbms_output.put_line(v_employee_id || ' '|| v_ename || ' ' || v_gender || ' ' || v_monthsal || ' ' || v_age );
+  end pcd_empInfo_2;
+  -- Procedure PCD_EMPINFO_2이(가) 컴파일되었습니다.
+
+  
+  
+  
+  create or replace procedure pcd_empInfo_3 
+  (p_employeeid IN employees.employee_id%type)   
+  -- p_employeeid 변수의 타입은 employees 테이블에 있는 employee_id 컬럼의 값과 같다.
+  is
+    -- record 타입 생성 --
+    type myEmpType is record
+    (empid        employees.employee_id%type
+    ,fullname     varchar2(50)
+    ,gender       varchar2(10)
+    ,monthsal     varchar2(15)
+    ,age          number(3)
+    );
+    
+    v_rcd
+ 
+  begin
+    
+    select employee_id, first_name || ' ' || last_name,
+           case when substr(jubun, 7, 1) in ('1','3') then '남' else '여' end, 
+           to_char( nvl(salary + (commission_pct * salary), salary), '$9,999,999'),
+           extract(year from sysdate) - (case when substr(jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(jubun, 1, 2))+1           
+           INTO 
+           v_rcd
+    from employees
+    where employee_id = p_employeeid;
+    
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    
+    dbms_output.put_line(v_rcd.empid||' '||v_rcd.fullname||' '||v_rcd.gender||' '||v_rcd.monthsal||' '||v_rcd.age);
+  end pcd_empInfo_3;
+  
+  
+  
+  
+  create or replace procedure pcd_empInfo_4 
+  (p_employeeid IN employees.employee_id%type)   
+  -- p_employeeid 변수의 타입은 employees 테이블에 있는 employee_id 컬럼의 값과 같다.
+  is
+    v_all       employees%rowtype;  -- v_all 변수의 타입인 employees 테이블의 모든 컬럼을 받아주는 행타입이다.
+    v_result    varchar2(1000);
+  begin
+    select * 
+          into v_all
+    from employees
+    where employee_id = p_employeeid;
+    
+    v_result := v_all.employee_id||' '||
+                v_all.first_name||' '|| v_all.last_name ||' '||
+                case when substr(v_all.jubun, 7, 1) in ('1','3') then '남' else '여' end ||' '||
+                to_char( nvl(v_all.salary + (v_all.commission_pct * v_all.salary), v_all.salary), '$9,999,999'),
+                extract(year from sysdate) - (case when substr(v_all.jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(v_all.jubun, 1, 2))+1           
+
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    
+    dbms_output.put_line(v_result);
+  end pcd_empInfo_4;
+  
+  
+  create or replace procedure pcd_empInfo_4 
+  (p_employeeid IN employees.employee_id%type)   
+  is
+    v_all       employees%rowtype;  
+    v_result    varchar2(1000);
+  begin
+    select * 
+          into v_all
+    from employees
+    where employee_id = p_employeeid;
+    
+    v_result := v_all.employee_id||' '||
+                v_all.first_name||' '|| v_all.last_name ||' '||
+                case when substr(v_all.jubun, 7, 1) in ('1','3') then '남' else '여' end ||' '||
+                to_char( nvl(v_all.salary + (v_all.commission_pct * v_all.salary), v_all.salary), '$9,999,999'),
+                (extract(year from sysdate) - (case when substr(v_all.jubun, 7, 1) in ('1','2') then 1900 else 2000 end + substr(v_all.jubun, 1, 2))+1);           
+
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    dbms_output.put_line('사원번호   사원명   성별   월급    나이'); 
+    dbms_output.put_line( lpad('-',50,'-') ); 
+    
+    dbms_output.put_line(v_result);
+  end pcd_empInfo_4;
+  -- Procedure PCD_EMPINFO_4이(가) 컴파일되었습니다.
+
+  
+  
+  
+  -----------------------------------------------------------------------------
+                        --- *** 사용자가 정의하는 함수 *** ---
+  -----------------------------------------------------------------------------
+  
+  -- 아래는 오라클에서 제공해주는 함수
+  select substr('쌍용강북교육센터',3,2)
+  from dual;
+  
+  select jubun, substr(jubun,7,1)
+  from employees
+  order by employee_id;
+  
+  
+  -- 주민번호를 입력받아서 성별을 알려주는 함수를 생성해보겠습니다. --
+  /*
+        [문법]
+        create or replace function 함수명
+        (파라미터변수명 IN 파라미터변수의타입)
+        return 리턴되어질타입
+        is
+          변수선언;
+        begin
+          실행문;
+          return 리턴되어질값;
+        end 함수명;
+  */
+
+  create or replace function func_gender
+  (p_jubun  IN  varchar2)  -- varchar2(13) 와 같이 자리수를 쓰면 오류이다!!
+  return varchar2          -- varchar2(6) 와 같이 자리수를 쓰면 오류이다!!   
+  is
+    v_result varchar2(6);  -- varchar2(6) 와 같이 자리수를 써야한다!!   
+  begin
+    select case when substr(p_jubun,7,1) in ('1','3') then '남' else '여' end
+           INTO
+           v_result
+    from dual;
+    return v_result;
+  end func_gender;
+  -- Function FUNC_GENDER이(가) 컴파일되었습니다.
+
+
+  select func_gender('9502242234567'), func_gender('0302244234567')
+  from dual;  
+  
+  select jubun, func_gender(jubun)
+  from employees
+  order by employee_id;
+  
+  
+  
+  -- 또는 아래와 같이 만들 수도 있다.
+  
+  create or replace function func_gender_2
+  (p_jubun  IN  varchar2)  -- varchar2(13) 와 같이 자리수를 쓰면 오류이다!!
+  return varchar2          -- varchar2(6) 와 같이 자리수를 쓰면 오류이다!!   
+  is
+    v_result varchar2(6);  -- varchar2(6) 와 같이 자리수를 써야한다!!   
+  begin
+    v_result := case when substr(p_jubun,7,1) in ('1','3') then '남' else '여' end;
+           
+    return v_result;
+  end func_gender_2;
+  -- Function FUNC_GENDER_2이(가) 컴파일되었습니다.
+
+
+  select func_gender_2('9502242234567'), func_gender_2('0302244234567')
+  from dual;  
+  
+  
+  create or replace function func_age
+  (p_jubun  IN  varchar2)  
+  return number            
+  is
+    v_result number(3);
+  begin
+    select extract(year from sysdate)- (case when substr(p_jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(p_jubun,1,2) ) +1
+           INTO
+           v_result
+    from dual;
+    return v_result;
+  end func_age;
+  -- Function FUNC_AGE이(가) 컴파일되었습니다.
+
+
+  create or replace function func_age_2
+  (p_jubun  IN  varchar2) 
+  return number            
+  is
+    v_result number(3);    
+  begin
+    v_result := (extract(year from sysdate)- (case when substr(p_jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(p_jubun,1,2) ) +1);
+           
+    return v_result;
+  end func_age_2;
+  -- Function FUNC_AGE_2이(가) 컴파일되었습니다.
+
+
+  select jubun as 주민번호, func_gender(jubun) as 성별1, func_gender_2(jubun) as 성별2,
+        func_age(jubun) as 나이1, func_age_2(jubun) as 나이2
+  from employees
+  order by employee_id;
+  
+  
+  
+-------------------------------------------------------------------------------------  
+                  --- *** 생성되어진 함수의 소스를 조회해봅시다. *** ---
+  select line, text
+  from user_source
+  where type='FUNCTION' and name = 'FUNC_AGE';
+  
+/*
+1	"function func_age
+"
+2	"  (p_jubun  IN  varchar2)  
+"
+3	"  return number            
+"
+4	"  is
+"
+5	"    v_result number(3);
+"
+6	"  begin
+"
+7	"    select extract(year from sysdate)- (case when substr(p_jubun,7,1) in ('1','2') then 1900 else 2000 end + substr(p_jubun,1,2) ) +1
+"
+8	"           INTO
+"
+9	"           v_result
+"
+10	"    from dual;
+"
+11	"    return v_result;
+"
+12	  end func_age;
+*/
+  
+  
+  --- [퀴즈] 아래와 같은 결과물이 나오도록 프로시저를 생성하세요..
+  --         성별과 나이는 위에서 만든 함수를 사용하시면 됩니다.
+
+  exec pcd_employees_Info(101);   -- 101은 사원번호이다
+/*
+    ------------------------------------------------------
+    사원번호    부서명     사원명    입사일자    성별     나이 
+    ------------------------------------------------------
+      101       
+*/
+
+
+
+create or replace procedure pcd_employees_Info
+(p_employee_id  IN  employees.employee_id%type)
+is
+   v_employee_id         employees.employee_id%type;
+   v_department_name     departments.department_name%type;
+   v_fullname            varchar2(30);
+   v_hire_date           varchar2(10);
+   v_gender              varchar2(6);
+   v_age                 number(3);
+
+begin
+
+    select employee_id, department_name, fullname, hire_date, gender, age
+            INTO
+            v_employee_id,  v_department_name,  v_fullname,  v_hire_date,  v_gender, v_age
+    from 
+    (
+     select employee_id, first_name || ' ' || last_name AS FULLNAME, 
+            to_char(hire_date, 'yyyy-mm-dd') AS HIRE_DATE,
+            func_gender(jubun) AS GENDER, 
+            func_age(jubun) AS AGE, 
+            department_id
+     from employees 
+     where employee_id = p_employee_id
+     ) E 
+     JOIN departments D
+     ON E.department_id = D.department_id;
+     
+     dbms_output.put_line( lpad('-',50,'-') );
+     dbms_output.put_line('사원번호   부서명   사원명  입사일자   성별   나이');
+     dbms_output.put_line( lpad('-',50,'-') );
+ 
+     dbms_output.put_line(v_employee_id || ' '|| v_department_name || ' ' || 
+                          v_fullname || ' ' || v_hire_date || ' ' ||
+                          v_gender || ' ' || v_age);
+
+end pcd_employees_Info;
+-- Procedure PCD_EMPLOYEES_INFO이(가) 컴파일되었습니다.
+
+exec pcd_employees_Info(101);
+/*
+    --------------------------------------------------
+    사원번호   부서명   사원명  입사일자   성별   나이
+    --------------------------------------------------
+    101 Executive Neena Kochhar 2005-09-21 남 37
+*/
+
+exec pcd_employees_Info(178);   -- 사원번호 178은 부서번호가 NULL 인 '킴벨리 그랜트'이다.
+/*
+    오류 보고 -
+    ORA-01403: no data found
+*/
+-- PL/SQL 에서 select 되어진 결과물 즉 행이 없으면 오류이다.
+
+
+-- [해결책] --
+create or replace procedure pcd_employees_Info
+(p_employee_id  IN  employees.employee_id%type)
+is
+   v_employee_id         employees.employee_id%type;
+   v_department_name     departments.department_name%type;
+   v_fullname            varchar2(30);
+   v_hire_date           varchar2(10);
+   v_gender              varchar2(6);
+   v_age                 number(3);
+
+begin
+
+    select employee_id, department_name, fullname, hire_date, gender, age
+            INTO
+            v_employee_id,  v_department_name,  v_fullname,  v_hire_date,  v_gender, v_age
+    from 
+    (
+     select employee_id, first_name || ' ' || last_name AS FULLNAME, 
+            to_char(hire_date, 'yyyy-mm-dd') AS HIRE_DATE,
+            func_gender(jubun) AS GENDER, 
+            func_age(jubun) AS AGE, 
+            department_id
+     from employees 
+     where employee_id = p_employee_id
+     ) E 
+     LEFT JOIN departments D
+     ON E.department_id = D.department_id;
+     
+     dbms_output.put_line( lpad('-',50,'-') );
+     dbms_output.put_line('사원번호   부서명   사원명  입사일자   성별   나이');
+     dbms_output.put_line( lpad('-',50,'-') );
+ 
+     dbms_output.put_line(v_employee_id || ' '|| v_department_name || ' ' || 
+                          v_fullname || ' ' || v_hire_date || ' ' ||
+                          v_gender || ' ' || v_age);
+
+end pcd_employees_Info;
+-- Procedure PCD_EMPLOYEES_INFO이(가) 컴파일되었습니다.
+
+exec pcd_employees_Info(178);
+
+
+
+
+exec pcd_employees_Info(337);   -- 사원번호 337은 존재하지 않는 사원번호이다.
+/*
+    오류 보고 -
+    ORA-01403: no data found
+*/
+
+-- [데이터가 존재하지 않을 경우 해결책] --
+--> 예외절(Exception) 처리를 해주어야 한다.
+create or replace procedure pcd_employees_Info
+(p_employee_id  IN  employees.employee_id%type)
+is
+   v_employee_id         employees.employee_id%type;
+   v_department_name     departments.department_name%type;
+   v_fullname            varchar2(30);
+   v_hire_date           varchar2(10);
+   v_gender              varchar2(6);
+   v_age                 number(3);
+
+begin
+
+    select employee_id, department_name, fullname, hire_date, gender, age
+            INTO
+            v_employee_id,  v_department_name,  v_fullname,  v_hire_date,  v_gender, v_age
+    from 
+    (
+     select employee_id, first_name || ' ' || last_name AS FULLNAME, 
+            to_char(hire_date, 'yyyy-mm-dd') AS HIRE_DATE,
+            func_gender(jubun) AS GENDER, 
+            func_age(jubun) AS AGE, 
+            department_id
+     from employees 
+     where employee_id = p_employee_id
+     ) E 
+     LEFT JOIN departments D
+     ON E.department_id = D.department_id;
+     
+     dbms_output.put_line( lpad('-',50,'-') );
+     dbms_output.put_line('사원번호   부서명   사원명  입사일자   성별   나이');
+     dbms_output.put_line( lpad('-',50,'-') );
+ 
+     dbms_output.put_line(v_employee_id || ' '|| v_department_name || ' ' || 
+                          v_fullname || ' ' || v_hire_date || ' ' ||
+                          v_gender || ' ' || v_age);
+                          
+     EXCEPTION     
+        WHEN no_data_found THEN     -- no data found 은 오라클에서 데이터가 존재하지 않을 경우 발생하는 오류임.
+             dbms_output.put_line('>> 사원번호 '||p_employee_id||'가 존재하지 않습니다. <<');
+
+                          
+end pcd_employees_Info;
+-- Procedure PCD_EMPLOYEES_INFO이(가) 컴파일되었습니다.
+
+exec pcd_employees_Info(337);
+-- >> 사원번호 337가 존재하지 않습니다. <<
+
+
+
+
+        -------- ===== **** 제어문(IF문) **** ===== ----------
+/*
+    ※ 형식
+    if    조건1 then 실행문장1;
+    elsif 조건2 then 실행문장2;
+    elsif 조건3 then 실행문장3;
+    else  실행문장4;
+    end if;
+*/
+
+delete from employees;
+-- ORA-02292: integrity constraint (HR.DEPT_MGR_FK) violated - child record found
+-- -02292 이 오류번호이다.
+
+update employees set employee_id = 101
+where employee_id = 102;
+-- ORA-00001: unique constraint (HR.EMP_EMP_ID_PK) violated
+-- -00001 이 오류번호이다.
+
+create or replace function func_age_3
+(p_jubun  IN  varchar2) 
+return number            
+is
+v_result     number(3); 
+v_gender_num varchar2(1);
+v_year       number(4);
+
+error_jubun  exception;     -- error_jubun 은 사용자 정의 Exception(예외절)임을 선언한다. 
+
+begin
+v_gender_num := substr(p_jubun,7,1);
+-- v_gender_num 에는 '1' 또는 '2' 또는 '3' 또는 '4' 가 들어올 것이다.
+
+-- if v_gender_num = '1' or v_gender_num = '2' then 
+-- 또는
+if      v_gender_num in ('1','2') then v_year := 1900;
+elsif   v_gender_num in ('3','4') then v_year := 2000;
+else    RAISE error_jubun;      -- 사용자가 정의하는 예외절(Exception)을 구동시켜라.
+end if;
+
+v_result := (extract(year from sysdate) - (v_year + substr(p_jubun,1,2) ) +1);
+return v_result;
+
+exception 
+    when error_jubun then
+         raise_application_error(-20001,'>> 잘못된 주민번호입니다. <<');
+         -- -20001 은 오류넘버(오류번호)로써 사용자가 정의하는 EXCEPTION 은 항상 -20001 부터 -20999 이내의 값 중 아무거나 쓰면 된다.         
+       
+end func_age_3;
+-- 컴파일되었습니다
+
+select func_age_3('983051234567'),  func_age_3('0103054234567')
+from dual;
+
+select func_age_3('983051234567'),  func_age_3('0103054234567')
+from dual;
+
+
+
+        -------- ===== **** 반복문 **** ===== ----------
+/*
+    반복문에는 
+    기본 LOOP문과 FOR LOOP문과 WHILE LOOP문 이 있습니다.
+*/
+
+-- ========== 1. 기본 LOOP문
+/*
+    [문법]
+    loop 실행문장;
+    exit when 탈출조건; -- 탈출조건이 참이라면 loop 탈출한다.
+    end loop;
+*/
+
+create table tbl_looptest_1
+(bunho  number
+,name   varchar2(50)
+);
+-- Table TBL_LOOPTEST_1이(가) 생성되었습니다.
+
+--- tbl_looptest_1 테이블애 행을 20000 개를 insert 해보겠습니다.
+create or replace procedure pcd_tbl_looptest_1_insert
+(p_name     IN tbl_looptest_1.name%type
+,p_count    IN number)  -- p_count 에 20000 을 넣을 것이다.
+is
+    v_bunho     tbl_looptest_1.bunho%type := 0;  -- 변수의 초기화!!!!(변수의 값을 처음부터 넣어주기)
+begin
+    loop
+        v_bunho := v_bunho + 1; -- v_bunho 은 반복할 때마다 1씩 증가한다.
+
+        exit when v_bunho > p_count; -- 20001 > 20000
+        
+        insert into tbl_looptest_1(bunho, name)
+        values(v_bunho, p_name||v_bunho);
+        
+        exit when v_bunho = p_count; -- 탈출조건이 참이라면 loop 탈출한다.
+    end loop;
+end pcd_tbl_looptest_1_insert;
+-- Procedure PCD_TBL_LOOPTEST_1_INSERT이(가) 컴파일되었습니다.
+
+exec PCD_TBL_LOOPTEST_1_INSERT('홍길동',20000);
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+select *
+from tbl_looptest_1
+order by bunho asc;
+
+
+select count(*)
+from tbl_looptest_1;    -- 20000
+
+rollback;
+-- commit;
+
+
+
+--- *** 이름이 없는 익명 프로시저(anonymous procedure)로 
+---     tbl_looptest_1 테이블에 행을 50000 개를 insert 해보겠습니다 
+declare v_bunho number := 0;         -- 변수의 선언 및 초기화
+        p_count number := 50000;     
+        p_name  varchar2(50) := '엄정화';     
+begin
+    loop
+        v_bunho := v_bunho + 1; 
+        exit when v_bunho > p_count;
+        insert into tbl_looptest_1(bunho, name)
+        values(v_bunho, p_name||v_bunho);
+    end loop;
+    
+--  commit;
+end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+select count(*)
+from tbl_looptest_1;    -- 50000
+
+rollback;
+
+
+
+-- ========== 2. FOR LOOP문
+/*
+    [문법]
+    for 변수 in [reverse] 시작값..마지막값 loop
+    실행문장;
+    end loop;
+*/
+
+create table tbl_looptest_2
+(bunho  number
+,name   varchar2(50)
+);
+-- Table TBL_LOOPTEST_2이(가) 생성되었습니다.
+
+--- *** 이름이 없는 익명 프로시저(anonymous procedure)로 
+---     tbl_looptest_2 테이블에 행을 20000 개를 insert 해보겠습니다 
+declare p_name  varchar2(50) := '강감찬';     
+begin
+    for i in 1..20000 loop
+    insert into tbl_looptest_2(bunho, name)
+    values(i, p_name||i);
+    
+    end loop;
+--  commit;
+end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+select count(*)
+from tbl_looptest_2;    -- 20000
+
+rollback;
+
+
+
+-- ========== 3. WHILE LOOP문
+/*
+    [문법]
+    while 조건 loop
+        실행문장;       -- 조건이 참이라면 실행함. 조건이 거짓이 되어지면 반복문을 빠져나온다.
+    end loop;
+*/
+create table tbl_looptest_3
+(bunho  number
+,name   varchar2(50)
+);
+
+--- *** 이름이 없는 익명 프로시저(anonymous procedure)로 
+---     tbl_looptest_3 테이블에 행을 50000 개를 insert 해보겠습니다 
+declare 
+  p_cnt   number := 1;
+  p_name  varchar2(50) := '유관순';     
+begin
+    while not( p_cnt > 50000 ) loop    -- not(탈출조건) 탈출조건이 참이라면 탈출한다.
+        insert into tbl_looptest_3(bunho, name)
+        values(p_cnt,p_name||p_cnt);
+        
+        p_cnt := p_cnt + 1;
+    end loop;
+--  commit;
+end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+select count(*)
+from tbl_looptest_3;    -- 50000
+
+rollback;
+-- commit;
+
+
+declare p_name  varchar2(50) := '강감찬';     
+begin
+    for i in reverse 1..20000 loop  -- reverse 를 쓰면 맨 처음 i에는 20000 이 들어오고 그 다음에는 1 이 감소된 19999 가 i 에 들어온다. 
+                                    -- 계속해서 1 이 감소된 값이 i 에 들어오는데 마지막 i 에는 1 이 들어온다.
+    insert into tbl_looptest_2(bunho, name)
+    values(i, p_name||i);
+    
+    end loop;
+--  commit;
+end;
+
+
+select *
+from tbl_looptest_2
+order by bunho desc;
+
+select count(*)
+from tbl_looptest_2;    -- 20000
+
+rollback;
+-- commit;
+
+
+
+
+--===============================================================================
+                    --- *** 데이터의 유효성검사 *** ---
+create table tbl_member_test1
+(userid     varchar2(20)
+,passwd     varchar2(20) not null
+,name       varchar2(30) not null
+,constraint pk_tbl_member_test1_userid primary key (userid)
+);
+-- Table TBL_MEMBER_TEST1이(가) 생성되었습니다.
+
+-- 프로시저를 사용하여 tbl_member_test1 테이블에 insert 를 할 것입니다. --
+-- tbl_memeber_test1 테이블의 passwd 컬럼에는 
+-- 글자수가 최소 5글자 이상이면서 영문자 및 숫자 및 특수기호가 혼합되어져야만 한다.
+-- 위의 조건에 맞아야만 insert 할 것이고, 위의 조건에 위배되면 insert 를 하지 않도록 할 것이다.
+
+create or replace procedure pcd_tbl_member_test1_insert 
+(p_userid   tbl_member_test1.userid%type
+,p_passwd   tbl_member_test1.passwd%type
+,p_name     tbl_member_test1.name%type
+)
+is
+   v_length        number(20);
+   error_insert    exception; 
+   v_ch            varchar2(3);
+   v_flagAlphabet  number(1) := 0;
+   v_flagNumber    number(1) := 0;
+   v_flagSpecial   number(1) := 0;
+   
+   error_passwd    exception;
+begin
+      v_length := length(p_passwd);
+      
+      if v_length < 5 then 
+         raise error_insert;  -- 사용자가 정의하는 예외절(Exception)을 구동시켜라. 
+      else
+         for i in 1..v_length loop
+             v_ch := substr(p_passwd, i, 1);
+             
+             if (v_ch between 'a' and 'z') OR (v_ch between 'A' and 'Z') then  -- 영문자 이라면
+                 v_flagAlphabet := 1;
+             elsif (v_ch between '0' and '9') then  -- 숫자 이라면 
+                 v_flagNumber := 1;
+             else     -- 특수문자 이라면 
+                 v_flagSpecial := 1;
+             end if;    
+                 
+         end loop;
+         
+         if(v_flagAlphabet * v_flagNumber * v_flagSpecial = 1) then
+            insert into tbl_member_test1(userid, passwd, name)
+            values(p_userid, p_passwd, p_name);
+         else
+            raise  error_passwd; -- 사용자정의 EXCEPTION 인 error_passwd 를 구동시켜라.
+         end if;   
+         
+      end if;   
+      
+      exception 
+         when  error_insert then 
+               raise_application_error(-20002, '>> passwd 컬럼의 길이는 최소 5글자 이상이어야 합니다. <<');
+              --    -20002 은 오류넘버(오류번호)로써 사용자가 정의하는 Exception은 항상 -20001 부터 -20999 이내의 값중 아무거나 쓰면 된다.  
+         
+         when  error_passwd then  
+               raise_application_error(-20003, '>> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<');
+               
+end pcd_tbl_member_test1_insert;
+-- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.
+
+
+
+select *
+from tbl_member_test1;
+
+exec pcd_tbl_member_test1_insert('leess','q1$','이순신');
+-- ORA-20002: >> passwd 컬럼의 길이는 최소 5글자 이상이어야 합니다. <<
+
+exec pcd_tbl_member_test1_insert('leess','qwer1234','이순신');
+-- ORA-20003: >> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<
+
+exec pcd_tbl_member_test1_insert('leess','qwer1234$','이순신');
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+select *
+from tbl_member_test1;
+-- leess	qwer1234$	이순신
+
+rollback;
+
+
+
+
+    --- *** tbl_member_test1 테이블에 insert 할 수 있는 요일명과 시간을 제한하겠습하겠습니다. *** ---
+    ---     tbl_member_test1 테이블에 insert 할 수 있는 요일명은 월,화,수,목,금 만 가능하며
+    ---     또한 월,화,수,목,금 중에 오전 9시 이후부터 오후 4시 59분 59초까지만 가능하도록 한다.
+    ---     그 외에는 영업마감이므로 insert 를 할 수 없습니다. 라는 오류메시지를 띄우도록 한다.
+
+create or replace procedure pcd_tbl_member_test1_insert 
+(p_userid   tbl_member_test1.userid%type
+,p_passwd   tbl_member_test1.passwd%type
+,p_name     tbl_member_test1.name%type
+)
+is
+   v_length        number(20);
+   v_ch            varchar2(3);
+   v_flagAlphabet  number(1) := 0;
+   v_flagNumber    number(1) := 0;
+   v_flagSpecial   number(1) := 0;
+   
+   error_dayTime   exception;
+   error_insert    exception; 
+   error_passwd    exception;
+   
+begin
+      -- 오늘의 요일명을 알아오도록 한다.
+      if ( to_char(sysdate, 'd') in('1','7') OR   -- to_char(sysdate, 'd') => '1'(일),'2'(월),'3'(화),'4'(수),'5'(목),'6'(금),'7'(토) 
+           to_char(sysdate, 'hh24') < '09' OR to_char(sysdate, 'hh24') > '16'
+         ) then
+           raise  error_dayTime;
+         
+      else   
+         
+          v_length := length(p_passwd);
+          
+          if v_length < 5 then 
+             raise error_insert;  -- 사용자가 정의하는 예외절(Exception)을 구동시켜라. 
+          else
+             for i in 1..v_length loop
+                 v_ch := substr(p_passwd, i, 1);
+                 
+                 if (v_ch between 'a' and 'z') OR (v_ch between 'A' and 'Z') then  -- 영문자 이라면
+                     v_flagAlphabet := 1;
+                 elsif (v_ch between '0' and '9') then  -- 숫자 이라면 
+                     v_flagNumber := 1;
+                 else     -- 특수문자 이라면 
+                     v_flagSpecial := 1;
+                 end if;    
+                     
+             end loop;
+             
+             if(v_flagAlphabet * v_flagNumber * v_flagSpecial = 1) then
+                insert into tbl_member_test1(userid, passwd, name)
+                values(p_userid, p_passwd, p_name);
+             else
+                raise  error_passwd; -- 사용자정의 EXCEPTION 인 error_passwd 를 구동시켜라.
+             end if;   
+             
+          end if; 
+          
+      end if;    
+      
+      exception 
+         when  error_dayTime then 
+               raise_application_error(-20002, '>> 현재 영업시간(월~금 09시 ~ 17시 이전까지)이 아니므로 데이터 입력이 불가합니다. <<');
+      
+         when  error_insert then 
+               raise_application_error(-20003, '>> passwd 컬럼의 길이는 최소 5글자 이상이어야 합니다. <<');
+              --    -20002 은 오류넘버(오류번호)로써 사용자가 정의하는 Exception은 항상 -20001 부터 -20999 이내의 값중 아무거나 쓰면 된다.  
+         
+         when  error_passwd then  
+               raise_application_error(-20004, '>> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<');
+               
+end pcd_tbl_member_test1_insert;
+-- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.
+
+exec pcd_tbl_member_test1_insert('leess','qwer1234$','이순신');
+-- ORA-20002: >> 현재 영업시간(월~금 09시 ~ 17시 이전까지)이 아니므로 데이터 입력이 불가합니다. <<
+
+
+-------------- ***** 사용자 정의 예외절(EXCEPTION) ***** ---------------
+    예외절 = 오류절
+    
+    ※ 형식
+    
+    exception
+         when 익셉션이름1 [ or 익셉션이름2 ] then
+              실행문장1;
+              실행문장2;
+              실행문장3;
+         when 익셉션이름3 [ or 익셉션이름4 ] then     
+              실행문장4;
+              실행문장5;
+              실행문장6;
+         when others then
+              실행문장7;
+              실행문장8;
+              실행문장9;
+
 
 
 
