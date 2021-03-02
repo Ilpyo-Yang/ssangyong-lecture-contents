@@ -74,6 +74,13 @@ where msg like '%'||'우와'||'%';
 select *
 from jdbc_tbl_examtest;
 
+---------------------------------------------------------------------------------
+
+select * 
+from USER_TABLES 
+where table_name = 'JBDC_TBL_EXAMTEST';
+			
+
 select *
 from user_sequences
 where sequence_name = 'JDBC_SEQ_EXAMTEST';

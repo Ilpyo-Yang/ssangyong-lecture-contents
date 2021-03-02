@@ -37,13 +37,25 @@ public class DDL_create_PreparedStatement_06 {
 			
 			
 			// >>> 3. SQL문(편지)을 작성한다. <<< //
-			String sql1 = " create table jdbc_tbl_examtest "
+			String sql1 = " select * "
+					    + " from user_tables "
+					    + " where table_name = 'JDBC_TBL_EXAMTEST' ";
+			
+			String sql2 = " drop table JDBC_TBL_EXAMTEST purge ";
+			
+			String sql3 = " create table jdbc_tbl_examtest "
 					    + " (no    number(4) "
 					    + " ,name  varchar2(40) "
 					    + " ,msg   varchar2(200) "
 					    + ") ";
 			
-			String sql2 = " create sequence jdbc_seq_examtest "
+			String sql4 = " select * "
+					    + " from user_sequences "
+					    + " where sequence_name = 'JDBC_SEQ_EXAMTEST' ";
+			
+			String sql5 = " drop sequence JDBC_SEQ_EXAMTEST ";
+			
+			String sql6 = " create sequence jdbc_seq_examtest "
 					    + " start with 1 "
 					    + " increment by 1 "
 					    + " nomaxvalue "
@@ -51,47 +63,105 @@ public class DDL_create_PreparedStatement_06 {
 					    + " nocycle "
 					    + " nocache ";
 			
-			String sql3 = " insert into jdbc_tbl_examtest(no, name, msg) "
+			String sql7 = " insert into jdbc_tbl_examtest(no, name, msg) "
 					    + " values(jdbc_seq_examtest.nextval, '이순신', '안녕하세요? 이순신 입니다') "; 
 			
-			String sql4 = " select * "
+			String sql8 = " select * "
 					    + " from jdbc_tbl_examtest"
 					    + " order by no asc ";
 			
 			
 			// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
-			pstmt = conn.prepareStatement(sql1);
+			// "JDBC_TBL_EXAMTEST" 테이블이 존재하는지 알아본다. 
+			pstmt = conn.prepareStatement(sql1); 
 			
 			// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
-			int n = pstmt.executeUpdate(); 
-			/*  .executeUpdate(); 은 SQL문이 DML문(insert, update, delete, merge) 이거나 
-			                        SQL문이 DDL문(create, drop, alter, truncate) 일 경우에 사용된다. 
-			    
-			     SQL문이 DML문이라면 return 되어지는 값은 적용되어진 행의 개수를 리턴시켜준다.
-			         예를 들어, insert into ... 하면 1 개행이 입력되므로 리턴값은 1 이 나온다. 
-			             update ... 할 경우에 update 할 대상의 행의 개수가 5 이라면 리턴값은 5 가 나온다. 
-			             delete ... 할 경우에 delete 되어질 대상의 행의 개수가 3 이라면 리턴값은 3 가 나온다.
-			             
-			     SQL문이 DDL문이라면 return 되어지는 값은 무조건 0 이 리턴된다.       
-			*/
+			rs = pstmt.executeQuery(); 
 			
-			System.out.println("create table 을 한 DDL문의 n : " + n);
-			// create table 을 한 DDL문의 n : 0 
+			int n = 0;
+			if(rs.next()) {
+				// "JDBC_TBL_EXAMTEST" 테이블이 존재하는 경우 
+				
+				// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
+				// "JDBC_TBL_EXAMTEST" 테이블을 먼저 drop 한다.
+				pstmt.close();
+				pstmt = conn.prepareStatement(sql2); 
+				
+				// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
+				n = pstmt.executeUpdate(); 
+				/*	 pstmt.executeUpdate()은  
+                     DML(insert, update, delete, merge)문 및 DDL(create table, create view, drop table 등)문을 수행해주는 메소드로서 
+     	                        결과값은 int 형태로서 DML문 이라면 적용된 행의 갯수가 나오고 DDL문 이라면 0이 나온다.
+                */
+				System.out.println("drop table : " + n);
+				// drop table : 0 
+			}
 			
 			
-			pstmt.close();
-			pstmt = conn.prepareStatement(sql2);
-			n = pstmt.executeUpdate();
-			System.out.println("create sequence 를 한 DDL문의 n : " + n);
-			// create sequence 를 한 DDL문의 n : 0
+			// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
+			// "JDBC_TBL_EXAMTEST" 테이블을 create 한다.
+			pstmt = conn.prepareStatement(sql3); 
+			
+			// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
+			n = pstmt.executeUpdate(); 
+			/*	 pstmt.executeUpdate()은  
+                 DML(insert, update, delete, merge)문 및 DDL(create table, create view, drop table 등)문을 수행해주는 메소드로서 
+ 	                        결과값은 int 형태로서 DML문 이라면 적용된 행의 갯수가 나오고 DDL문 이라면 0이 나온다.
+            */
+			System.out.println("create table : " + n);
+			// create table : 0 
 			
 			
-			pstmt = conn.prepareStatement(sql3);
+		///////////////////////////////////////////////////////////
+			
+			// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
+			// "JDBC_SEQ_EXAMTEST" 시퀀스가 존재하는지 알아본다. 
+			pstmt = conn.prepareStatement(sql4); 
+			
+			// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
+			rs.close();
+			rs = pstmt.executeQuery(); 
+			
+			if(rs.next()) {
+				// "JDBC_SEQ_EXAMTEST" 시퀀스가 존재하는 경우 
+				
+				// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
+				// "JDBC_SEQ_EXAMTEST" 시퀀스를 먼저 drop 한다.
+				pstmt = conn.prepareStatement(sql5); 
+				
+				// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
+				n = pstmt.executeUpdate(); 
+				/*	 pstmt.executeUpdate()은  
+                     DML(insert, update, delete, merge)문 및 DDL(create table, create view, drop table 등)문을 수행해주는 메소드로서 
+     	                        결과값은 int 형태로서 DML문 이라면 적용된 행의 갯수가 나오고 DDL문 이라면 0이 나온다.
+                */
+				System.out.println("drop sequence : " + n);
+				// drop sequence : 0 
+			}
+			
+			
+			// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
+			// "JDBC_SEQ_EXAMTEST" 시퀀스를 create 한다.
+			pstmt = conn.prepareStatement(sql6); 
+			
+			// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
+			n = pstmt.executeUpdate(); 
+			/*	 pstmt.executeUpdate()은  
+                 DML(insert, update, delete, merge)문 및 DDL(create table, create view, drop table 등)문을 수행해주는 메소드로서 
+ 	                        결과값은 int 형태로서 DML문 이라면 적용된 행의 갯수가 나오고 DDL문 이라면 0이 나온다.
+            */
+			System.out.println("create sequence : " + n);
+			// create sequence : 0    	
+			
+			
+			pstmt = conn.prepareStatement(sql7);
 			n = pstmt.executeUpdate();
 			System.out.println("insert 를 한 DML문의 n : " + n);
 			// insert 를 한 DML문의 n : 1
 			
-			pstmt = conn.prepareStatement(sql4);
+			
+			pstmt = conn.prepareStatement(sql8);
+			rs.close();
 			rs = pstmt.executeQuery();
 			
 			StringBuilder sb = new StringBuilder();
