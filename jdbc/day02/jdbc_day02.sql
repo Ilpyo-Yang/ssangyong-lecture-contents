@@ -244,3 +244,90 @@ where type='PROCEDURE' and name ='PCD_TBL_MEMBER_TEST1_INSERT';
 
 select *
 from tbl_member_test1;
+
+select *
+from user_constraints
+where table_name = 'TBL_MEMBER_TEST1';
+
+select *
+from user_cons_columns
+where table_name = 'TBL_MEMBER_TEST1';
+
+
+
+select *
+from jdbc_tbl_student;
+
+select *
+from jdbc_tbl_class;
+
+insert into jdbc_tbl_student(stno, name, tel, addr, registerdate, fk_classno)
+values(jdbc_seq_memo.nextval, '배수지', '02-5678-2345', '경기도 고양시 일산구', sysdate, 7);
+                         
+create or replace procedure pcd_tbl_member_test1_insert 
+(p_userid   tbl_member_test1.userid%type    -- IN 은 생략가능함, OUT 은 생략불가.
+,p_passwd   tbl_member_test1.passwd%type    
+,p_name     tbl_member_test1.name%type
+)
+is
+   v_length        number(20);
+   v_ch            varchar2(3);
+   v_flagAlphabet  number(1) := 0;
+   v_flagNumber    number(1) := 0;
+   v_flagSpecial   number(1) := 0;
+   
+   error_dayTime   exception;
+   error_insert    exception; 
+   error_passwd    exception;
+   
+begin
+      -- 오늘의 요일명을 알아오도록 한다.
+      if ( to_char(sysdate, 'd') in('1','7') OR   -- to_char(sysdate, 'd') => '1'(일),'2'(월),'3'(화),'4'(수),'5'(목),'6'(금),'7'(토) 
+           to_char(sysdate, 'hh24') < '09' OR to_char(sysdate, 'hh24') > '17'
+         ) then
+           raise  error_dayTime;
+         
+      else   
+         
+          v_length := length(p_passwd);
+          
+          if v_length < 5 then 
+             raise error_insert;  -- 사용자가 정의하는 예외절(Exception)을 구동시켜라. 
+          else
+             for i in 1..v_length loop
+                 v_ch := substr(p_passwd, i, 1);
+                 
+                 if (v_ch between 'a' and 'z') OR (v_ch between 'A' and 'Z') then  -- 영문자 이라면
+                     v_flagAlphabet := 1;
+                 elsif (v_ch between '0' and '9') then  -- 숫자 이라면 
+                     v_flagNumber := 1;
+                 else     -- 특수문자 이라면 
+                     v_flagSpecial := 1;
+                 end if;    
+                     
+             end loop;
+             
+             if(v_flagAlphabet * v_flagNumber * v_flagSpecial = 1) then
+                insert into tbl_member_test1(userid, passwd, name)
+                values(p_userid, p_passwd, p_name);
+             else
+                raise  error_passwd; -- 사용자정의 EXCEPTION 인 error_passwd 를 구동시켜라.
+             end if;   
+             
+          end if; 
+          
+      end if;    
+      
+      exception 
+         when  error_dayTime then 
+               raise_application_error(-20002, '>> 현재 영업시간(월~금 09시 ~ 17시 이전까지)이 아니므로 데이터 입력이 불가합니다. <<');
+      
+         when  error_insert then 
+               raise_application_error(-20003, '>> passwd 컬럼의 길이는 최소 5글자 이상이어야 합니다. <<');
+              --    -20002 은 오류넘버(오류번호)로써 사용자가 정의하는 Exception은 항상 -20001 부터 -20999 이내의 값중 아무거나 쓰면 된다.  
+         
+         when  error_passwd then  
+               raise_application_error(-20004, '>> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<');
+               
+end pcd_tbl_member_test1_insert;
+-- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.     
