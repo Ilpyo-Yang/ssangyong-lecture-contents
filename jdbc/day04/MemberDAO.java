@@ -4,8 +4,9 @@ import java.sql.*;
 import java.util.Map;
 import java.util.Scanner;
 
-import jdbc.day03.MemberDTO;
 import jdbc.day04.singleton.dbconnection.MyDBConnection;
+
+// DAO(Database Access Object) => 데이터베이스에 연결하여 SQL 구문을 실행시켜주는 객체
 
 public class MemberDAO implements interMemberDAO {
 
@@ -82,37 +83,75 @@ public class MemberDAO implements interMemberDAO {
 		
 	}// end of public int memberRegister(MemberDTO member) -------------------------
 
+	
 	@Override
-	public MemberDTO login(Map<String, String> paraMap) {
-		MemberDTO member = null;
+	   public MemberDTO login(Map<String, String> paraMap) {
+	      
+	      MemberDTO member = null;
+	      
+	      try {
+	          conn = MyDBConnection.getConn();
+	          
+	          String sql = "select userseq, userid, passwd, name, mobile, point "+
+	                     "     , to_char(registerday, 'yyyy-mm-dd') AS registerday, status "+
+	                     "from jdbc_member "+
+	                     "where userid = ? and passwd = ? ";
+	          
+	          pstmt = conn.prepareStatement(sql);
+	          pstmt.setString(1, paraMap.get("userid"));
+	          pstmt.setString(2, paraMap.get("passwd"));
+	                     
+	          rs = pstmt.executeQuery();
+	            
+	          if(rs.next()) {
+	            member = new MemberDTO();
+	            
+	            member.setUserseq(rs.getInt(1));
+	            member.setUserid(rs.getString(2));
+	            member.setPasswd(rs.getString(3));
+	            member.setName(rs.getString(4));
+	            member.setMobile(rs.getString(5));
+	            member.setPoint(rs.getInt(6));
+	            member.setRegisterday(rs.getString(7));
+	            member.setStatus(rs.getInt(8));
+	          }
+	          
+	      } catch (SQLException e) {
+	         e.printStackTrace();
+	      } finally {
+	         close();
+	      }
+	      
+	      return member;
+	   }// end of public MemberDTO login(Map<String, String> paraMap)---------- 
+
+
+	@Override
+	public int updateMemberPoint(String userid) {
+		int result = 0;
 		
 		try {
-			conn = MyDBConnection.getConn();
+			conn = MyDBConnection.getConn();	
+			// conn 은 수동 commit 으로 되어있다.
 			
-			String sql = " select name "
-				    	+ " from jdbc_member "
-			            + " where userid = ? and passwd = ? ";
-	
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, paraMap.get("userid"));
-			pstmt.setString(2, paraMap.get("passwd"));
+			String sql = " update jdbc_member set point=point+10 "+
+				         " where userid= ? ";
 		
-			rs = pstmt.executeQuery();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, userid);
 			
-			if(rs.next()) {
-				member = new MemberDTO();
-				member.setName(rs.getString("NAME"));
-			}
+			result = pstmt.executeUpdate();
+			// update 가 성공되어지면 result 에는 1 이 들어간다.
 			
-			
-		} catch (Exception e) {
-			
+		} catch (SQLException e) {
+			e.printStackTrace();
 		} finally {
 			close();
 		}
+				
+		return result;
+		// result 는 1 또는 0 을 return 할 것이다.
 		
-		return member;
-	}// end of public MemberDTO login(Map<String, String> paraMap) -------------------------
-
+	}// public int updateMemberPoint(String userid) -------------------------------------
 
 }

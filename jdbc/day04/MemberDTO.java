@@ -69,6 +69,14 @@ public class MemberDTO {
 	}
 	
 	
-	
+	@Override
+	public String toString() {
+		return "1. 회원번호 : "+userseq+"\n"
+			  + "2. 회원아이디 : "+userid+"\n"
+			  + "3. 회원명 : "+name+"\n"
+			  + "4. 연락처 : "+mobile+"\n"
+			  + "5. 포인트 : "+point+"\n"
+			  + "6. 가입일자 : "+registerday+"\n";
+	}
 	
 }

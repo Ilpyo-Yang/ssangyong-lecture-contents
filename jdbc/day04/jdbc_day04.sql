@@ -123,5 +123,61 @@ select userseq, userid, passwd, name, mobile, point
 from jdbc_member 
 where userid = 'leess' and passwd = 'qwer134++';
 
+-----------------------------------------------------------------------------
 
+/*
+    Transaction(트랜잭션) 처리 실습을 위해서 
+    jdbc_member 컬럼의 값은 최대 30을 넘지 못하도록 check 제약을 걸도록 하겠습니다.
+*/					   
+
+alter table jdbc_member
+add constraint CK_jdbc_member_point check(point between 0 and 30);
+-- Table JDBC_MEMBER이(가) 변경되었습니다.
+
+select *
+from jdbc_board;
+
+select *
+from jdbc_member
+order by userseq;
+
+update jdbc_member set point = point +10
+where userid = 'leess';
+-- 1 행 이(가) 업데이트되었습니다.
+
+update jdbc_member set point = point +10
+where userid = 'leess';
+-- 1 행 이(가) 업데이트되었습니다.
+
+update jdbc_member set point = point +10
+where userid = 'leess';
+-- 1 행 이(가) 업데이트되었습니다.
+
+update jdbc_member set point = point +10
+where userid = 'leess';
+-- ORA-02290: check constraint (HR.CK_JDBC_MEMBER_POINT) violated
+
+rollback;
+
+
+select B.boardno
+     , case when length(B.subject)>10 then substr(B.subject,1,8)||'..' else B.subject end as subject
+     , M.name
+     , to_char(B.writeday,'yyyy-mm-dd hh24:mi:ss') as writeday
+     , b.viewcount
+from jdbc_board B join jdbc_member M
+on B.fk_userid = M.userid
+order by 1 desc;
+-- primary key 가 있는 jdbc_member 테이블이 부모 테이블이다.
+
+
+String sql = "\n"+
+"select B.boardno\n"+
+"     , case when length(B.subject)>10 then substr(B.subject,1,8)||'..' else B.subject end as subject\n"+
+"     , M.name\n"+
+"     , to_char(B.writeday,'yyyy-mm-dd hh24:mi:ss') as writeday\n"+
+"     , b.viewcount\n"+
+"from jdbc_board B join jdbc_member M\n"+
+"on B.fk_userid = M.userid\n"+
+"order by 1 desc";
 
