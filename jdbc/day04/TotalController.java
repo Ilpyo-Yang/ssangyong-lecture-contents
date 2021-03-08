@@ -238,12 +238,25 @@ public class TotalController {
 					
 					
 				case "5": // 글수정하기
-					
+					n = updateBoard(member, sc);
+					if(n==0) System.out.println(">> 수정할 글번호가 글 목록에 존재하지 않습니다. <<\n");
+					else if(n==1) System.out.println(">> 다른 사용자의 글은 수정불가합니다. <<\n");
+					else if(n==2) System.out.println(">> 글 암호가 올바르지 않습니다!! <<\n");
+					else if(n==3) System.out.println(">> 장애 발생으로 인해 글 수정 실패!! <<\n");
+					else if(n==4) System.out.println(">> 글 수정 취소!! <<\n");
+					else if(n==5) System.out.println(">> 글 수정 성공!! <<\n");
 					break;
 					
 				case "6": // 글삭제하기
-					
+					n = deleteBoard(member, sc);
+					if(n==0) System.out.println(">> 삭제할 글번호가 글 목록에 존재하지 않습니다. <<\n");
+					else if(n==1) System.out.println(">> 다른 사용자의 글은 삭제불가합니다. <<\n");
+					else if(n==2) System.out.println(">> 글 암호가 올바르지 않습니다!! <<\n");
+					else if(n==3) System.out.println(">> 장애 발생으로 인해 글 삭제 실패!! <<\n");
+					else if(n==4) System.out.println(">> 글 삭제 취소!! <<\n");
+					else if(n==5) System.out.println(">> 글 삭제 성공!! <<\n");
 					break;
+
 					
 				case "7": // 최근1주일간 일자별 게시글 작성건수 
 					
@@ -277,7 +290,6 @@ public class TotalController {
 		
 		
 	}// end of private void menu_Board()-----------------------
-	
 	
 
 
@@ -527,4 +539,187 @@ public class TotalController {
 		*/
 	}// end of private int writeComment(MemberDTO member, Scanner sc)--------
 	
+	
+
+	// **** 글수정하기 **** //
+	private int updateBoard(MemberDTO member, Scanner sc) {
+		int result = 0;
+		/*
+			0. 수정할 글번호가 글 목록에 존재하지 않습니다. 
+			1. 다른 사용자의 글은 수정불가합니다.
+			2. 글 암호가 올바르지 않습니다!! 
+			3. 장애 발생으로 인해 글 수정 실패!! 
+			4. 글 수정 취소!! 
+			5. 글 수정 성공!!
+		*/
+		System.out.println("\n>>> 글수정하기 <<<");
+		
+		System.out.print("▷ 수정할 글번호 : ");
+		String boardno = sc.nextLine();
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("boardno", boardno);
+		
+		BoardDTO bdto = bdao.viewContents(paraMap);
+		//현재 paraMap에는 글 번호만 있다.
+		
+		if(bdto != null) {
+			// 수정할 글 번호가 글 목목에 존재하는 경우
+			if(!member.getUserid().equals(bdto.getFk_userid())) {
+				// 수정할 글번호가 다른 사용자의 글인 경우
+				result = 1;
+			}
+			else {
+				// 수정할 글번호가 로그인한 사용자의 글인 경우
+				System.out.print("▷ 글암호: ");
+				String boardpasswd = sc.nextLine();
+				if(!boardpasswd.equals(bdto.getBoardpasswd())){
+					// 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같지 않을 경우
+					result = 2;
+				} else {
+					// 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같을 경우
+					// 수정할 글을 보여주고서 글수정 작업에 들어가도록 한다.
+					System.out.println("---------------------------------------------------------");
+					System.out.println("글제목 : "+bdto.getSubject());
+					System.out.println("글내용 : "+bdto.getContents());
+					System.out.println("---------------------------------------------------------\n");
+				
+					System.out.println("▷ 글제목[변경하지 않으려면 엔터] : ");
+					String subject = sc.nextLine();
+					if(subject!=null&&subject.trim().isEmpty()) {
+						subject = bdto.getSubject();
+					}
+					
+					System.out.println("▷ 글내용[변경하지 않으려면 엔터] : ");
+					String contents = sc.nextLine();
+					if(contents!=null&&contents.trim().isEmpty()) {
+						contents = bdto.getContents();
+					}
+					
+					paraMap.put("subject", subject);
+					paraMap.put("contents", contents);
+					
+					int n = bdao.updateBoard(paraMap);
+					if(n!=1) {
+						// 장애발생으로 인행 글 수정 실패한 경우
+						result = 3;
+					} else {
+						// 정상적으로 글 수정을 한 경우
+						Connection conn = MyDBConnection.getConn();
+						
+						do {
+							System.out.print("▷ 정말로 수정하시겠습니까?[Y/N] : ");
+							String yn  = sc.nextLine();
+							try {
+								if("y".equalsIgnoreCase(yn)) {
+									conn.commit(); // 커밋
+									result = 5;
+									break;
+								} else if("n".equalsIgnoreCase(yn)) {
+									conn.rollback(); // 커밋
+									result = 4;
+									break;
+								} else {
+									System.out.println(">> Y 또는 N 만 입력하세요!! <<");
+								}
+								
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
+						} while (true);
+					}
+				}
+				
+			}
+		} 
+		
+		return result;
+	}// end of private int updateBoard(MemberDTO member, Scanner sc) ------------------------------------------
+
+
+
+	
+	// **** 글삭제하기 **** //
+	private int deleteBoard(MemberDTO member, Scanner sc) {
+		int result = 0;
+		/*
+			0. 삭제할 글번호가 글 목록에 존재하지 않습니다. 
+			1. 다른 사용자의 글은 삭제불가합니다.
+			2. 글 암호가 올바르지 않습니다!! 
+			3. 장애 발생으로 인해 글 삭제 실패!! 
+			4. 글 삭제 취소!! 
+			5. 글 삭제 성공!!
+		*/
+		System.out.println("\n>>> 글삭제하기 <<<");
+		
+		System.out.print("▷ 삭제할 글번호 : ");
+		String boardno = sc.nextLine();
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("boardno", boardno);
+		
+		BoardDTO bdto = bdao.viewContents(paraMap);
+		//현재 paraMap에는 글 번호인 "boardno" 만 있는 상태이다.
+		
+		if(bdto != null) {
+			// 삭제할 글 번호가 글 목목에 존재하는 경우
+			if(!member.getUserid().equals(bdto.getFk_userid())) {
+				// 삭제할 글번호가 다른 사용자의 글인 경우
+				result = 1;
+			}
+			else {
+				// 삭제할 글번호가 로그인한 사용자의 글인 경우
+				System.out.print("▷ 글암호: ");
+				String boardpasswd = sc.nextLine();
+				if(!boardpasswd.equals(bdto.getBoardpasswd())){
+					// 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같지 않을 경우
+					result = 2;
+				} else {
+					// 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같을 경우
+					// 삭제할 글을 보여주고서 글삭제 작업에 들어가도록 한다.
+					System.out.println("---------------------------------------------------------");
+					System.out.println("글제목 : "+bdto.getSubject());
+					System.out.println("글내용 : "+bdto.getContents());
+					System.out.println("---------------------------------------------------------\n");
+					
+					paraMap.put("boardpasswd", boardpasswd);
+					
+					int n = bdao.deleteBoard(paraMap);	// 글 삭제하기
+					
+					if(n!=1) {
+						// 장애발생으로 인행 글 삭제 실패한 경우
+						result = 3;
+					} else {
+						// 정상적으로 글 삭제를 한 경우
+						Connection conn = MyDBConnection.getConn();
+						
+						do {
+							System.out.print("▷ 정말로 수정하시겠습니까?[Y/N] : ");
+							String yn  = sc.nextLine();
+							try {
+								if("y".equalsIgnoreCase(yn)) {
+									conn.commit(); // 커밋
+									result = 5;
+									break;
+								} else if("n".equalsIgnoreCase(yn)) {
+									conn.rollback(); // 커밋
+									result = 4;
+									break;
+								} else {
+									System.out.println(">> Y 또는 N 만 입력하세요!! <<");
+								}
+								
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
+						} while (true);
+					}
+				}
+				
+			}
+		} 
+		
+		return result;
+
+	}// private int deleteBoard(MemberDTO member, Scanner sc) ------------------------------------------
 }

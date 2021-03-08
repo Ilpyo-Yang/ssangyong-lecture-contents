@@ -288,3 +288,79 @@ String sql = "select C.contents, M.name, C.writeday \n"+
 " where fk_boardno = 8\n"+
 ") C JOIN jdbc_member M \n"+
 "ON C.fk_userid = M.userid; ";
+
+update jdbc_board set subject = '새제목', contents = '새내용'
+where boardno = 8;
+
+String sql = "update jdbc_board set subject = '새제목', contents = '새내용'\n"+
+"where boardno = 8;";
+
+
+-- ===== 최근 1주일간 일자별 게시글 작성건수 조회하기 ===== --
+select *
+from jdbc_board;
+
+select boardno, subject, writeday, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss')
+from jdbc_board
+order by boardno desc;
+
+update jdbc_board set writeday = writeday-3
+where boardno = 1
+
+commit;
+
+select boardno, subject, writeday, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss')
+from jdbc_board
+order by boardno desc;
+
+/*
+    ---------------------------------------------------------------------------------------------
+        TOTAL    PREVIOUS6    PREVIOUS5    PREVIOUS4    PREVIOUS3    PREVIOUS2    PREVIOUS1     TODAY   
+    ---------------------------------------------------------------------------------------------
+          4          0            0            4            0            0            0           1
+*/
+
+
+-- [퀴즈] 최근 1주일간의 게시글만 출력하세요. 
+
+select boardno, subject, writeday, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss'), 
+       sysdate - writeday, 
+       to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd')    
+from jdbc_board
+order by boardno desc;
+
+
+select writeday
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,6,1) AS PREVIOUS6
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,5,1) AS PREVIOUS5
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,4,1) AS PREVIOUS4
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,3,1) AS PREVIOUS3
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,2,1) AS PREVIOUS2
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,1,1) AS PREVIOUS1
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,0,1) AS TODAY
+from jdbc_board
+where to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') < 7;
+
+
+select writeday
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,6,1 ,0) AS PREVIOUS6
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,5,1 ,0) AS PREVIOUS5
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,4,1 ,0) AS PREVIOUS4
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,3,1 ,0) AS PREVIOUS3
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,2,1 ,0) AS PREVIOUS2
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,1,1 ,0) AS PREVIOUS1
+     , decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,0,1 ,0) AS TODAY
+from jdbc_board
+where to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') < 7;
+
+
+select count(*) AS TOTAL
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,6,1 ,0) ) AS PREVIOUS6
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,5,1 ,0) ) AS PREVIOUS5
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,4,1 ,0) ) AS PREVIOUS4
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,3,1 ,0) ) AS PREVIOUS3
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,2,1 ,0) ) AS PREVIOUS2
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,1,1 ,0) ) AS PREVIOUS1
+     , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,0,1 ,0) ) AS TODAY
+from jdbc_board
+where to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') < 7; 

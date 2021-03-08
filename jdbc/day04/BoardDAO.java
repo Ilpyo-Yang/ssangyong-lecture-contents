@@ -206,7 +206,7 @@ public class BoardDAO implements interBoardDAO {
 		try {
 			  conn = MyDBConnection.getConn();
 			  
-			  String sql = " select subject, contents, fk_userid " + 
+			  String sql = " select subject, contents, fk_userid, boardpasswd " + 
 			  		       " from jdbc_board " + 
 			  		       " where boardno = ? ";
 			  
@@ -220,6 +220,7 @@ public class BoardDAO implements interBoardDAO {
 				  bdto.setSubject(rs.getString(1));
 				  bdto.setContents(rs.getString(2));
 				  bdto.setFk_userid(rs.getString(3));
+				  bdto.setBoardpasswd(rs.getString(3));
 			  }// end of if(rs.next())-----------------------
 			  
 		} catch (SQLException e) {
@@ -384,6 +385,62 @@ public class BoardDAO implements interBoardDAO {
 		return commentList;
 		
 	}// end of public List<BoardCommentDTO> commentList(String boardno)---------------------
+
+
 	
+	// 글수정하기
+	@Override
+	public int updateBoard(Map<String, String> paraMap) {		
+		int result = 0;
+		
+		try {
+			  conn = MyDBConnection.getConn(); // conn 은 수동commit 으로 되어져 있다.
+			  
+			  String sql = " update jdbc_board set subject = ? , contents = ? "+
+					       " where boardno = ? ";
+				  
+			  pstmt = conn.prepareStatement(sql);
+			  pstmt.setString(1, paraMap.get("subject"));
+			  pstmt.setString(2, paraMap.get("contents"));
+			  pstmt.setString(3, paraMap.get("boardno"));
+			  
+			  result = pstmt.executeUpdate();
+			
+			  
+		} catch (SQLException e) {
+			    e.printStackTrace();
+		} finally {
+			close();
+		}		
+		
+		return result;
+	}
+	
+	
+	// 글삭제하기
+		@Override
+		public int deleteBoard(Map<String, String> paraMap) {		
+			int result = 0;
+			
+			try {
+				  conn = MyDBConnection.getConn(); // conn 은 수동commit 으로 되어져 있다.
+				  
+				  String sql = " delete from jdbc_board "
+				  			 + " where boardno = ? and boardpasswd = ? ";
+						  
+				  pstmt = conn.prepareStatement(sql);
+				  pstmt.setString(1, paraMap.get("boardno"));
+				  pstmt.setString(2, paraMap.get("boardpasswd"));
+				  
+				  result = pstmt.executeUpdate();
+				  
+			} catch (SQLException e) {
+				    e.printStackTrace();
+			} finally {
+				close();
+			}		
+			
+			return result;
+		}// end of public int deleteBoard(Map<String, String> paraMap) -----------------------------------
 	
 }

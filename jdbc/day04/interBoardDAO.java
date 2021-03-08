@@ -16,7 +16,11 @@ public interface interBoardDAO {
 
 	List<BoardCommentDTO> commentList(String boardno);
 	// 원글에 대한 댓글을 가져오는 것(특정 게시글 번호에 대한 jdbc_comment 테이블과 jdbc_member 테이블 join)
+
+	int updateBoard(Map<String, String> paraMap); // 글수정하기
+
+	int deleteBoard(Map<String, String> paraMap); // 글삭제하기
 	
-	
+	 
 	
 }
