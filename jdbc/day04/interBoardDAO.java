@@ -20,6 +20,15 @@ public interface interBoardDAO {
 	int updateBoard(Map<String, String> paraMap); // 글수정하기
 
 	int deleteBoard(Map<String, String> paraMap); // 글삭제하기
+
+	Map<String, Integer> statisticsByWeek();	// 최근 1주일간에 대해 select 되어져 나온 결과물
+				// 객체
+
+	List<Map<String, String>> statisticsByCurrentMonth();	// 이번달 일자별 게시글 작성건수
+
+	List<Map<String, String>> allMemberInfo(String menuNo);	// 모든 회원정보 보여주기
+
+	List<MemberDTO> allMemberInfo2();	// 모든 회원정보 보여주기2
 	
 	 
 	

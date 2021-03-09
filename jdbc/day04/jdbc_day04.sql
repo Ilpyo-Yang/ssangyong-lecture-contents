@@ -364,3 +364,84 @@ select count(*) AS TOTAL
      , SUM( decode( to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') ,0,1 ,0) ) AS TODAY
 from jdbc_board
 where to_date( to_char(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd') - to_date( to_char(writeday, 'yyyy-mm-dd'), 'yyyy-mm-dd') < 7; 
+
+
+
+
+
+create or replace function func_midnight
+(p_date   IN   date)
+return date 
+is 
+begin 
+    return to_date(to_char(p_date,'yyyy-mm-dd'),'yyyy-mm-dd');
+end func_midnight;
+-- Function FUNC_MIDNIGHT이(가) 컴파일되었습니다.
+
+
+select to_char(sysdate,'yyyy-mm-dd hh24:mi:ss')
+     , to_char(func_midnight(sysdate),'yyyy-mm-dd hh24:mi:ss')
+from dual;
+-- 2021-03-09 09:16:03	2021-03-09 00:00:00
+
+
+select count(*) AS TOTAL
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,6,1 ,0) ) AS PREVIOUS6
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,5,1 ,0) ) AS PREVIOUS5
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,4,1 ,0) ) AS PREVIOUS4
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,3,1 ,0) ) AS PREVIOUS3
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,2,1 ,0) ) AS PREVIOUS2
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,1,1 ,0) ) AS PREVIOUS1
+     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,0,1 ,0) ) AS TODAY
+from jdbc_board
+where func_midnight(sysdate) - func_midnight(writeday) < 7; 
+-- 사용자 정의 함수 이용해서 코드 최적화 하기
+
+
+
+
+String sql = "select count(*) AS TOTAL\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,6,1 ,0) ) AS PREVIOUS6\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,5,1 ,0) ) AS PREVIOUS5\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,4,1 ,0) ) AS PREVIOUS4\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,3,1 ,0) ) AS PREVIOUS3\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,2,1 ,0) ) AS PREVIOUS2\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,1,1 ,0) ) AS PREVIOUS1\n"+
+"     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,0,1 ,0) ) AS TODAY\n"+
+"from jdbc_board\n"+
+"where func_midnight(sysdate) - func_midnight(writeday) < 7";
+
+
+
+-- 이번달 일자별 게시글 작성건수 조회하기
+select decode(grouping(to_char(writeday,'yyyy-mm-dd')),0,to_char(writeday,'yyyy-mm-dd'),'전체') as WRITEDAY
+     , count(*) AS CNT
+from jdbc_board
+where to_char(writeday,'yyyy-mm')=to_char(sysdate,'yyyy-mm')
+group by rollup(to_char(writeday,'yyyy-mm-dd'));
+
+
+String sql = "\n"+
+"select decode(grouping(to_char(writeday,'yyyy-mm-dd')),0,to_char(writeday,'yyyy-mm-dd'),'전체') as WRITEDAY\n"+
+"     , count(*) AS CNT\n"+
+"from jdbc_board\n"+
+"where to_char(writeday,'yyyy-mm')=to_char(sysdate,'yyyy-mm')\n"+
+"group by rollup(to_char(writeday,'yyyy-mm-dd'));";
+
+
+
+select decode(grouping(to_char(writeday,'yyyy-mm-dd')),0,to_char(writeday,'yyyy-mm-dd'),'전체') as WRITEDAY
+     , count(*) AS CNT
+from jdbc_board
+where to_char(writeday,'yyyy-mm')=to_char(add_months(sysdate,-1),'yyyy-mm')
+group by rollup(to_char(writeday,'yyyy-mm-dd'));
+
+
+
+
+select userid, name, mobile, point, registerday
+from jdbc_member;
+
+
+String sql = "select userid, name, mobile, point, registerday\n"+
+"from jdbc_member;";

@@ -1,9 +1,11 @@
 package jdbc.day04;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import jdbc.day04.singleton.dbconnection.MyDBConnection;
+import my.util.MyUtil;
 
 
 public class TotalController {
@@ -259,11 +261,11 @@ public class TotalController {
 
 					
 				case "7": // 최근1주일간 일자별 게시글 작성건수 
-					
+					statisticsByWeek();
 					break;
 					
 				case "8": // 이번달 일자별 게시글 작성건수
-					
+					statisticsByCurrentMonth();
 					break;
 					
 				case "9": // 나가기
@@ -271,9 +273,26 @@ public class TotalController {
 					break;
 					
 				case "10": // 모든회원정보조회(관리자 전용 메뉴)
-					
 					if("admin".equals(member.getUserid())) {
-						System.out.println("== 모든 회원정보를 보여줄께요 ==");
+						do {
+							System.out.println("[1. 회원명의 오름차순 / 2. 회원명의 내림차순  / 3. 가입일자의 오름차순 / 4. 가입일자의 내림차순");
+							System.out.print("선택: ");
+							menuNo = sc.nextLine();
+							switch (menuNo) {
+							case "1":
+							case "2":
+							case "3":
+							case "4":
+								System.out.println("== 모든 회원정보를 보여줄께요 ==");
+								allMemberInfo(menuNo);
+								break;
+
+							default:
+								break;
+							}
+						} while (true);
+
+						//allMemberInfo2(); -- 만들다말았다
 					}	
 					else
 						System.out.println(">> 메뉴에 없는 번호 입니다. << \n");
@@ -291,8 +310,8 @@ public class TotalController {
 		
 	}// end of private void menu_Board()-----------------------
 	
-
-
+	
+	
 	// **** 글쓰기(Transaction 처리) **** //
 	// ( 글쓰기[jdbc_board 테이블에 insert] + 글쓴회원의 포인트를 10증가[jdbc_member 테이블에 update] ==> Transaction 처리 )
 	private int write(MemberDTO member, Scanner sc) {
@@ -722,4 +741,111 @@ public class TotalController {
 		return result;
 
 	}// private int deleteBoard(MemberDTO member, Scanner sc) ------------------------------------------
+
+
+	
+	// **** 최근1주일간 일자별 게시글 작성건수  **** //
+	private void statisticsByWeek() {
+		System.out.println("------------------------------------ [최근1주일간 일자별 게시글 작성건수] -------------------------------------");
+		String title = "전체\t";
+		System.out.println("------------------------------------------------------------------------------------------------------");
+		
+		for (int i=0; i<7; i++) {
+			title += MyUtil.addDay(i-6)+"\t";
+			
+		}// end of for (int i=0; i<7; i++) --------------------------------------------------------
+		
+		System.out.println(title);	// 만약 오늘이 2021-03-09 이라면
+		// 전체	2021-03-03	2021-03-04	2021-03-05	2021-03-06	2021-03-07	2021-03-08	2021-03-09
+		
+		
+		Map<String, Integer> resultMap = bdao.statisticsByWeek(); // 최근 1주일간에 대해 select 되어져 나온 결과물
+		
+		String str = resultMap.get("TOTAL")+"\t"+
+				  	 resultMap.get("PREVIOUS6")+"\t"+
+					 resultMap.get("PREVIOUS5")+"\t"+
+					 resultMap.get("PREVIOUS4")+"\t"+
+					 resultMap.get("PREVIOUS3")+"\t"+
+					 resultMap.get("PREVIOUS2")+"\t"+
+					 resultMap.get("PREVIOUS1")+"\t"+
+					 resultMap.get("TODAY")+"\t";
+		
+		System.out.println(str);
+		
+	}// private void statisticsByWeek() ------------------------------------------------------------
+
+	
+// ★★★ return 값을 무멋으로 할 것인가?
+// insert와 select ==> DTO,	insert ==> Map
+	
+	
+
+	
+	// **** 이번달 일자별 게시글 작성건수 **** //
+	private void statisticsByCurrentMonth() {
+		Calendar currentDate = Calendar.getInstance();
+		SimpleDateFormat sdateFmt = new SimpleDateFormat("yyyy년 MM월");
+		String currentMonth = sdateFmt.format(currentDate.getTime());
+		
+		System.out.println(">>> [ "+currentMonth+" 일자별 게시글 작성건수 ] <<<");
+		System.out.println("----------------------------------------------------------");
+		String title = "작성일자\t\t작성건수";	
+		System.out.println(title);
+		System.out.println("----------------------------------------------------------");
+		
+		List<Map<String, String>> mapList = bdao.statisticsByCurrentMonth(); // 일자별 select 되어져 나온 결과물
+		
+		StringBuilder sb = new StringBuilder();
+		
+		if(mapList.size()>0) {
+		    for(Map<String, String> map : mapList) {	// for(a:b) ==> b의 요소 타입 a
+		    	sb.append(map.get("WRITEDAY")+"\t"+map.get("CNT")+"\n");
+		    }
+			System.out.println(sb.toString());		
+		} else {
+			System.out.println("작성된 게시글이 없습니다.");
+		}
+					 
+		
+		
+	}
+
+
+	
+	// 모든회원정보조회(관리자 전용 메뉴)
+	private void allMemberInfo(String menuNo) {
+		System.out.println("----------------------------------------------------------");
+		System.out.println("회원아이디\t회원명\t전화번호\t포인트\t등록일자");
+		System.out.println("----------------------------------------------------------");
+		
+		List<Map<String, String>> mapList = bdao.allMemberInfo(); 
+		
+		StringBuilder sb = new StringBuilder();
+		
+		if(mapList.size()>0) {
+		    for(Map<String, String> map : mapList) {	// for(a:b) ==> b의 요소 타입 a
+		    	sb.append(map.get("userid")+"\t"+map.get("name")+"\t"+map.get("mobile")+"\t"+map.get("point")+"\t"+map.get("registerday")+"\n");
+		    }
+			System.out.println(sb.toString());		
+		} else {
+			System.out.println("회원정보가 없습니다.");
+		}
+	
+	}
+	
+	
+	// 모든회원정보조회(관리자 전용 메뉴)2
+	private void allMemberInfo2() {
+		System.out.println("----------------------------------------------------------");
+		System.out.println("회원아이디\t회원명\t전화번호\t포인트\t등록일자");
+		System.out.println("----------------------------------------------------------");
+		
+		bdao.allMemberInfo2();
+		
+	
+	}
+
+
+
+
 }

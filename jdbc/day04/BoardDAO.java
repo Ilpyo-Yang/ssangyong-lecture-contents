@@ -442,5 +442,131 @@ public class BoardDAO implements interBoardDAO {
 			
 			return result;
 		}// end of public int deleteBoard(Map<String, String> paraMap) -----------------------------------
+
+
+		
+		// 최근 1주일간에 대해 select 되어져 나온 결과물
+		@Override
+		public Map<String, Integer> statisticsByWeek() {
+			Map<String, Integer> resultMap = new HashMap<>();
+			
+			try {
+				  conn = MyDBConnection.getConn(); // conn 은 수동commit 으로 되어져 있다.
+				  
+				  String sql = "select count(*) AS TOTAL\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,6,1 ,0) ) AS PREVIOUS6\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,5,1 ,0) ) AS PREVIOUS5\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,4,1 ,0) ) AS PREVIOUS4\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,3,1 ,0) ) AS PREVIOUS3\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,2,1 ,0) ) AS PREVIOUS2\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,1,1 ,0) ) AS PREVIOUS1\n"+
+							   "     , SUM( decode( func_midnight(sysdate) - func_midnight(writeday) ,0,1 ,0) ) AS TODAY\n"+
+							   "from jdbc_board\n"+
+							   "where func_midnight(sysdate) - func_midnight(writeday) < 7";
+
+				  pstmt = conn.prepareStatement(sql);
+				  rs = pstmt.executeQuery();
+				  
+				  rs.next();
+				  
+				  resultMap.put("TOTAL", rs.getInt(1));
+				  resultMap.put("PREVIOUS6", rs.getInt(2));
+				  resultMap.put("PREVIOUS5", rs.getInt(3));
+				  resultMap.put("PREVIOUS4", rs.getInt(4));
+				  resultMap.put("PREVIOUS3", rs.getInt(5));
+				  resultMap.put("PREVIOUS2", rs.getInt(6));
+				  resultMap.put("PREVIOUS1", rs.getInt(7));
+				  resultMap.put("TODAY", rs.getInt(8));
+				  
+				  
+			} catch (SQLException e) {
+				    e.printStackTrace();
+			} finally {
+				close();
+			}	
+			
+			return resultMap;
+		}// public Map<String, Integer> statisticsByWeek() -----------------------------------------------
+
+		
+		
+
+		// 이번달 일자별 게시글 작성건수
+		@Override
+		public List<Map<String, String>> statisticsByCurrentMonth() {
+			List<Map<String, String>> mapList = new ArrayList<>();
+			
+			try {
+				  conn = MyDBConnection.getConn(); // conn 은 수동commit 으로 되어져 있다.
+				  
+				  String sql = "select decode(grouping(to_char(writeday,'yyyy-mm-dd')),0,to_char(writeday,'yyyy-mm-dd'),'전체') as WRITEDAY\n"+
+							  "     , count(*) AS CNT\n"+
+							  "from jdbc_board\n"+
+							  "where to_char(writeday,'yyyy-mm')=to_char(sysdate,'yyyy-mm')\n"+
+							  "group by rollup(to_char(writeday,'yyyy-mm-dd'))";
+
+				  pstmt = conn.prepareStatement(sql);
+				  rs = pstmt.executeQuery();
+				  
+				  while (rs.next()) {
+					  Map<String, String> map = new HashMap<>();
+					  map.put("WRITEDAY", rs.getString(1));
+					  map.put("CNT", String.valueOf(rs.getInt(2)));
+					  
+					  mapList.add(map);
+					  
+				  }// end of while (rs.next()) -------------------------------------------------------------------
+			  
+			} catch (SQLException e) {
+				    e.printStackTrace();
+			} finally {
+				close();
+			}	
+			
+			return mapList;
+		}
+
+
+		// 모든 회원정보 보여주기
+		@Override
+		public List<Map<String, String>> allMemberInfo(String menuNo) {
+			List<Map<String, String>> mapList = new ArrayList<>();
+			
+			try {
+				  conn = MyDBConnection.getConn(); // conn 은 수동commit 으로 되어져 있다.
+				  
+				  String sql = "select userid, name, mobile, point, registerday "+
+						  	   "from jdbc_member "+
+						  	   "order by ";
+				  pstmt = conn.prepareStatement(sql);
+				  rs = pstmt.executeQuery();
+				  
+				  while (rs.next()) {
+					  Map<String, String> map = new HashMap<>();
+					  map.put("userid", rs.getString(1));
+					  map.put("name", rs.getString(2));
+					  map.put("mobile", rs.getString(3));
+					  map.put("point", rs.getString(4));
+					  map.put("registerday", rs.getString(5));
+					  
+					  mapList.add(map);
+					  
+				  }// end of while (rs.next()) -------------------------------------------------------------------
+			  
+			} catch (SQLException e) {
+				    e.printStackTrace();
+			} finally {
+				close();
+			}	
+			return mapList;
+		}
+
+
+		// 모든 회원정보 보여주기2
+		@Override
+		public List<MemberDTO> allMemberInfo2() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	
 }

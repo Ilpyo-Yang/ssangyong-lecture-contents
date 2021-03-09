@@ -1,179 +1,22 @@
 package my.util;
 
-//import java.lang.*;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MyUtil {
-
-// === ÇöÀç½Ã°¢À» Ãâ·ÂÇØÁÖ´Â static ¸Ş¼Òµå »ı¼ºÇÏ±â === //
-   public static void currentTime() {
-      Date now = new Date(); // ÇöÀç½Ã°¢
-      
-      SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
-      String result = sdfrmt.format(now);
-      System.out.println(">> ÇöÀç½Ã°¢ : " + result);
-      // 2021-01-07 11:22:35 
-   }
-   
-   
-   
-// === ºñ¹Ğ¹øÈ£°¡ ±ÔÄ¢¿¡ ¸Â´ÂÁö Æ²¸®´ÂÁö ¾Ë·ÁÁÖ´Â static ¸Ş¼Òµå »ı¼ºÇÏ±â === // 
-   // ºñ¹Ğ¹øÈ£ ±ÔÄ¢Àº ºñ¹Ğ¹øÈ£ÀÇ ±æÀÌ´Â 8±ÛÀÚ ÀÌ»ó 15±ÛÀÚ ÀÌÇÏÀÌ¾î¾ß ÇÏ°í,
-   // ¶ÇÇÑ ºñ¹Ğ¹øÈ£´Â ¿µ¹®´ë¹®ÀÚ, ¿µ¹®¼Ò¹®ÀÚ, ¼ıÀÚ, Æ¯¼ö±âÈ£°¡ È¥ÇÕµÇ¾î¾ß¸¸ ÇÑ´Ù.
-   // ¿ì¸®´Â ±ÔÄ¢¿¡ ¸ÂÀ¸¸é true , ±ÔÄ¢¿¡ Æ²¸®¸é  false ¸¦ ¸®ÅÏÇØÁÖµµ·Ï ¸¸µç´Ù.
-   public static boolean isCheckPasswd(String passwd) {
-      
-      // ¿¹¸¦ µé¾î¼­ 
-      // "ab123cd#S".toCharArray(); À» ÇÏ¸é
-      // {'a','b','1','2','3','c','d','#','S'} À¸·Î º¯È¯µÈ´Ù.
-      
-      char[] chArr = passwd.toCharArray();
-   /*
-       -------------------------------------
-       | a | b | 1 | 2 | 3 | c | d | # | S |
-       -------------------------------------    
-    */
-      
-      if( 8 <= chArr.length && chArr.length <= 15 ) {
-      
-         boolean flagUpper   = false; // ¿µ¹®´ë¹®ÀÚ Ç¥½ÄÀ» À§ÇÑ ¿ëµµ 
-         boolean flagLower   = false; // ¿µ¹®¼Ò¹®ÀÚ Ç¥½ÄÀ» À§ÇÑ ¿ëµµ
-         boolean flagNumber  = false; // ¼ıÀÚ Ç¥½ÄÀ» À§ÇÑ ¿ëµµ
-         boolean flagSpecial = false; // Æ¯¼ö¹®ÀÚ Ç¥½ÄÀ» À§ÇÑ ¿ëµµ
-         
-      /*   
-         for(int i=0; i<chArr.length; i++) {
-            char ch = chArr[i];
-            
-            if(Character.isUpperCase(ch)) {   // ¿µ¹®´ë¹®ÀÚÀÎ °æ¿ì
-               flagUpper = true;
-            }
-            
-            else if(Character.isLowerCase(ch)) { // ¿µ¹®¼Ò¹®ÀÚÀÎ °æ¿ì
-               flagLower = true;
-            }
-            
-            else if(Character.isDigit(ch)) { // ¼ıÀÚÀÎ °æ¿ì
-               flagNumber = true;
-            }
-            
-            else { // Æ¯¼ö¹®ÀÚÀÎ °æ¿ì
-               flagSpecial = true;
-            }
-            
-         }// end of for------------------------
-      */   
-         
-         // === ¶Ç´Â ===
-         for(char ch : chArr) {
-            
-            if(Character.isUpperCase(ch)) {   // ¿µ¹®´ë¹®ÀÚÀÎ °æ¿ì
-               flagUpper = true;
-            }
-            
-            else if(Character.isLowerCase(ch)) { // ¿µ¹®¼Ò¹®ÀÚÀÎ °æ¿ì
-               flagLower = true;
-            }
-            
-            else if(Character.isDigit(ch)) { // ¼ıÀÚÀÎ °æ¿ì
-               flagNumber = true;
-            }
-            
-            else { // Æ¯¼ö¹®ÀÚÀÎ °æ¿ì
-               flagSpecial = true;
-            }
-            
-         }// end of for----------------------
-         
-         if(flagUpper && flagLower && flagNumber && flagSpecial) {
-            return true;
-         }
-         else {
-            return false;
-         }
-      
-      }
-      
-      else { // ºñ¹Ğ¹øÈ£ÀÇ ±æÀÌ°¡ 8±ÛÀÚ ¹Ì¸¸ ÀÌ°Å³ª 15±ÛÀÚ º¸´Ù Å« °æ¿ìÀÌ´Ù.
-         return false;
-      }
-      
-   }// end of public static boolean isCheckPasswd(String passwd)--------
-   
-   
-   
-   
-// === , °¡ µé¾îÀÖ´Â ¼ıÀÚ·Î µÈ ¹®ÀÚ¿­À» , Á¦°ÅÇØ¼­ Á¤¼ö·Î ¸®ÅÏ½ÃÄÑÁÖ´Â ¸Ş¼­µå »ı¼ºÇÏ±â === //
-   
-    public static int delComma(String str) {
-    	do {
-    		int commaIndex = str.indexOf(",");
-    		if(commaIndex==-1) break;
-			str = str.substring(0, commaIndex) + str.substring(commaIndex+1);
-			//"2"+"000,000" => "2000,000"
-			//"2000"+"000" => "2000000"
-		} while (true);
-    	return Integer.parseInt(str);
-    }//end of public static int delComma(String str) ---------------------
-    
-    
-    
-    
-// === ÁÖ¹Î¹øÈ£ 7ÀÚ¸®¸¦ ¹Ş¾Æ¼­ ¿Ã¹Ù¸¥ µ¥ÀÌÅÍÀÎÁö °Ë»çÇØÁÖ´Â ¸Ş¼­µå »ı¼º === // 
-    public static boolean isCheckJubun(String jubun) {
-    	if(jubun==null)  return false;   //¹ØÀ¸·Î ³»·Á°¡Áö ¾Ê°í false¸¦ ÁÖ°í ³¡³²
-    	char[] chArr = jubun.toCharArray();
-    	if(chArr.length!=7) return false;
-    	for (int i=0; i<7; i++) {
-			if (!Character.isDigit(chArr[i])) {
-				return false;
-			}
-		}
-    	if (!('1'<=chArr[6]&&chArr[6]<='4')) return false;
-    	
-    	//¿ù => "01" ~ "12"
-    	int month = Integer.parseInt(jubun.substring(2, 4));  //1~12
-    	if(!(1<=month&&month<=12)) return false;
-    	int day = Integer.parseInt(jubun.substring(4, 6)); //1~31
-    	if(!(1<=month&&month<=31)) return false;
-    	//2¿ùÀº 30ÀÏ 31ÀÏÀº ¾ø´Ù.
-    	if(month==2 && 30<=day&&day<=31) return false;
-    	
-    	return true; //¸¶Áö¸·¿¡ ¸ğµç Á¶°Ç¹®¿¡ ÇØ´çÇÑ´Ù¸é!
-    }//end of public static boolean isCheckJuban(String jubun) ------------
-    
-    public static boolean isCheckJubun2(String jubun) {
-    	if(jubun==null) return false;
-    	//jubun  => "9501151" "9501152"
-    	
-    	// Á¤±ÔÇ¥Çö½Ä(Regular Expression)ÀÌ¶õ?
-    	// ==> Æ¯Á¤ÇÑ ±ÔÄ¢À» °¡Áø ¹®ÀÚ¿­ÀÇ ÁıÇÕÀ» Ç¥ÇöÇÏ±â À§ÇØ ¾²ÀÌ´Â Çü½Ä¾ğ¾î 
-    	
-    	// == 1. Á¤±ÔÇ¥Çö½Ä(Regular Expression) ÆĞÅÏÀ» ÀÛ¼ºÇÑ´Ù. ==
-    	//Pattern p = Pattern.compile("^ [0-9][0-9][01][0-9]{3}[1-4] $");
-    	//^ Àº ½ÃÀÛÀ» ÀÇ¹ÌÇÑ´Ù.
-    	//$ ´Â ³¡À» ÀÇ¹ÌÇÑ´Ù.
-    	//[] ´Â ±ÛÀÚ 1°³°¡ µé¾î¿À´Â °ÍÀ» ÀÇ¹ÌÇÑ´Ù.
-    	//[0123456789] Àº 0~9±îÁö¸¸ µé¾î¿Â´Ù´Â ¶æÀÌ´Ù.
-    	//[0123456789] Àº [0-9]¿Í °°´Ù.    	
-    	//[0-9]{3} ´Â [0-9][0-9][0-9] ÀÌ·¸°Ô ¿¬´Ş¾Æ ³ª¿Ã ¶§ ¾µ ¼ö ÀÖ´Ù.
-    	Pattern p = Pattern.compile("^ \\d{2}[01]\\d{3}[1-4] $");
-    	//[0-9] ¿Í \\d Àº °°´Ù.
-    	    	
-    	
-    	// == 2. ¹®ÀÚ¿­ÀÌ ÁÖ¾îÁø Á¤±Ô½ÄÆĞÅÏ°ú ÀÏÄ¡ÇÏ´ÂÁö ÆÇº°ÇÏ´Â °´Ã¼¸¦ »ı¼ºÇÑ´Ù. ==
-    	Matcher m = p.matcher(jubun);
-    	
-    	// == 3. ÆÇº°ÇÏµµ·Ï ÇÑ´Ù. ==
-    	//ÁÖ¾îÁø Á¤±Ô½Ä ÆĞÅÏ°ú ÀÏÄ¡ÇÏ¸é true, ÀÏÄ¡ÇÏÁö ¾ÊÀ¸¸é false¸¦ ¸®ÅÏ½ÃÄÑÁØ´Ù.
-    	Boolean b = m.matches();
-    	return b;
-    }//end of public static boolean isCheckJuban2(String jubun) ------------
-
+	
+	public static String addDay(int n) {
+		Calendar currentDate = Calendar.getInstance();	// í˜„ì¬ ë‚ ì§œì™€ ì‹œê°„ì„ ì–»ì–´ì˜¨ë‹¤.
+		// currentDate.add(Calendar.DATE, 1);	
+		// ==> í˜„ì¬ ë‚ ì§œì—ì„œ ë‘ë²ˆ ì§¸ íŒŒë¼ë¯¸í„°ì— ì…ë ¥í•´ì¤€ ìˆ«ìë§Œí¼ ë‚ ì§œìˆ˜(Calender.DATE)ì—ì„œ ê°€ê°. 
+		// ==> ìœ„ì˜ ê²°ê³¼ëŠ” currentDate ê°’ì´ 1ì¼ ë”í•œ ê°’ìœ¼ë¡œ ë³€í•œë‹¤.
+				
+		currentDate.add(Calendar.DATE, (n));
+		
+		SimpleDateFormat sdateFmt = new SimpleDateFormat("yyyy-MM-dd");
+		
+		return sdateFmt.format(currentDate.getTime());
+		// currentDate.getTime() ==> calendar íƒ€ì…ì„ date íƒ€ì…ìœ¼ë¡œ ë°”ê¿”ì£¼ëŠ” ê²ƒ
+		// .format ==> date íƒ€ì…ì„ String íƒ€ì…ìœ¼ë¡œ ë°”ê¿”ì£¼ëŠ” ê²ƒ
+	}
 }
-
-
-
