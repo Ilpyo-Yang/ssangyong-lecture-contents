@@ -13,6 +13,6 @@ public class Member_Main {
 		
 		sc.close();
 		System.out.println("~~~ 프로그램 종료 ~~~");
-	}// end of main() -------------------------------------------------
+	}// end of main()--------------------------
 
 }

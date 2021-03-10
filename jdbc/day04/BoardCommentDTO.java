@@ -1,6 +1,6 @@
 package jdbc.day04;
 
-public class BoardCommentDTO {	 // BoardCommentDTO 가 오라클의 jdbc_comment(자식 테이블)에 해당함. 
+public class BoardCommentDTO {  // BoardCommentDTO 가 오라클의 jdbc_comment(자식 테이블)에 해당함.
 
 	private int commentno;      // 댓글번호 
 	private String fk_boardno;  // 원글의 글번호 
@@ -8,8 +8,8 @@ public class BoardCommentDTO {	 // BoardCommentDTO 가 오라클의 jdbc_comment
 	private String contents;    // 댓글내용 
 	private String writeday;    // 작성일자	
 	
-	private MemberDTO member; // select 용 (jdbc_member 테이블과 jdbc_comment 테이블의 JOIN). 글쓴이에 대한 모든 정보                 
-    					      // MemberDTO 가 오라클의 jdbc_member(부모 테이블)에 해당함.
+	private MemberDTO member;   // select 용 (jdbc_member 테이블과 jdbc_comment 테이블의 JOIN). 글쓴이에 대한 모든 정보                 
+                                // MemberDTO 가 오라클의 jdbc_member(부모 테이블)에 해당함.
 	
 	public int getCommentno() {
 		return commentno;
@@ -50,7 +50,7 @@ public class BoardCommentDTO {	 // BoardCommentDTO 가 오라클의 jdbc_comment
 	public void setWriteday(String writeday) {
 		this.writeday = writeday;
 	}
-
+	
 	public MemberDTO getMember() {
 		return member;
 	}
@@ -61,11 +61,11 @@ public class BoardCommentDTO {	 // BoardCommentDTO 가 오라클의 jdbc_comment
 
 	
 	////////////////////////////////////////////////////
-		
-	public String viewInfo() {  // 댓글내용\t\t작성자\t작성일자 
-	// contents\t\tmember.getName()\twriteday
 	
-	return contents+"\t\t"+member.getName()+"\t"+writeday;
+	public String viewInfo() {  // 댓글내용\t\t작성자\t작성일자 
+		                        // contents\t\tmember.getName()\twriteday
+		
+		return contents+"\t\t"+member.getName()+"\t"+writeday;
 	}
 	
 }

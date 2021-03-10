@@ -11,8 +11,8 @@ import my.util.MyUtil;
 public class TotalController {
 
 	// field, attribute, property, 속성
-	interMemberDAO mdao = new MemberDAO();
-	interBoardDAO  bdao = new BoardDAO(); 
+	InterMemberDAO mdao = new MemberDAO();
+	InterBoardDAO  bdao = new BoardDAO(); 
 	
 	
 	// **** 시작메뉴 **** //
@@ -186,9 +186,12 @@ public class TotalController {
 					boardList();
 					break;
 					
+					
+					
 				case "2": // 글내용보기
 					viewContents(member.getUserid(), sc);
 					break;
+					
 					
 					
 				case "3": // 글쓰기(insert).  
@@ -221,6 +224,7 @@ public class TotalController {
 					break;
 					
 					
+					
 				case "4": // 댓글쓰기(jdbc_comment 테이블에 insert 하기) 
 					n = writeComment(member, sc);
 					
@@ -239,61 +243,87 @@ public class TotalController {
 					break;
 					
 					
+					
 				case "5": // 글수정하기
+					
 					n = updateBoard(member, sc);
-					if(n==0) System.out.println(">> 수정할 글번호가 글 목록에 존재하지 않습니다. <<\n");
-					else if(n==1) System.out.println(">> 다른 사용자의 글은 수정불가합니다. <<\n");
-					else if(n==2) System.out.println(">> 글 암호가 올바르지 않습니다!! <<\n");
-					else if(n==3) System.out.println(">> 장애 발생으로 인해 글 수정 실패!! <<\n");
-					else if(n==4) System.out.println(">> 글 수정 취소!! <<\n");
-					else if(n==5) System.out.println(">> 글 수정 성공!! <<\n");
+					
+					if(n == 0)
+						System.out.println(">> 수정할 글번호가 글목록에 존재하지 않습니다. << \n"); 
+					
+					else if(n == 1)
+						System.out.println(">> 다른 사용자의 글은 수정불가 합니다.!! << \n"); 
+					
+					else if(n == 2)
+						System.out.println(">> 글암호가 올바르지 않습니다.!! << \n"); 
+					
+					else if(n == 3)
+						System.out.println(">> 장애발생으로 인해 글 수정 실패!! << \n");
+					
+					else if(n == 4)
+						System.out.println(">> 글 수정 취소!! << \n");
+					
+					else if(n == 5)
+						System.out.println(">> 글 수정 성공!! << \n");
+					
 					break;
 					
+					
+					
 				case "6": // 글삭제하기
+					
 					n = deleteBoard(member, sc);
-					if(n==0) System.out.println(">> 삭제할 글번호가 글 목록에 존재하지 않습니다. <<\n");
-					else if(n==1) System.out.println(">> 다른 사용자의 글은 삭제불가합니다. <<\n");
-					else if(n==2) System.out.println(">> 글 암호가 올바르지 않습니다!! <<\n");
-					else if(n==3) System.out.println(">> 장애 발생으로 인해 글 삭제 실패!! <<\n");
-					else if(n==4) System.out.println(">> 글 삭제 취소!! <<\n");
-					else if(n==5) System.out.println(">> 글 삭제 성공!! <<\n");
+					
+					if(n == 0)
+						System.out.println(">> 삭제할 글번호가 글목록에 존재하지 않습니다. << \n"); 
+					
+					else if(n == 1)
+						System.out.println(">> 다른 사용자의 글은 삭제불가 합니다.!! << \n"); 
+					
+					else if(n == 2)
+						System.out.println(">> 글암호가 올바르지 않습니다.!! << \n"); 
+					
+					else if(n == 3)
+						System.out.println(">> 장애발생으로 인해 글 삭제 실패!! << \n");
+					
+					else if(n == 4)
+						System.out.println(">> 글 삭제 취소!! << \n");
+					
+					else if(n == 5)
+						System.out.println(">> 글 삭제 성공!! << \n");
+					
 					break;
-
+					
+					
 					
 				case "7": // 최근1주일간 일자별 게시글 작성건수 
 					statisticsByWeek();
 					break;
 					
+					
+					
 				case "8": // 이번달 일자별 게시글 작성건수
 					statisticsByCurrentMonth();
 					break;
+					
+					
 					
 				case "9": // 나가기
 					
 					break;
 					
+					
+					
 				case "10": // 모든회원정보조회(관리자 전용 메뉴)
+					
 					if("admin".equals(member.getUserid())) {
-						do {
-							System.out.println("[1. 회원명의 오름차순 / 2. 회원명의 내림차순  / 3. 가입일자의 오름차순 / 4. 가입일자의 내림차순");
-							System.out.print("선택: ");
-							menuNo = sc.nextLine();
-							switch (menuNo) {
-							case "1":
-							case "2":
-							case "3":
-							case "4":
-								System.out.println("== 모든 회원정보를 보여줄께요 ==");
-								allMemberInfo(menuNo);
-								break;
-
-							default:
-								break;
-							}
-						} while (true);
-
-						//allMemberInfo2(); -- 만들다말았다
+						System.out.print("▷ 정렬 [1:회원명의 오름차순  / 2:회원명의 내림차순 / \n" + 
+								         "      3:가입일자의 오름차순 / 4:가입일자의 내림차순]: ");
+						String sortChoice = sc.nextLine();
+						
+						selectAllMember(sortChoice);
 					}	
+					
 					else
 						System.out.println(">> 메뉴에 없는 번호 입니다. << \n");
 					
@@ -302,16 +332,18 @@ public class TotalController {
 				default:
 					System.out.println(">> 메뉴에 없는 번호 입니다. << \n");
 					break;
-			}// end of 
+					
+			}// end of switch (menuNo)------------------------
 			
 			
 		} while ( !("9".equals(menuNo)) );
 		
 		
 	}// end of private void menu_Board()-----------------------
-	
-	
-	
+		
+
+
+
 	// **** 글쓰기(Transaction 처리) **** //
 	// ( 글쓰기[jdbc_board 테이블에 insert] + 글쓴회원의 포인트를 10증가[jdbc_member 테이블에 update] ==> Transaction 처리 )
 	private int write(MemberDTO member, Scanner sc) {
@@ -514,7 +546,7 @@ public class TotalController {
 	
 	
 	
-	// 댓글쓰기(jdbc_comment 테이블에 insert 하기) 
+	// **** 댓글쓰기(jdbc_comment 테이블에 insert 하기) **** 
 	private int writeComment(MemberDTO member, Scanner sc) {
 		
 		int result = 0;
@@ -559,293 +591,350 @@ public class TotalController {
 	}// end of private int writeComment(MemberDTO member, Scanner sc)--------
 	
 	
-
-	// **** 글수정하기 **** //
+	
+	// **** 글수정하기 ****
 	private int updateBoard(MemberDTO member, Scanner sc) {
+		
 		int result = 0;
 		/*
-			0. 수정할 글번호가 글 목록에 존재하지 않습니다. 
-			1. 다른 사용자의 글은 수정불가합니다.
-			2. 글 암호가 올바르지 않습니다!! 
-			3. 장애 발생으로 인해 글 수정 실패!! 
-			4. 글 수정 취소!! 
-			5. 글 수정 성공!!
-		*/
-		System.out.println("\n>>> 글수정하기 <<<");
+		 result == 0    수정할 글번호가 글목록에 존재하지 않습니다.
+
+         result == 1  다른 사용자의 글은 수정불가 합니다.!!
+
+		 result == 2    글암호가 올바르지 않습니다.!!
+			
+		 result == 3    장애발생으로 인해 글 수정 실패!!
+			
+		 result == 4    글 수정 취소!!
+			
+		 result == 5    글 수정 성공!! 
+		 */
 		
-		System.out.print("▷ 수정할 글번호 : ");
-		String boardno = sc.nextLine();
-		
-		Map<String, String> paraMap = new HashMap<>();
-		paraMap.put("boardno", boardno);
-		
-		BoardDTO bdto = bdao.viewContents(paraMap);
-		//현재 paraMap에는 글 번호만 있다.
-		
-		if(bdto != null) {
-			// 수정할 글 번호가 글 목목에 존재하는 경우
-			if(!member.getUserid().equals(bdto.getFk_userid())) {
-				// 수정할 글번호가 다른 사용자의 글인 경우
-				result = 1;
-			}
-			else {
+		 System.out.println("\n>>> 글 수정 하기 <<<");
+		 
+		 System.out.print("▷ 수정할 글번호 : "); 
+		 String boardno = sc.nextLine();
+		 
+		 Map<String, String> paraMap = new HashMap<>();
+		 paraMap.put("boardno", boardno);
+					
+		 BoardDTO bdto = bdao.viewContents(paraMap);
+		 // 현재 paraMap 에는 글번호인 "boardno" 만 있는 상태이다.
+		 
+		 if(bdto != null) {
+			 // 수정할 글번호가 글목록에 존재하는 경우
+			 
+			 if( !member.getUserid().equals(bdto.getFk_userid()) ) {
+			     // 수정할 글번호가 다른 사용자의 글인 경우
+				 result = 1;
+			 }
+			 
+			 else {
 				// 수정할 글번호가 로그인한 사용자의 글인 경우
-				System.out.print("▷ 글암호: ");
-				String boardpasswd = sc.nextLine();
-				if(!boardpasswd.equals(bdto.getBoardpasswd())){
-					// 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같지 않을 경우
-					result = 2;
-				} else {
-					// 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같을 경우
-					// 수정할 글을 보여주고서 글수정 작업에 들어가도록 한다.
-					System.out.println("---------------------------------------------------------");
-					System.out.println("글제목 : "+bdto.getSubject());
-					System.out.println("글내용 : "+bdto.getContents());
-					System.out.println("---------------------------------------------------------\n");
-				
-					System.out.println("▷ 글제목[변경하지 않으려면 엔터] : ");
-					String subject = sc.nextLine();
-					if(subject!=null&&subject.trim().isEmpty()) {
+				 System.out.print("▷ 글암호 : ");
+				 String boardpasswd = sc.nextLine();
+				 
+				 if( !boardpasswd.equals(bdto.getBoardpasswd()) ) {
+					 // 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할때 입력해준 글암호와 같지 않을 경우  
+					 result = 2;
+				 }
+				 
+				 else {
+					// 글을 수정하려고 사용자가 입력한 글암호가 글쓰기를 할때 입력해준 글암호와 같을 경우 
+					// 수정할 글을 보여주고서 글수정 작업에 들어가도록 한다. 
+					System.out.println("-----------------------------------------");
+					System.out.println("글제목 : " + bdto.getSubject());
+					System.out.println("글내용 : " + bdto.getContents());
+					System.out.println("----------------------------------------- \n");
+					
+					System.out.print("▷ 글제목[변경하지 않으려면 엔터]: "); 
+					String subject = sc.nextLine();  
+					if( subject != null && subject.trim().isEmpty()  ) {
 						subject = bdto.getSubject();
 					}
-					
-					System.out.println("▷ 글내용[변경하지 않으려면 엔터] : ");
-					String contents = sc.nextLine();
-					if(contents!=null&&contents.trim().isEmpty()) {
+					 
+					System.out.print("▷ 글내용[변경하지 않으려면 엔터]: "); 
+					String contents = sc.nextLine();  
+					if( contents != null && contents.trim().isEmpty()  ) {
 						contents = bdto.getContents();
 					}
 					
 					paraMap.put("subject", subject);
 					paraMap.put("contents", contents);
 					
-					int n = bdao.updateBoard(paraMap);
-					if(n!=1) {
-						// 장애발생으로 인행 글 수정 실패한 경우
+					int n = bdao.updateBoard(paraMap); // 글 수정하기
+					
+					if(n != 1) {
+						// 장애발생으로 인해 글 수정 실패한 경우
 						result = 3;
-					} else {
-						// 정상적으로 글 수정을 한 경우
+					}
+					
+					else {
+						// 정상적으로 글 수정을 한 경우 
+						
 						Connection conn = MyDBConnection.getConn();
 						
 						do {
-							System.out.print("▷ 정말로 수정하시겠습니까?[Y/N] : ");
-							String yn  = sc.nextLine();
+							System.out.print("▷ 정말로 수정하시겠습니까?[Y/N] "); 
+							String yn = sc.nextLine();
+							
 							try {
+								
 								if("y".equalsIgnoreCase(yn)) {
-									conn.commit(); // 커밋
+									conn.commit(); // 커밋 
 									result = 5;
 									break;
-								} else if("n".equalsIgnoreCase(yn)) {
-									conn.rollback(); // 커밋
+								}
+								
+								else if("n".equalsIgnoreCase(yn)) {
+									conn.rollback(); // 롤백 
 									result = 4;
 									break;
-								} else {
-									System.out.println(">> Y 또는 N 만 입력하세요!! <<");
+								}
+								
+								else {
+									System.out.println(">> Y 또는 N 만 입력하세요!! << ");
 								}
 								
 							} catch (SQLException e) {
 								e.printStackTrace();
 							}
+							
 						} while (true);
+						
 					}
-				}
-				
-			}
-		} 
+					
+				 }
+				 
+			 }
+				 
+		 }
+		 
 		
 		return result;
-	}// end of private int updateBoard(MemberDTO member, Scanner sc) ------------------------------------------
-
-
-
+		
+	}// end of private int updateBoard(MemberDTO member, Scanner sc)----------
 	
-	// **** 글삭제하기 **** //
+	
+	
+	// **** 글삭제하기 ****
 	private int deleteBoard(MemberDTO member, Scanner sc) {
+		
 		int result = 0;
 		/*
-			0. 삭제할 글번호가 글 목록에 존재하지 않습니다. 
-			1. 다른 사용자의 글은 삭제불가합니다.
-			2. 글 암호가 올바르지 않습니다!! 
-			3. 장애 발생으로 인해 글 삭제 실패!! 
-			4. 글 삭제 취소!! 
-			5. 글 삭제 성공!!
-		*/
-		System.out.println("\n>>> 글삭제하기 <<<");
+		 result == 0    삭제할 글번호가 글목록에 존재하지 않습니다.
+
+         result == 1  다른 사용자의 글은 삭제불가 합니다.!!
+
+		 result == 2    글암호가 올바르지 않습니다.!!
+			
+		 result == 3    장애발생으로 인해 글 삭제 실패!!
+			
+		 result == 4    글 삭제 취소!!
+			
+		 result == 5    글 삭제 성공!! 
+		 */
 		
-		System.out.print("▷ 삭제할 글번호 : ");
-		String boardno = sc.nextLine();
-		
-		Map<String, String> paraMap = new HashMap<>();
-		paraMap.put("boardno", boardno);
-		
-		BoardDTO bdto = bdao.viewContents(paraMap);
-		//현재 paraMap에는 글 번호인 "boardno" 만 있는 상태이다.
-		
-		if(bdto != null) {
-			// 삭제할 글 번호가 글 목목에 존재하는 경우
-			if(!member.getUserid().equals(bdto.getFk_userid())) {
-				// 삭제할 글번호가 다른 사용자의 글인 경우
-				result = 1;
-			}
-			else {
+		 System.out.println("\n>>> 글 삭제 하기 <<<");
+		 
+		 System.out.print("▷ 삭제할 글번호 : "); 
+		 String boardno = sc.nextLine();
+		 
+		 Map<String, String> paraMap = new HashMap<>();
+		 paraMap.put("boardno", boardno);
+					
+		 BoardDTO bdto = bdao.viewContents(paraMap);
+		 // 현재 paraMap 에는 글번호인 "boardno" 만 있는 상태이다.
+		 
+		 if(bdto != null) {
+			 // 삭제할 글번호가 글목록에 존재하는 경우
+			 
+			 if( !member.getUserid().equals(bdto.getFk_userid()) ) {
+			     // 삭제할 글번호가 다른 사용자의 글인 경우
+				 result = 1;
+			 }
+			 
+			 else {
 				// 삭제할 글번호가 로그인한 사용자의 글인 경우
-				System.out.print("▷ 글암호: ");
-				String boardpasswd = sc.nextLine();
-				if(!boardpasswd.equals(bdto.getBoardpasswd())){
-					// 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같지 않을 경우
-					result = 2;
-				} else {
-					// 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할 때 입력해준 글 암호와 같을 경우
-					// 삭제할 글을 보여주고서 글삭제 작업에 들어가도록 한다.
-					System.out.println("---------------------------------------------------------");
-					System.out.println("글제목 : "+bdto.getSubject());
-					System.out.println("글내용 : "+bdto.getContents());
-					System.out.println("---------------------------------------------------------\n");
+				 System.out.print("▷ 글암호 : ");
+				 String boardpasswd = sc.nextLine();
+				 
+				 if( !boardpasswd.equals(bdto.getBoardpasswd()) ) {
+					 // 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할때 입력해준 글암호와 같지 않을 경우  
+					 result = 2;
+				 }
+				 
+				 else {
+					// 글을 삭제하려고 사용자가 입력한 글암호가 글쓰기를 할때 입력해준 글암호와 같을 경우 
+					// 삭제할 글을 보여주고서 글삭제 작업에 들어가도록 한다. 
+					System.out.println("-----------------------------------------");
+					System.out.println("글제목 : " + bdto.getSubject());
+					System.out.println("글내용 : " + bdto.getContents());
+					System.out.println("----------------------------------------- \n");
 					
 					paraMap.put("boardpasswd", boardpasswd);
 					
-					int n = bdao.deleteBoard(paraMap);	// 글 삭제하기
+					int n = bdao.deleteBoard(paraMap); // 글 삭제하기
 					
-					if(n!=1) {
-						// 장애발생으로 인행 글 삭제 실패한 경우
+					if(n != 1) {
+						// 장애발생으로 인해 글 삭제 실패한 경우
 						result = 3;
-					} else {
-						// 정상적으로 글 삭제를 한 경우
+					}
+					
+					else {
+						// 정상적으로 글 삭제를 한 경우 
+						
 						Connection conn = MyDBConnection.getConn();
 						
 						do {
-							System.out.print("▷ 정말로 수정하시겠습니까?[Y/N] : ");
-							String yn  = sc.nextLine();
+							System.out.print("▷ 정말로 삭제하시겠습니까?[Y/N] "); 
+							String yn = sc.nextLine();
+							
 							try {
+								
 								if("y".equalsIgnoreCase(yn)) {
-									conn.commit(); // 커밋
+									conn.commit(); // 커밋 
 									result = 5;
 									break;
-								} else if("n".equalsIgnoreCase(yn)) {
-									conn.rollback(); // 커밋
+								}
+								
+								else if("n".equalsIgnoreCase(yn)) {
+									conn.rollback(); // 롤백 
 									result = 4;
 									break;
-								} else {
-									System.out.println(">> Y 또는 N 만 입력하세요!! <<");
+								}
+								
+								else {
+									System.out.println(">> Y 또는 N 만 입력하세요!! << ");
 								}
 								
 							} catch (SQLException e) {
 								e.printStackTrace();
 							}
+							
 						} while (true);
+						
 					}
-				}
-				
-			}
-		} 
+					
+				 }
+				 
+			 }
+				 
+		 }
+		 
 		
 		return result;
-
-	}// private int deleteBoard(MemberDTO member, Scanner sc) ------------------------------------------
-
-
+		
+	}// end of private int deleteBoard(MemberDTO member, Scanner sc)----------
 	
-	// **** 최근1주일간 일자별 게시글 작성건수  **** //
+	
+	
+	// **** 최근1주일간 일자별 게시글 작성건수 ****
 	private void statisticsByWeek() {
-		System.out.println("------------------------------------ [최근1주일간 일자별 게시글 작성건수] -------------------------------------");
+		
+		System.out.println("\n--------------- [최근 1주일간 일자별 게시글 작성건수] ---------------"); 
+		
 		String title = "전체\t";
-		System.out.println("------------------------------------------------------------------------------------------------------");
+				
+		for(int i=0; i<7; i++) {
+			title += MyUtil.addDay(i-6) + "  "; // -6  -5  -4  -3  -2  -1  0 
+		}// end of for----------------------------------------------
+	
+		System.out.println(title); // 만약 오늘이 2021-03-09 이라면
+		// 전체	2021-03-03	2021-03-04	2021-03-05	2021-03-06	2021-03-07	2021-03-08	2021-03-09         
 		
-		for (int i=0; i<7; i++) {
-			title += MyUtil.addDay(i-6)+"\t";
-			
-		}// end of for (int i=0; i<7; i++) --------------------------------------------------------
-		
-		System.out.println(title);	// 만약 오늘이 2021-03-09 이라면
-		// 전체	2021-03-03	2021-03-04	2021-03-05	2021-03-06	2021-03-07	2021-03-08	2021-03-09
-		
+		System.out.println("----------------------------------------------------------");
 		
 		Map<String, Integer> resultMap = bdao.statisticsByWeek(); // 최근 1주일간에 대해 select 되어져 나온 결과물
 		
-		String str = resultMap.get("TOTAL")+"\t"+
-				  	 resultMap.get("PREVIOUS6")+"\t"+
-					 resultMap.get("PREVIOUS5")+"\t"+
-					 resultMap.get("PREVIOUS4")+"\t"+
-					 resultMap.get("PREVIOUS3")+"\t"+
-					 resultMap.get("PREVIOUS2")+"\t"+
-					 resultMap.get("PREVIOUS1")+"\t"+
-					 resultMap.get("TODAY")+"\t";
+		String str = resultMap.get("TOTAL") + "\t" + 
+				     resultMap.get("PREVIOUS6") + "\t" + 
+				     resultMap.get("PREVIOUS5") + "\t" + 
+				     resultMap.get("PREVIOUS4") + "\t" + 
+				     resultMap.get("PREVIOUS3") + "\t" + 
+				     resultMap.get("PREVIOUS2") + "\t" + 
+				     resultMap.get("PREVIOUS1") + "\t" + 
+				     resultMap.get("TODAY");
 		
 		System.out.println(str);
 		
-	}// private void statisticsByWeek() ------------------------------------------------------------
-
-	
-// ★★★ return 값을 무멋으로 할 것인가?
-// insert와 select ==> DTO,	insert ==> Map
+	}// end of private void statisticsByWeek()-------------
 	
 	
-
 	
-	// **** 이번달 일자별 게시글 작성건수 **** //
+	
+	// **** 이번달 일자별 게시글 작성건수 ****
 	private void statisticsByCurrentMonth() {
-		Calendar currentDate = Calendar.getInstance();
+		
+		Calendar currentDate = Calendar.getInstance(); 
+		// 현재 날짜와 시간을 얻어온다.
+		
 		SimpleDateFormat sdateFmt = new SimpleDateFormat("yyyy년 MM월");
-		String currentMonth = sdateFmt.format(currentDate.getTime());
+		String currentMonth = sdateFmt.format(currentDate.getTime()); 
 		
-		System.out.println(">>> [ "+currentMonth+" 일자별 게시글 작성건수 ] <<<");
-		System.out.println("----------------------------------------------------------");
-		String title = "작성일자\t\t작성건수";	
-		System.out.println(title);
-		System.out.println("----------------------------------------------------------");
+		System.out.println("\n>>> [" + currentMonth + " 일자별 게시글 작성건수] <<<"); 
+		System.out.println("-------------------------");
+		System.out.println(" 작성일자\t작성건수");
+		System.out.println("-------------------------");
 		
-		List<Map<String, String>> mapList = bdao.statisticsByCurrentMonth(); // 일자별 select 되어져 나온 결과물
+		List<Map<String, String>> mapList = bdao.statisticsByCurrentMonth();
 		
-		StringBuilder sb = new StringBuilder();
-		
-		if(mapList.size()>0) {
-		    for(Map<String, String> map : mapList) {	// for(a:b) ==> b의 요소 타입 a
-		    	sb.append(map.get("WRITEDAY")+"\t"+map.get("CNT")+"\n");
-		    }
-			System.out.println(sb.toString());		
-		} else {
-			System.out.println("작성된 게시글이 없습니다.");
+		if( mapList.size() > 0 ) {
+			
+			StringBuilder sb = new StringBuilder();
+			
+			for(Map<String, String> map : mapList) {
+				
+				sb.append( map.get("WRITEDAY") + "\t" + map.get("CNT") + "\n" ); 
+				
+			}// end of for-----------------------------
+			
+			System.out.println( sb.toString() );
+			
 		}
-					 
 		
-		
-	}
-
-
-	
-	// 모든회원정보조회(관리자 전용 메뉴)
-	private void allMemberInfo(String menuNo) {
-		System.out.println("----------------------------------------------------------");
-		System.out.println("회원아이디\t회원명\t전화번호\t포인트\t등록일자");
-		System.out.println("----------------------------------------------------------");
-		
-		List<Map<String, String>> mapList = bdao.allMemberInfo(); 
-		
-		StringBuilder sb = new StringBuilder();
-		
-		if(mapList.size()>0) {
-		    for(Map<String, String> map : mapList) {	// for(a:b) ==> b의 요소 타입 a
-		    	sb.append(map.get("userid")+"\t"+map.get("name")+"\t"+map.get("mobile")+"\t"+map.get("point")+"\t"+map.get("registerday")+"\n");
-		    }
-			System.out.println(sb.toString());		
-		} else {
-			System.out.println("회원정보가 없습니다.");
+		else {
+			System.out.println(" 작성된 게시글이 없습니다.");
 		}
-	
-	}
-	
-	
-	// 모든회원정보조회(관리자 전용 메뉴)2
-	private void allMemberInfo2() {
-		System.out.println("----------------------------------------------------------");
-		System.out.println("회원아이디\t회원명\t전화번호\t포인트\t등록일자");
-		System.out.println("----------------------------------------------------------");
 		
-		bdao.allMemberInfo2();
 		
+	}// end of private void statisticsByCurrentMonth()--------------
+
 	
-	}
-
-
-
-
+	
+	// **** 모든회원정보조회(관리자 전용 메뉴) ****
+	private void selectAllMember(String sortChoice) {
+		
+		System.out.println("\n>>>    모든회원정보    <<<");
+		System.out.println("------------------------------------------");
+		System.out.println("회원번호   아이디   성명   연락처   포인트   가입일자");
+		System.out.println("------------------------------------------"); 
+		
+		List<MemberDTO> memberList = mdao.selectAllMember(sortChoice);
+		
+		if(memberList.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			
+			for(MemberDTO member : memberList) {
+				
+				sb.append("  "+member.getUserseq()+"  "+
+						  member.getUserid()+"  "+
+						  member.getName()+"  "+
+						  member.getMobile()+"  "+
+						  member.getPoint()+"  "+
+						  member.getRegisterday()+"\n");
+				
+			}// end of for------------------------
+			
+			System.out.println(sb.toString());
+		}
+		
+		else {
+			System.out.println("가입된 회원이 없습니다.");
+		}
+		
+	}// end of private void selectAllMember(String sortChoice)-------------
+	
+	
+	
 }

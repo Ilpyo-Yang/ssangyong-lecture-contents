@@ -79,11 +79,11 @@ from jdbc_tbl_student;
 
 select count(*) 
 from jdbc_tbl_student
-where stno = 9001;  -- 1
+where stno = '9001';  -- 1
 
 select count(*) 
 from jdbc_tbl_student
-where stno = 9020;  -- 0
+where stno = '9020';  -- 0
 
 
 /*
@@ -133,32 +133,33 @@ end pcd_student_select_one;
 
 
 
-
 select S.stno, S.name, S.tel, S.addr, to_char(S.registerdate, 'yyyy-mm-dd')
-     , C.classname, C.teachername
+     , C.classname, C.teachername 
 from ( select stno, name, tel, addr, registerdate, fk_classno
        from jdbc_tbl_student
        where addr like '%'||'서울'||'%' ) S
-JOIN jdbc_tbl_class C
+JOIN jdbc_tbl_class C 
 ON S.fk_classno = C.classno;
 
 
 create or replace procedure pcd_student_select_many
-(p_addr   IN    jdbc_tbl_student.addr%type
-,o_data   OUT   SYS_REFCURSOR
+(p_addr    IN    jdbc_tbl_student.addr%type 
+,o_data    OUT   SYS_REFCURSOR 
 )
 is
 begin
-    open o_data for     
-    select S.stno, S.name, S.tel, S.addr, to_char(S.registerdate, 'yyyy-mm-dd') as registerdate
-         , C.classname, C.teachername
-    from ( select stno, name, tel, addr, registerdate, fk_classno
-           from jdbc_tbl_student
-           where addr like '%'||p_addr||'%' ) S
-    JOIN jdbc_tbl_class C
-    ON S.fk_classno = C.classno;
+     open o_data for
+     select S.stno, S.name, S.tel, S.addr, to_char(S.registerdate, 'yyyy-mm-dd') AS registerdate 
+          , C.classname, C.teachername 
+     from ( select stno, name, tel, addr, registerdate, fk_classno
+            from jdbc_tbl_student
+            where addr like '%'|| p_addr ||'%' ) S
+     JOIN jdbc_tbl_class C 
+     ON S.fk_classno = C.classno;
+     
 end pcd_student_select_many;
 -- Procedure PCD_STUDENT_SELECT_MANY이(가) 컴파일되었습니다.
+
 
 
      --- *** tbl_member_test1 테이블에 insert 할 수 있는 요일명과 시간을 제한하겠습니다. *** ---
@@ -170,9 +171,9 @@ end pcd_student_select_many;
      -- 위의 조건에 맞아야만 insert 할 것이고, 위의 조건에 위배되면 insert 를 하지 않도록 할 것이다.
      
 create or replace procedure pcd_tbl_member_test1_insert 
-(p_userid   tbl_member_test1.userid%type    -- IN 은 생략가능함, OUT 은 생략불가.
-,p_passwd   tbl_member_test1.passwd%type    
-,p_name     tbl_member_test1.name%type
+(p_userid   tbl_member_test1.userid%type   -- IN 은 생략가능함.
+,p_passwd   tbl_member_test1.passwd%type   -- IN 은 생략가능함.
+,p_name     tbl_member_test1.name%type     -- IN 은 생략가능함.
 )
 is
    v_length        number(20);
@@ -235,12 +236,13 @@ begin
                raise_application_error(-20004, '>> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<');
                
 end pcd_tbl_member_test1_insert;
--- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.     
+-- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.
 
 
-select line, text
+select line, text 
 from user_source
-where type='PROCEDURE' and name ='PCD_TBL_MEMBER_TEST1_INSERT';
+where type = 'PROCEDURE' and name = 'PCD_TBL_MEMBER_TEST1_INSERT';
+
 
 select *
 from tbl_member_test1;
@@ -254,80 +256,22 @@ from user_cons_columns
 where table_name = 'TBL_MEMBER_TEST1';
 
 
-
-select *
+select * 
 from jdbc_tbl_student;
 
 select *
 from jdbc_tbl_class;
 
-insert into jdbc_tbl_student(stno, name, tel, addr, registerdate, fk_classno)
-values(jdbc_seq_memo.nextval, '배수지', '02-5678-2345', '경기도 고양시 일산구', sysdate, 7);
-                         
-create or replace procedure pcd_tbl_member_test1_insert 
-(p_userid   tbl_member_test1.userid%type    -- IN 은 생략가능함, OUT 은 생략불가.
-,p_passwd   tbl_member_test1.passwd%type    
-,p_name     tbl_member_test1.name%type
-)
-is
-   v_length        number(20);
-   v_ch            varchar2(3);
-   v_flagAlphabet  number(1) := 0;
-   v_flagNumber    number(1) := 0;
-   v_flagSpecial   number(1) := 0;
-   
-   error_dayTime   exception;
-   error_insert    exception; 
-   error_passwd    exception;
-   
-begin
-      -- 오늘의 요일명을 알아오도록 한다.
-      if ( to_char(sysdate, 'd') in('1','7') OR   -- to_char(sysdate, 'd') => '1'(일),'2'(월),'3'(화),'4'(수),'5'(목),'6'(금),'7'(토) 
-           to_char(sysdate, 'hh24') < '09' OR to_char(sysdate, 'hh24') > '17'
-         ) then
-           raise  error_dayTime;
-         
-      else   
-         
-          v_length := length(p_passwd);
-          
-          if v_length < 5 then 
-             raise error_insert;  -- 사용자가 정의하는 예외절(Exception)을 구동시켜라. 
-          else
-             for i in 1..v_length loop
-                 v_ch := substr(p_passwd, i, 1);
-                 
-                 if (v_ch between 'a' and 'z') OR (v_ch between 'A' and 'Z') then  -- 영문자 이라면
-                     v_flagAlphabet := 1;
-                 elsif (v_ch between '0' and '9') then  -- 숫자 이라면 
-                     v_flagNumber := 1;
-                 else     -- 특수문자 이라면 
-                     v_flagSpecial := 1;
-                 end if;    
-                     
-             end loop;
-             
-             if(v_flagAlphabet * v_flagNumber * v_flagSpecial = 1) then
-                insert into tbl_member_test1(userid, passwd, name)
-                values(p_userid, p_passwd, p_name);
-             else
-                raise  error_passwd; -- 사용자정의 EXCEPTION 인 error_passwd 를 구동시켜라.
-             end if;   
-             
-          end if; 
-          
-      end if;    
-      
-      exception 
-         when  error_dayTime then 
-               raise_application_error(-20002, '>> 현재 영업시간(월~금 09시 ~ 17시 이전까지)이 아니므로 데이터 입력이 불가합니다. <<');
-      
-         when  error_insert then 
-               raise_application_error(-20003, '>> passwd 컬럼의 길이는 최소 5글자 이상이어야 합니다. <<');
-              --    -20002 은 오류넘버(오류번호)로써 사용자가 정의하는 Exception은 항상 -20001 부터 -20999 이내의 값중 아무거나 쓰면 된다.  
-         
-         when  error_passwd then  
-               raise_application_error(-20004, '>> passwd 컬럼의 값은 영문자, 숫자, 특수문자가 혼합되어져야만 합니다. <<');
-               
-end pcd_tbl_member_test1_insert;
--- Procedure PCD_TBL_MEMBER_TEST1_INSERT이(가) 컴파일되었습니다.     
+insert into jdbc_tbl_student(stno, name, tel, addr, fk_classno)
+values(jdbc_seq_stno.nextval, '배수지', '031-5678-2345', '경기도 고양시 일산구', 7);
+/*
+오류 보고 -
+ORA-02291: integrity constraint (HR.FK_JDBC_TBL_STUDENT_CLASSNO) violated - parent key not found
+*/
+
+
+
+
+
+
+

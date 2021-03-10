@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+div{
+	font-size: 20pt !important;	/* 글자크기 20pt */
+	font-weight: bold;  /* 글자굵기 굵게 */
+	font-style: italic; /* 글자모양 이탤릭체 */
+}

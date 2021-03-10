@@ -3,11 +3,11 @@ set hidden param parseThreshold = 150000;
 show user;
 -- USER이(가) "HR"입니다.
 
----- *** 회원테이블 생성하기 *** ----
+
+---- *** 회원 테이블 생성하기 *** ----
 select *
 from user_tables
 where table_name = 'JDBC_MEMBER';
-
 
 create table jdbc_member
 (userseq       number        not null    -- 회원번호
@@ -22,8 +22,6 @@ create table jdbc_member
 ,constraint UQ_jdbc_member unique(userid)
 ,constraint CK_jdbc_member check( status in(0,1) )
 );
--- Table JDBC_MEMBER이(가) 생성되었습니다.
-
 
 create sequence userseq
 start with 1
@@ -32,17 +30,16 @@ nomaxvalue
 nominvalue
 nocycle
 nocache;
--- Sequence USERSEQ이(가) 생성되었습니다.
 
 
 select *
 from jdbc_member
-order by userseq desc;
+order by userseq asc;
 
-String sql = "insert into JDBC_MEMBER(userseq, userid, passwd, name, moblie)\n"+
-"values(userseq.nextval,?,?,?,?)\n"+
-"";
 
-String sql = "select name\n"+
-"from jdbc_member\n"+
-"where userid = 'leess' and passwd = 'qwer134++'";
+
+
+
+
+
+

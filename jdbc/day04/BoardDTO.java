@@ -13,9 +13,7 @@ public class BoardDTO {  // BoardDTO 가 오라클의 jdbc_board(자식 테이�
 	private MemberDTO member;   // select 용 (jdbc_member 테이블과 jdbc_board 테이블의 JOIN). 글쓴이에 대한 모든 정보                 
 	                            // MemberDTO 가 오라클의 jdbc_member(부모 테이블)에 해당함.
 	
-	private int commentcnt;	// select 용, 원글에 딸린 댓글의 개수
-	
-	
+	private int commentcnt;     // select 용. 원글에 딸린 댓글의 개수 
 	
 	
 	public int getBoardno() {
@@ -81,7 +79,7 @@ public class BoardDTO {  // BoardDTO 가 오라클의 jdbc_board(자식 테이�
 	public void setMember(MemberDTO member) {
 		this.member = member;
 	}
-
+	
 	public int getCommentcnt() {
 		return commentcnt;
 	}
@@ -90,24 +88,22 @@ public class BoardDTO {  // BoardDTO 가 오라클의 jdbc_board(자식 테이�
 		this.commentcnt = commentcnt;
 	}
 
-	///////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////
 	
-	public String viewInfo() {	//글번호\t글제목\t글쓴이\t작성일자\t조회수
+	public String viewInfo() {  // 글번호\t글제목\t글쓴이\t작성일자\t조회수 
 		
-		if(subject!=null && subject.length()>10 ) {
-			subject=subject.substring(0,8)+"..";
-			// 글제목이 10글자보다 크면 8글자만 보여주고 뒤에 ".."을 찍어준다.
+		if(subject != null && subject.length() > 10) {
+			subject = subject.substring(0, 8) + "..";
+			// 글제목이 10글자 보다 크면 8글자만 보여주고 뒤에 ".." 을 찍어준다.
 		}
 		
-		if(commentcnt>0) {
+		if(commentcnt > 0) {
 			subject += "["+commentcnt+"]";
 		}
 		
-		String viewInfo = boardno+"\t"+subject+"\t"+member.getName()+"\t"+
-		                 writeday+"\t"+viewcount;
+		String viewInfo = boardno+"\t"+subject+"\t"+member.getName()+"\t"+writeday+"\t"+viewcount;
 		
 		return viewInfo;
 	}
-	
 	
 }

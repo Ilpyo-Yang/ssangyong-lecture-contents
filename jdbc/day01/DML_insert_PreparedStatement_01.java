@@ -37,9 +37,8 @@ public class DML_insert_PreparedStatement_01 {
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@"+ip+":1521:xe", "HR", "cclass");
 			
 			// === Connection conn 기본값은 auto commit 이다. === //
-			// === Connection conn 기본값인 수동 commit 으로 전환하겠다. === //
-			conn.setAutoCommit(false);	// 수동 commit 으로 전환
-			
+			// === Connection conn 의 기본값인 auto commit 을  수동 commit 으로 전환하겠다. === // 
+			conn.setAutoCommit(false); // 수동 commit 으로 전환 
 			
 			// >>> 3. SQL문(편지)을 작성한다. <<< //
 			System.out.print("▷  글쓴이 : ");
@@ -47,33 +46,31 @@ public class DML_insert_PreparedStatement_01 {
 			
 			System.out.print("▷  글내용 : ");
 			String msg = sc.nextLine();
-				
+			
+		/*	
+			String sql = "insert into jdbc_tbl_memo(no, name, msg) "+
+				         "values(jdbc_seq_memo.nextval, '"+name+"', '"+msg+"')";
+		    
+		    ==> 이렇게 하지 마시고 아래와 같이 위치홀더를 쓰세요~~!!!
+		*/
 			
 			String sql = "insert into jdbc_tbl_memo(no, name, msg) "+
-					     "values(jdbc_seq_memo.nextval, ?, ?)";
+					     "values(jdbc_seq_memo.nextval, ?, ?)"; // SQL문 맨 뒤에 ; 을 넣으면 오류이다.!!!!
+					     
 			// ? 를 "위치홀더" 라고 부른다.
-			// 오라클에 대입될  ' '을 신경쓰지 않는다. 타입에 관련없이 ? 로 입력함. 
 			
 			
-			/*
-			String sql = "insert into jdbc_tbl_memo(no, name, msg) "+
-		    	     "values(jdbc_seq_memo.nextval, '"+name+"', '"+msg+"')";	
-		    	     // 오라클 인식을 위해서 ' ' 꼭 넣어야 한다.
-			// 해커가 insert 하는 문장을 다 볼 수 있게 됨. ==> 위와 같이 위치홀더를 사용하는 것이 좋다.
-			*/   
-			
-			System.out.println("SQL 문장 : "+sql);
-			    	     
 			// >>> 4. 연결한 오라클서버(conn)에 SQL문(편지)을 전달할 PreparedStatement 객체(우편배달부) 생성하기 <<< //
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, name); // 1 은 String sql 에서 첫번째 위치홀더(?)를 말한다. 첫번째 위치홀더(?)에 name 을 넣어준다. 
 			pstmt.setString(2, msg);  // 2 는 String sql 에서 두번째 위치홀더(?)를 말한다. 두번째 위치홀더(?)에 msg 를 넣어준다. 
 			
+			System.out.println("SQL 문장 : " + sql);
 			
 			// >>> 5. PreparedStatement pstmt 객체(우편배달부)는 작성된 SQL문(편지)을 오라클 서버에 보내서 실행이 되도록 해야 한다 <<< // 
 			int n = pstmt.executeUpdate(); 
-			/*  .executeUpdate() 은 SQL문이 DML문(insert, update, delete, merge) 이거나 
-			                       SQL문이 DDL문(create, drop, alter, truncate) 일 경우에 사용된다. 
+			/*  .executeUpdate(); 은 SQL문이 DML문(insert, update, delete, merge) 이거나 
+			                        SQL문이 DDL문(create, drop, alter, truncate) 일 경우에 사용된다. 
 			    
 			     SQL문이 DML문이라면 return 되어지는 값은 적용되어진 행의 개수를 리턴시켜준다.
 			         예를 들어, insert into ... 하면 1 개행이 입력되므로 리턴값은 1 이 나온다. 
@@ -85,34 +82,37 @@ public class DML_insert_PreparedStatement_01 {
 			    .executeQuery(); 은 SQL문이 DQL문(select) 일 경우에 사용된다.
 			*/
 			
-			if(n==1) {
+			if(n == 1) {
+				
 				String yn = "";
+				
 				do {
-					//////////////////////////////////////////////////
-					System.out.print("▷ 정말로 입력하시겠습니까?[Y/N] : ");
+					////////////////////////////////////////
+					System.out.print("▷  정말로 입력하시겠습니까?[Y/N] : "); 
 					yn = sc.nextLine();
 					
 					if("y".equalsIgnoreCase(yn)) {
 						conn.commit(); // 커밋
 						System.out.println(">> 데이터 입력 성공!! <<");
 					//	break;
-					} else if("n".equalsIgnoreCase(yn)) {
-						conn.rollback(); // 커밋
+					}
+					else if("n".equalsIgnoreCase(yn)) {
+						conn.rollback(); // 롤백
 						System.out.println(">> 데이터 입력 취소!! <<");
 					//	break;
-					} else {
-						System.out.println(">> Y 또는 N 만 입력하세요!! <<\n");
 					}
-					//////////////////////////////////////////////////
+					else {
+						System.out.println(">> Y 또는 N 만 입력하세요!! << \n");
+					}
+					////////////////////////////////////////
+					
 			//	} while (true);
-			//  } while (!(탈출조건));
-			    } while (!("y".equalsIgnoreCase(yn) || "n".equalsIgnoreCase(yn)));
-			
-			} else {
-				System.out.println(">> 데이터 입력에 오류가 발생함 <<");
+			    } while ( !("y".equalsIgnoreCase(yn) || "n".equalsIgnoreCase(yn)) );
+				
 			}
-			
-			System.out.println("insert 되어진 행의 개수 : " + n);
+			else {
+				System.out.println(">> 데이터 입력에 오류가 발생함 << ");
+			}
 			
 		} catch (ClassNotFoundException e) {
 			System.out.println(">> ojdbc6.jar 파일이 없습니다. <<");
