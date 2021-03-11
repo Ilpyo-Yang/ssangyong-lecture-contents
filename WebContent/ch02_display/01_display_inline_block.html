@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	▷ block 방식 - 세로로 떨어지는 방식 ◁
+	<h1>h1 은 display 의 기본값은 block 방식이다</h1>
+	<h2>h2 은 display 의 기본값은 block 방식이다</h2>
+	<h3>h3 은 display 의 기본값은 block 방식이다</h3>
+	<h4>h4 은 display 의 기본값은 block 방식이다</h4>
+	<h5>h5 은 display 의 기본값은 block 방식이다</h5>
+	<h6>h6 은 display 의 기본값은 block 방식이다</h6>
+	
+	<br> <!-- 줄바꿈 -->
+	
+	<div>div 는 display가 block 방식이다.</div>
+	<div>div 는 display가 block 방식이다.</div>
+	
+	<hr> <!-- 수평선 -->
+	
+	
+	<h1>▷ inline 방식 - 가로로 표현되어지는 방식 ◁</h1>
+	<div>
+		inline 방식의 태크는  &lt;a&gt; &lt;label&gt; &lt;span&gt; 이 있다 <br>
+		<!-- 
+			&lt; 부등호(<)
+			&gt; 부등호(>)
+			<a> 앵커 태크
+			
+			&nbsp; 이 공백 1개 이다
+			
+			&amp; 앰퍼샌드(&) 기호
+
+			&quot; 쌍따옴표
+		 	&#039; 홑따옴표
+		 	&#035; 샵
+		 -->
+		 
+		 JSP&amp;Servlet<br>
+		 &quot;ORACLE&quot;<br>
+		 He&#039;s<br>
+		 &#035;10
+		 	 
+	</div>
+
+		 
+		 <a href="http://www.naver.com">네이버</a>&nbsp;&nbsp;&nbsp;
+		 <a href="http://www.daum.net">다음</a> &nbsp;&nbsp;&nbsp; 
+		 <a href="http://www.nate.com">네이트</a>
+		 
+		 <br> <!-- 줄바꿈 -->
+		 
+		 <lable>레이블1 label 태그는 display가 inline 방식이다.</lable>
+		 <lable>레이블1 label 태그는 display가 inline 방식이다.</lable>
+		 <lable>레이블1 label 태그는 display가 inline 방식이다.</lable>
+		 
+		 <br> <!-- 줄바꿈 -->
+		 
+		 <span>스팬1 span 태그는 display가 inline 방식이다.</span>
+		 <span>스팬1 span 태그는 display가 inline 방식이다.</span>
+		 <span>스팬1 span 태그는 display가 inline 방식이다.</span>
+		 
+		 <br> <!-- 줄바꿈 -->
+	
+		 <!-- 블럭요소(block element)에 width 를 안주면 기본적으로 화면크기 전체가 width가 되고, height를 안주면 기본적으로 내용물의 높이 만큼 height 가 된다. -->
+		 
+		 <div style="border: solid 1px red;">div1&nbsp;&nbsp;블럭요소(block element)는 height 및 width가 적용된다.</div>
+		 <br>
+		 <div style="border: solid 1px blue; width: 100px; height: 300px;">div2&nbsp;&nbsp;블럭요소(block element)는 height 및 width가 적용된다.</div>
+	     <br>
+		 <div style="border: solid 1px green; width: 50%; height: 500px;">div3&nbsp;&nbsp;블럭요소(block element)는 height 및 width가 적용된다.</div>
+	
+		 <br>
+		 <br>
+		 
+		 <span style="border: solid 1px red; width: 100px; height: 100px;">span1&nbsp;&nbsp;인라인요소(inline element)는 height 및 width가 적용이 안된다.</span><br>
+	     <span style="border: solid 1px blue; width: 200px; height: 200px;">span2&nbsp;&nbsp;인라인요소(inline element)는 height 및 width가 적용이 안된다.</span><br>
+	     <span style="border: solid 1px green; width: 300px; height: 300px;">span3&nbsp;&nbsp;인라인요소(inline element)는 height 및 width가 적용이 안된다.</span>
+	     
+	     <br>
+		 <br>
+		 
+		 <hr>
+		 
+		 
+		 <span style="display: inline; border: solid 1px red; width: 150px; height: 100px;">짜장면1</span>
+		 <span style="display: inline; border: solid 1px blue; width: 200px; height: 150px;">탕수육1</span>
+		 <span style="display: inline; border: solid 1px green; width: 100px; height: 200px;">팔보채1</span> 
+		 
+		 <!-- display: inline; 은 가로형태로 보여주는 것이고, 또한 width 및 height 가 적용이 안된다. -->
+		 
+		 <br>
+		 <br>
+		 
+		 <span style="display: block; border: solid 1px red; height: 100px;">짜장면2</span>
+		 <span style="display: block; border: solid 1px blue; width: 200px; height: 150px;">탕수육2</span>
+		 <span style="display: block; border: solid 1px green; width: 100px; height: 200px;">팔보채2</span> 
+		 
+		 <!-- inline span 태그를 display: block; 으로 해서 변경함, 그러므로 width 및 height 가 적용이 된다. 
+		 	    또한 block 방식으로 변경했으므로 세로형태로 보여진다. 
+		 	  width를 안주면 화면전체로 잡힌다. 	  
+		 -->
+		
+		 <br>
+		 <br>
+		 
+		 <span style="display: inline-block; border: solid 1px red; width: 100px; height: 100px;">짜장면3</span>
+		 <span style="display: inline-block; border: solid 1px blue; width: 200px; height: 150px;">탕수육3</span>
+		 <span style="display: inline-block; border: solid 1px green; width: 300px; height: 200px;">팔보채3</span> 
+		 
+		 <!-- inline span 태그를 display: inline-block; 으로 해서 변경함, 
+		 	   이 형태는 가로형태가 보여지면서 width 및 height 가 적용되는 것이다.	  
+		 -->
+		
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+</body>
+</html>

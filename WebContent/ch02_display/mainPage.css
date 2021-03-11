@@ -1,0 +1,59 @@
+@charset "UTF-8";
+
+body {
+	font-family: Arial, "MS Trebuchet", sans-serif;		/*Arial "MS Trebuchet" sans-serif*/
+	/*
+		글자 서체모양은 Arial 으로 나타내어라.
+		만약에 Arial 으로 나타낼 수가 없으면 "MS Trebuchet" 으로 나타내어라.
+		그런데 "MS Trebuchet" 으로도 나타낼 수가 없으면 sans-serif 으로 나타내어라.
+	*/
+	
+	border: solid 1px gray;
+	
+	/*=== 여백 설정하기 ===*/
+	/* 
+	   1. margin 은 바깥여백이다.
+	   margin: 100px 100px 50px 20px; ==> 시계방향 상 우 하 좌 
+	   margin: 50px;	    ==>  margin: 50px 50px 50px 50px; 와 같은 것이다. 즉, 상 우 하  좌 모두 바깥 여백을 50px 로 준 것이다 
+	   margin: 100px 50px;	==>  margin: 100px 50px 100px 50px; 와 같은 것이다. 즉, 상 하는 100px, 우 좌는 50px 로 바깥여백을 준 것이다
+	   margin: 0px;			==>  여백없음
+	  
+	   2. padding 은 안쪽여백이다. 
+	   padding: 100px 100px 50px 20px; ==> 시계방향 상 우 하 좌 
+	   padding: 50px;	    ==>  padding: 50px 50px 50px 50px; 와 같은 것이다. 즉, 상 우 하  좌 모두 안쪽 여백을 50px 로 준 것이다 
+	   padding: 100px 50px;	==>  padding: 100px 50px 100px 50px; 와 같은 것이다. 즉, 상 하는 100px, 우 좌는 50px 로 안쪽여백을 준 것이다
+	   padding: 0px;		==>  여백없음
+	*/
+}
+
+div#container {
+	border: solid 1px navy;
+	width: 80%;
+	margin: 20px auto;
+}
+
+
+div#header {
+	border: solid 1px red;
+	height: 100px;
+	background-color: #ccc;	  /*#ccc; 는 #cccccc; 와 같은 것이다*/
+	margin-top: 50px;   /* margin-top: 50px; 은 margin: 50px 0 0 0; 와 같은 것이다. */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+}
