@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>form 에 대해서 알아봅시다.-1</title>
+
+<style type="text/css">
+	body {
+		background-color: #fff;
+	}
+	form {
+		line-height: 30px;
+	}
+</style>
+
+</head>
+<body>
+
+	<div id="container">
+	
+		<!-- fieldset 태그는 폼을 그룹핑(묶어주는것)하는 역할  -->
+		<fieldset>
+		
+			<!-- legend 태그는 fieldset 에 대한 제목을 지정하는 것이다. -->
+			<legend>
+				프로젝트 정보
+			</legend>
+			
+			<!-- ? 중심으로 오른쪽이 보내줘야 할 데이터 -->
+			<!-- action 을 적지 않으면 자기자신한테 감 -->	
+			<form action="register.do">
+				프로젝트명 : <input type="text" name="prjName"/><br>
+				중요도 : <input type="range"/><br>
+				완료예상시간 : <input type="text"/><br>
+				시작날짜 : <input type="date"/><br>
+				월 : <input type="date"/><br>
+				주 : <input type="date"/><br>
+				시작시간 : <input type="datetime-local"/><br>
+				이메일 : <input type="text"/><br>
+				URL : <input type="text"/><br>
+				검색 : <input type="text"/><br>
+				프로젝트 색상 : <input type="color"/><br>
+				
+				<input type="submit" value="전송"/>
+				<input type="reset" value="취소"/>
+			</form>
+		</fieldset>
+	</div>
+</body>
+</html>

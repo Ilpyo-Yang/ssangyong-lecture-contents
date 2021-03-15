@@ -27,26 +27,41 @@ body {
 }
 
 div#container {
-	border: solid 1px navy;
+	border: solid 0px navy;
 	width: 80%;
 	margin: 20px auto;
 }
 
 
 div#header {
-	border: solid 1px red;
+	border: solid 0px red;
 	height: 100px;
 	background-color: #ccc;	  /*#ccc; 는 #cccccc; 와 같은 것이다*/
 	margin-top: 50px;   /* margin-top: 50px; 은 margin: 50px 0 0 0; 와 같은 것이다. */
 }
 
 
+div#side {
+	width: 30%;
+	background-color: #888;   /*#888; 는 #888888; 와 같은 것이다*/
+}
 
 
+div#contents {
+	width: 65%
+	background-color: #eee;   /*#eee; 는 #eeeeee; 와 같은 것이다*/
+}
 
 
+div.customDisplay {
+	display: inline-block;
+	height: 400px;
+}
 
-
+div#footer {
+	height: 50px; /* height 에는 % 는 사용해봐야 안 먹는다. */
+	background-color: #eef;   /*#eee; 는 #eeeeee; 와 같은 것이다*/
+}
 
 
 

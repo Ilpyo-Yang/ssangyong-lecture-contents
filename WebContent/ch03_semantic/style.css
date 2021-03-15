@@ -1,0 +1,112 @@
+@charset "UTF-8";
+
+/* 여백 및 기본적인 폰트를 설정 */
+body {
+   margin: 0;
+   padding: 0;
+   font-family: Arial, "MS Trebuchet", sans-serif;
+   
+   word-break: break-all; /* 공백없이 영어로만 되어질 경우 해당구역을 빠져나가므로 이것을 막기위해서 사용한다. */
+}
+
+div#wrap {
+	/*border: solid 1px navy;*/
+	width: 960px;
+	margin: 0 auto;
+}
+
+header#page_header ul, div#first > ul, footer#page_footer > nav > ul {
+	list-style-type: none;  /*기호를 안 보이게 함*/
+}
+
+header#page_header ul > li {
+	/*border: solid 1px gray;*/
+	display: inline-block;
+	width: 100px;
+	margin-right: 20px;
+}
+
+/* a 태그에 밑줄 제거하기 */
+a {
+	text-decoration: none;
+}
+
+
+/* a 태그에 방문전의 링크 */
+a:link {
+	color: blue;
+}
+
+/* a 태그에 방문후의 링크 */
+a:visited {
+	color: blue;
+}
+
+/* 클래스가 menu 인 a 태그에 마우스 포인터를 올려놓았을 때 */
+a.menu:hover {
+	background-color: red;
+	color: yellow;
+	font-weight: bolder;
+}
+
+hr {
+	border: solid 1px blue; 
+	margin-bottom: 3%;"
+}
+
+section#posts {
+	/*border: solid 1px red;*/
+	float: left; /* 가로방향으로 표시하는데 그 방향은 왼쪽에서부터 출발한다. */
+	/* float: right;  가로방향으로 표시하는데 그 방향은 오른쪽에서부터 출발한다. */
+	width: 70%;
+}
+
+section#sidebar {
+	/*border: solid 1px green;*/
+	float: right;  /*가로방향으로 표시하는데 그 방향은 오른쪽에서부터 출발한다. */
+	width: 27%;
+	line-height: 30px;
+	border-left: solid 1px gray;
+	padding-left: 1%;
+}
+
+section#posts article > aside {
+	/*border: solid 1px green;*/
+	float: right;  /*가로방향으로 표시하는데 그 방향은 오른쪽에서부터 출발한다. */
+	width: 35%;
+	margin-left: 20px;	
+	font-size:  20px;
+	font-weight: bolder;
+	color: #b30059;
+	line-height: 40px; /* 줄간격 */
+	
+}
+
+p {
+	margin-bottom: 30px;	
+}
+
+footer#page_footer {
+	/*border: solid 1px blue;*/
+	clear: both; /* float을 해제해서 하단에 안착시킨다. */
+	text-align: center;
+}
+
+footer#page_footer ul > li {
+	/*border: solid 1px gray;*/
+	display: inline-block;
+	width: 70px;
+	margin-right: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
