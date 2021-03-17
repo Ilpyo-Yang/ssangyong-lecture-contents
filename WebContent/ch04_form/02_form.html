@@ -2,9 +2,185 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>form 에 대해서 알아봅니다. -2</title>
+
+<style type="text/css">
+	body {
+	/*   border: solid 1px gray; */
+	   margin: 0;
+	   padding: 0; 
+	   font-family: Arial, "MS Trebuchet", sans-serif;
+	   word-break: break-all; /* 공백없이 영어로만 되어질 경우 해당구역을 빠져나가므로 이것을 막기위해서 사용한다. */
+	}
+	
+	#container {
+	/*   border: solid 1px blue; */
+	   width: 80%;
+	   margin: 0 auto;
+	}
+	
+	legend {
+	   font-size: 20pt;
+	}
+	
+	ul {
+	/*   border: solid 1px red; */ 
+	   list-style-type: none;
+	   padding: 0;
+	}
+	
+	li {
+	   line-height: 40px;
+	}
+	
+	label.title {
+	/*  border: solid 1px blue; */
+		display: inline-block;
+		width: 100px;
+		color: navy;
+		font-weight: bolder;
+	}
+	
+	input.myinput{
+		height: 20px;
+	}
+	select { /*글자 길이를 안정하는 경우 입력된 값 중 가장 긴 길이의 값으로 입력된다.*/
+		width: 200px;
+	}
+	select.myselect { 
+		height:25px;
+	}
+
+</style>
+
+
 </head>
 <body>
-
+<div id="container">
+	
+		<form action="register.do">	
+			<!-- fieldset 태그는 폼을 그룹핑(묶어주는것)하는 역할  -->
+			<fieldset>
+		
+				<!-- legend 태그는 fieldset 에 대한 제목을 지정하는 것이다. -->
+				<legend>
+					프로젝트 정보
+				</legend>
+			
+				<ul>
+					<li>
+						<label class="title" for="userid">아이디</label>
+						<input type="text" class="myinput" id="userid" size="20" maxlength="20" autofocus required />
+					</li>
+					
+					<li>
+						<label class="title" for="passwd1">암호</label>
+						<input type="password" class="myinput" id="passwd1" size="20" maxlength="20" autofocus required autocomplete="off"/>
+					</li>
+					
+					<li>
+						<label class="title" for="passwd2">암호확인</label>
+						<input type="password" class="myinput" id="passwd2" size="20" maxlength="20" autofocus required autocomplete="off"/>
+					</li>
+					
+					<li>
+						<label class="title" for="username">성명</label>
+						<input type="text" class="myinput" id="username" size="20" maxlength="20" autofocus required />
+					</li>
+					
+					<li>
+						<label class="title" for="email">이메일</label>
+						<input type="email" class="myinput" id="email" autofocus required placeholder="예: hongkd@gmail.com"/>
+					</li>
+					
+					<li>
+						<label class="title" >성별</label>
+						<label for="male">남자</label> <input type="radio" name="gender" id="male"  />
+						<label for="female">여자</label> <input type="radio" name="gender" id="female" checked />
+					</li>
+					
+						<!-- 
+						     radio 는 한개만 선택가능 & name 작성해야 한다, 동일한 값을 주면 한 개만 선택된다
+						     checkbox 는 복수개 선택가능 
+						-->
+					
+					<li>
+						<label class="title" for="hobby">취미</label>
+						<label for="game">게임</label> <input type="checkbox" id="game" />&nbsp;&nbsp;
+						<label for="movie">영화감상</label> <input type="checkbox" id="movie" />&nbsp;&nbsp;
+						<label for="write">글쓰기</label> <input type="checkbox" id="write" />&nbsp;&nbsp;
+						<label for="music">음악감상</label> <input type="checkbox" id="music" />
+					</li>
+					
+					<li>
+						<label class="title" for="degree">최종학력</label>
+						<select class="myselect">
+							<option>고졸</option>
+							<option selected>초대졸</option>
+							<option>대졸</option>
+							<option>대학원졸</option>
+						</select>
+					</li>
+					
+					<li>
+						<label class="title" >선호음식</label>
+						<select size="3" multiple > 
+							<!-- mutiple: 복수개 선택하기 -->
+							<option>짜장면</option>
+							<option>파스타</option>
+							<option>파타이</option>
+							<option>부대찌게</option>
+							<option>떡볶이</option>
+							<option>치킨</option>
+						</select>
+					</li>
+					
+					<li>			
+						<label class="title" >선호프로그램</label>
+						<select class="myselect"> 
+							<optgroup label="데이터베이스">
+								<option>Oracle</option>
+								<option>MSSQL</option>
+								<option>SyBase</option>
+							</optgroup>
+							<optgroup label="개발언어">
+								<option>Java</option>
+								<option>JSP</option>
+								<option>Spring</option>
+								<option>C/C++</option>
+							</optgroup>
+						</select>
+					</li>
+					
+					<li>
+						<label class="title" for="browsername">웹브라우저</label>
+						<input id="browsername" list="browserType" />
+						<datalist id="browserType">
+			                  <option value="Chrome" />
+			                  <option value="Internet Explore" />
+			                  <option value="Firefox" />
+			                  <option value="Opera" />
+			                  <option value="Safari" />
+		                </datalist>
+					</li>
+					
+					<li>
+						<label class="title" for="attach">파일첨부</label>
+						<input type="file" id="attach" autofocus required />
+					</li>
+					
+					<li>
+						<label class="title" for="registercomment">가입인사말</label>
+						<textarea rows="5" cols="30" id="registercomment" ></textarea>
+					</li>
+					
+					<li>
+						<input type="submit" value="전송"/>
+						<input type="reset" value="취소"/>	
+					</li>					
+				</ul>
+			</fieldset>
+		</form>
+	</div>
 </body>
 </html>

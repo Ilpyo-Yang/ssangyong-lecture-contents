@@ -8,8 +8,36 @@
 	body {
 		background-color: #fff;
 	}
+	div#container {
+		border: solid 1px gray;
+		width: 80%;
+		margin: 0 auto;
+	}
 	form {
+		margin-top: 100px;
+	}
+	legend {
+		font-size: 20pt;
+	}
+	li {
+		border: solid 1px green;
 		line-height: 30px;
+	}
+	ul {
+		border: solid 1px red;
+		list-style-type: none;
+		padding: 0;
+	}
+	
+	/* 
+		<a> <label> <span> inline 방식
+		width 와 height 를 줄 수 없다.
+	 */
+	 
+	label {	/* 간격맞추는 방법 참고하기 */
+		border: solid 1px blue;
+		display: inline-block;
+		width: 150px;		
 	}
 </style>
 
@@ -18,33 +46,92 @@
 
 	<div id="container">
 	
-		<!-- fieldset 태그는 폼을 그룹핑(묶어주는것)하는 역할  -->
-		<fieldset>
+		<form action="register.do">	
+			<!-- fieldset 태그는 폼을 그룹핑(묶어주는것)하는 역할  -->
+			<fieldset>
 		
-			<!-- legend 태그는 fieldset 에 대한 제목을 지정하는 것이다. -->
-			<legend>
-				프로젝트 정보
-			</legend>
+				<!-- legend 태그는 fieldset 에 대한 제목을 지정하는 것이다. -->
+				<legend>
+					프로젝트 정보
+				</legend>
 			
-			<!-- ? 중심으로 오른쪽이 보내줘야 할 데이터 -->
-			<!-- action 을 적지 않으면 자기자신한테 감 -->	
-			<form action="register.do">
-				프로젝트명 : <input type="text" name="prjName"/><br>
-				중요도 : <input type="range"/><br>
-				완료예상시간 : <input type="text"/><br>
-				시작날짜 : <input type="date"/><br>
-				월 : <input type="date"/><br>
-				주 : <input type="date"/><br>
-				시작시간 : <input type="datetime-local"/><br>
-				이메일 : <input type="text"/><br>
-				URL : <input type="text"/><br>
-				검색 : <input type="text"/><br>
-				프로젝트 색상 : <input type="color"/><br>
+				<ul>
+					<li>
+						<label for="projName">프로젝트명 : </label>
+						<input type="text" id="projName" size="20" autofocus placeholder="예: 인사관리프로젝트" required autocomplete="off" />
+						<!-- 
+							for: id가 1인 곳으로 커서를 보낸다
+							placeholder: 글자를 미리 예시로 보여주는 것
+							autofocus: 커서 자동 깜빡임
+							required: 필수 입력사항, 입력하지 않으면 전송되지 않는다.
+							autocomplete="off" : submit 되었던 문자열 입력값을 보여주지 않게 한다.
+						 	maxlength="30" : 영어이든 한글이든 최대 30글자, oracle 에서 varchar2(30)과 동일
+						 	size="20" : 웹페이지상에 보여주는 input 태그의 길이가 20
+						 -->
+					</li>
+					
+					<li>
+						<label for="priorty">중요도 : </label>
+						<input type="range" id="priorty" min="0" max="10" value="5" step="1" />
+						<!-- range : 슬라이드 막대로 표시하는 숫자필드 -->
+					</li>
+					
+					<li>
+						<label for="estimatehours">완료예상시간 :</label>
+						<input type="number" id="estimatehours" autofocus min="1" max="100" value="10" step="1"/>
+						<!-- number : 숫자필드 -->
+					</li>
+					
+					<li>
+						<label for="startdate">시작날짜 :</label>
+						<input type="date" id="startdate" />
+						<!-- date : 날짜필드 -->
+					</li>
+					<li>
+						<label for="month">월 :</label>
+						<input type="month" id="month" />
+						<!-- month : 월 단위 날짜필드 -->
+					</li>
+					<li>
+						<label for="week">주 :</label>
+						<input type="week" id="week" />
+						<!-- week : 주 단위 날짜필드 -->
+					</li>
+					<li>
+						<label for="starttime">시작시간 :</label>
+						<input type="time" id="starttime" />
+						<!-- "time" : 시간 날짜필드 -->
+					</li>
+					<li>
+						<label for="email">이메일 :</label>
+						<input type="email" id="email" autocomplete="off"  />
+						<!-- "email" : 이메일 필드 -->
+					</li>
+					<li>
+						<label for="url">URL : </label>
+						<input type="url" id="url" autocomplete="off" />
+						<!-- "url" : URL 필드(http://www.abc.df 형식) -->
+					</li>
+					<li>
+						<label for="search">검색 : </label>
+						<input type="search" id="search"/>
+						<!-- "search" : search 필드 -->
+					</li>
+					<li>
+						<label for="projectcolor">프로젝트 색상 : </label>
+						<input type="color" id="projectcolor"/>
+						<!-- "color" : 색상 지정 필드 -->
+					</li>
+					<li>
+						<input type="submit" value="전송"/>
+						<input type="reset" value="취소"/>	
+					</li>
+					
+				</ul>
 				
-				<input type="submit" value="전송"/>
-				<input type="reset" value="취소"/>
-			</form>
-		</fieldset>
+				
+			</fieldset>
+		</form>
 	</div>
 </body>
 </html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>테이블 만들기3[정렬]</title>
+<style type="text/css">
+ 	table, th, td {
+ 		border: solid 1px #fcb558;
+ 		border-collapse: collapse;
+ 	}
+ 	th {
+ 		background-color: gray;
+ 		width: 200px;
+ 		height:30px;
+ 	}
+ 	
+    /* 	적용우선순위 : 태그 < class < id */
+ 	
+ 	td {
+ 		/* th 기본정렬은 왼쪽 */
+ 		text-align: center;
+ 		/* text-align 은 정렬의 기준을 가로를 기준으로 한다. 
+ 		      즉, 왼쪽(left) 오른쪽(right) 가운데(center) 정렬이다. */ 
+ 	}
+ 	td.price {
+ 		text-align: right;
+ 	}
+ 	tr#jumper {
+ 		height: 100px;
+ 	}
+ 	td.mybottom {
+ 		vertical-align: bottom;
+ 		/* vertical-align 은 정렬의 기준을 세로를 기준으로 한다. 즉, 위쪽(top) 가운데(middle) 아래쪽(bottom) 정렬이다. 
+                     주의할 사항은 내용물이 table 태그내에 있든지 또는 내용물의 display가 table 일때만 적용된다는 것이다. */  
+ 	}
+ 	td.mytop {
+ 		vertical-align: top;
+ 	}
+ 	
+ 	div#mydiv {
+ 		display: table;
+ 	}
+ 	div#mydiv > div {
+ 		border: solid 1px red;
+ 		margin: 10px 0; 
+ 		height: 100px;
+ 		
+ 		display: table-cell;
+ 	}
+ 	div#div1 {
+ 		vertical-align: top;
+ 	}
+ 	div#div2 {
+ 		vertical-align: middle;
+ 	}
+ 	div#div3 {
+ 		vertical-align: bottom;
+ 	}
+</style>
+
+</head>
+<body>
+	<table>
+		<thead>
+		
+			<tr>
+				<th>제품이름과 설명</th>
+				<th>개당 가격</th>
+				<th>박스당 가격</th>
+			</tr>
+			
+		</thead>
+		<tbody>
+		
+			<tr>
+				<td>블라우스 - 붉은색 실크</td>
+				<td class="price">20,000원</td>
+				<td>150</td>
+			</tr>
+			
+			<tr>
+				<td>바지 - 검은색 원단</td>
+				<td class="price">4,000원</td>
+				<td>300</td>
+			</tr>
+			
+			<tr id="jumper">
+				<td class="mybottom">점퍼</td>
+				<td class="price">5,000원</td>
+				<td class="mytop">500</td>
+			</tr>
+			
+		</tbody>
+	</table>
+	
+	<hr style="border: solid 1px gray; margin: 20px 0;">
+	
+	<div id="mydiv">
+		<div id="div1">세로기준으로 위</div>
+		<div id="div2">세로기준으로 가운데</div>
+		<div id="div3">세로기준으로 밑</div>
+	</div>
+	
+</body>
+</html>

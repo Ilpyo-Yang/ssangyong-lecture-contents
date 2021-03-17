@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>테이블 만들기2[테이블캡션(설명)넣기]</title>
+<style type="text/css">
+ 	table, th, td {
+ 		border: solid 1px #fcb558;
+ 		border-collapse: collapse;
+ 	}
+ 	th {
+ 		background-color: gray;
+ 		width: 200px;
+ 		height:30px;
+ 	}
+ 	
+    /* 	적용우선순위 : 태그 < class < id */
+ 	
+ 	td {
+ 		/* th 기본정렬은 왼쪽 */
+ 		text-align: center;
+ 	}
+ 	td#price {
+ 		text-align: right;
+ 	}
+ 	
+ 	table {
+ 		margin-bottom: 50px;
+ 	}
+</style>
+</head>
+<body>
+	<table>
+		<caption>&lt;테이블&gt; 테이블에 대한 설명문구1</caption>
+		<thead>
+		
+			<tr>
+				<th>제품이름과 설명</th>
+				<th>개당 가격</th>
+				<th>박스당 가격</th>
+			</tr>
+			
+		</thead>
+		<tbody>
+		
+			<tr>
+				<td>블라우스 - 붉은색 실크</td>
+				<td id="price">20,000원</td>
+				<td>150</td>
+			</tr>
+			
+			<tr>
+				<td>바지 - 검은색 원단</td>
+				<td id="price">4,000원</td>
+				<td>300</td>
+			</tr>
+			
+		</tbody>
+	</table>
+
+	<table>
+		<!-- caption 의 위치는 <table> 태그 바로 다음에 온다. -->
+		<caption align="bottom">&lt;테이블&gt; 테이블에 대한 설명문구1</caption>
+		<thead>
+		
+			<tr>
+				<th>제품이름과 설명</th>
+				<th>개당 가격</th>
+				<th>박스당 가격</th>
+			</tr>
+			
+		</thead>
+		<tbody>
+		
+			<tr>
+				<td>블라우스 - 붉은색 실크</td>
+				<td id="price">20,000원</td>
+				<td>150</td>
+			</tr>
+			
+			<tr>
+				<td>바지 - 검은색 원단</td>
+				<td id="price">4,000원</td>
+				<td>300</td>
+			</tr>
+			
+		</tbody>
+	</table>
+	
+</body>
+</html>
