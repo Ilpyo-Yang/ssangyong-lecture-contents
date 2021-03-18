@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>퀴즈3 메인페이지 만들기</title>
+
+<style type="text/css">
+	div#container {
+		/* border: solid 1px navy; */
+		width: 80%;
+		margin: 20px auto;
+	}
+	
+	header {
+		/* border: solid 1px red; */
+		height: 120px;
+	}
+	div.head {
+		display: inline-block;
+	}
+	
+	div#logo {
+		margin-top: 20px;
+		width: 20%; 
+	}
+
+	
+	div.main {
+		display: inline-block;
+		height: 400px;
+		margin-top: 10px;
+	}
+	
+	
+	div#mainmenu {
+		margin-bottom: 15px;
+	}
+	a.mainmenu:hover {
+		background-color: blue;
+		color: yellow;
+		font-weight: bolder;
+	}
+	div#mainmenu li {
+		display: inline-block;
+		margin-right: 50px;
+		list-style-type: none;
+		color: navy; 
+		font-size: 13pt;
+		font-weight: bold;
+	}
+	
+	
+	div#side {
+		width: 23%;
+		background-color: #999;  
+		padding: 15px 0 0 10px;
+		display: inline-block;
+	}
+	table {
+		color: white;
+		height: 100px;
+		width: 90%;
+		vertical-align: top;
+	}
+
+	div#login {
+		font-size: 10pt;
+		clear: right;
+	}
+	
+	div#contents {
+		width: 73%;
+		background-color: #262626; 
+		color: #ffffe6; 
+		padding: 15px 0 0 15px;
+		display: inline-block;
+		float: right;
+	}
+	div#footer {
+		height: 50px;
+		background-color: #ccc; 
+		text-align: center;
+		line-height: 50px;
+	}
+
+</style>
+
+</head>
+<body>
+	<div id="container">
+		
+		<header>
+			<div id="logo" class="head" >
+				<img src="images/daum.png" height="100px"/>	
+			</div>
+		</header>
+	
+		<div id="mainmenu">
+			<ul>
+				<li><a class="mainmenu">카페</a></li>
+				<li><a class="mainmenu">메일</a></li>
+				<li><a class="mainmenu">뉴스</a></li>
+				<li><a class="mainmenu">지도</a></li>
+				<li><a class="mainmenu">증권</a></li>
+				<li><a class="mainmenu">블로그</a></li>
+			</ul>
+		</div>
+
+		<div id="side" class="main">
+			<div id="login">
+				<table align="left">			
+						<tr>
+							<td><label for="userid">아이디</label></td>
+							<td><input type="text"  id="userid" size="20" maxlength="20" autofocus required placeholder="아이디"/></td>
+						</tr>
+						
+						<tr>
+							<td><label for="passwd">비밀번호</label></td>
+							<td><input type="password" id="passwd" size="20" maxlength="20" autofocus required placeholder="비밀번호"/></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td align="right">
+								<input type="submit" value="로그인"/>
+								<input type="reset" value="취소"/>
+							</td>
+						</tr>			
+					</table>
+			</div>	
+		</div>
+		
+		<div id="contents" class="main">
+			<h3>기사1 제목입력</h3>
+			<p>"부동산 거래 동맥경화 우려.. 금리인하 검토시기 왔다"</p>
+			<h3>기사2 제목입력</h3>
+			<p>"예매창 지붕 뚫었다"..'어벤져스:엔드게임' 4DX, 예매 오픈 후 순삭 '매진'[공식입장]</p>
+		</div>
+		
+		<div id="footer">Copyright &copy; Kakao Corp. All rights reserved</div>
+	</div>
+</body>
+</html>

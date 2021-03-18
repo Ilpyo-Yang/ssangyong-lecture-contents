@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>테이블 만들기6 [colspan, rowspan, :first-child, :last-child, ~, +, nth-child(숫자)"]</title>
+<style type="text/css">
+ 	table, th, td {
+ 		border: solid 1px #fcb558;
+ 		border-collapse: collapse;
+ 	}
+ 	th {
+ 		background-color: gray;
+ 		width: 200px;
+ 		height:30px;
+ 	}
+ 	
+    /* 	적용우선순위 : 태그 < class < id */
+ 	
+ 	td {
+ 		/* th 기본정렬은 왼쪽 */
+ 		text-align: center;
+ 	}
+ 	td#price {
+ 		text-align: right;
+ 	}
+ 	th#titleFirst ~ th
+ 	/*th#titleFirst 다음에 나오는 모든 형제태그(== 엘리먼트, 노드) 중에서 모든 th 태그를 선택하는 것이다. */ {
+ 		background-color: yellow;
+ 		height: 50px;
+ 	}
+ 	th#titleFirst ~ th:hover {
+ 	/*
+        th#titleFirst 다음에 오는 모든 형제태그(노드) 중에  th 모두가 선택대상에 
+      	마우스 커서가 올라가면 글자색을 빨강색으로 해준다.
+    */
+ 		color: red;
+ 	}
+ 	tr#blouse > td:first-child {
+ 		text-align: left;
+ 		color: blue;
+ 	}
+ 	tr#blouse > td:last-child {
+ 		text-align: right;
+ 		color: red;
+ 	}
+ 	
+ 	table > tbody >tr#pants > td:first-child ~ td {
+ 	/*td:first-child 뒤에 오는 모든 형제태그 중에 td*/
+ 	/*코드 상에는 tbody가 없지만 크롬에서는 자동으로 tbody를 잡고 있음으로 넣어주어야 한다*/
+ 	/* 
+ 	   table 태그내에 tbody 태그를 기술하지 않더라도 항상 tbody 태그를 자동적으로 생겨나므로 
+       table > tr#pants 와 같이 하면 안 되고,
+       table > tbody > tr#pants 와 같이 selector 를 잡아주어야 한다.
+    */
+		background-color: cyan;
+ 	}
+ 	tr:last-child > td {
+ 		background-color: #ffe6e6;
+ 	}	
+	tr:nth-child(4) >td {
+	/*4번재 tr 태그의 자식 태그중 모든 td 태그를 가리키는 것*/
+		color: blue;
+	}
+	span:nth-child(2) {
+		color: red;
+		font-weight: bold;
+	}
+	span:nth-child(2) + span {
+	/*span:nth-child(2)의 태그에 바로 다음에 나오는 형제태그 span 1개를 말한다*/
+		border: solid 1px green;
+	}
+	
+</style>
+</head>
+<body>
+	<table>	
+			<tr>
+				<!-- thead, tbody 에 갇쳐 있으면 밑으로 내려갈 수가 없다 -->
+				<!-- rowspan 은 행병합인데 rowspan="3" 은 3개행을 하나로 병합한다. -->
+				<th rowspan="3" id="titleFirst">봄 맞이 바겐세일</th>
+				<th>제품이름과 설명</th>
+				<th>개당 가격</th>
+				<th>박스당 가격</th>
+			</tr>
+		
+			<tr id="blouse">
+				<td>블라우스 - 붉은색 실크</td>
+				<td id="price">20,000원</td>
+				<td>150</td>
+			</tr>
+			
+			<tr id="pants">
+				<td>바지 - 검은색 원단</td>
+				<td id="price">4,000원</td>
+				<td>300</td>
+			</tr>
+			
+			<tr>
+				<td colspan="2">
+					 <span>총액</span>
+					 <span>및</span> 
+					 <span>총박스</span> 
+					 <span>개수</span>
+				 </td>
+				<td>24,000원</td>
+				<td>450</td>
+			</tr>
+
+	</table>
+	
+</body>
+</html>

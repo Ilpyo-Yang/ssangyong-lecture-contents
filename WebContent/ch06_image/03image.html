@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>테이블 속에 이미지를 넣은 후, 이미지를 </title>
+<style type="text/css">
+	div#container {
+		/* border: solid 1px blue; */
+		margin: 30px auto;
+		width: 80%;
+		padding: 50px 0;
+	}
+	div#container > table, iv#container > th {
+		border: solid 1px gray;
+		border-collapse: collapse;
+	}
+	
+	img.picture {
+		/* 
+		    border-radius 는 테두리를 둥글게 만드는 속성이다.    
+		    
+		    border-radius: top-left-x top-right-x bottom-right-x bottom-left-x / top-left-y top-right-y bottom-right-y bottom-left-y 로 표현한다.
+		    
+		    border-radius: 20px 20px 20px 20px / 20px 20px 20px 20px; 
+		        또는 아래처럼 해도 같은 것이다. 
+		    border-radius: 20px; 
+	    */
+		
+		/* border-radius: 40px 40px 40px 40px / 60px 60px 60px 60px; */
+		
+		/* border-radius: 20px; */
+		
+		/* 상하좌우 사각진 부분을 절반씩 깎으므로 둥근원 모양이 된다. */
+		border-radius: 50%;
+	}
+	
+	div#container th {
+		font-size: 20pt;
+		height: 80px;
+	}
+	
+	
+</style>
+
+</head>
+<body>
+	<div id="container" align="center">
+		<table>
+			<thead>
+				<tr>
+					<th>아이유</th>
+					<th>김태희</th>
+					<th>박보영</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td style="border-right: none"><img src="images/iyou.jpg" class="picture"/></td>
+					<td style="border-right: none"><img src="images/kimth.jpg" class="picture"/></td>
+					<td style="border-right: none"><img src="images/parkby.jpg" class="picture"/></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
