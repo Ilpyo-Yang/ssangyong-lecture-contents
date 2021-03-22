@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>자바스크립트 배열</title>
+
+<style type="text/css">
+
+   body {
+      padding: 20px;
+   }
+   
+   div.display {
+      display: inline-block;
+      border: solid 1px gray;
+      width: 15%;
+      margin: 10px;
+   }
+
+</style>
+
+<script type="text/javascript">
+
+	window.onload = function() {
+		
+		// === 자바스크립트에서 배열은 아래와 같이 나타낸다 === //
+		var arrFruit1 = new Array(); // 배열도 객체이다. 
+		arrFruit1.push("사과"); // 배열명.push() : 배열의 마지막에 새로운 요소를 추가한 후, 변경된 배열의 길이를 반환해줌.
+		arrFruit1.push("딸기");
+		arrFruit1.push("메론");
+		arrFruit1.push("참외");
+		var nLength_arrFruit1 = arrFruit1.push("수박");
+		
+		console.log("1. 배열 arrFruit1 의 길이 => " + arrFruit1.length);     // 1. 배열 arrFruit1 의 길이 => 5
+		console.log("2. 변수 nLength_arrFruit1 => " + nLength_arrFruit1); // 2. 변수 nLength_arrFruit1 => 5 
+		
+		var html = "<ol>";
+		
+		// === 자바스크립트에서 사용되는 배열 처리 1 ===
+		for(var i=0; i<arrFruit1.length; i++) {
+			html += "<li>"+ arrFruit1[i] +"</li>"; 
+		}// end of for-----------------------------
+	
+	
+	    // 또는 
+	    // === 자바스크립트에서 사용되는 배열 처리 2 ===
+	/*	for(var i=0; i<arrFruit1.length; i+=1) { // i+=2  2씩 증가 
+			html += "<li>"+ arrFruit1[i] +"</li>"; 
+		}// end of for-----------------------------
+	*/
+	
+	    // 또는 
+        // === 자바스크립트에서 사용되는 배열 처리 3 ===
+	/*	for(var item of arrFruit1) {
+			html += "<li>"+ item +"</li>"; 
+		}// end of for-----------------------------
+	*/
+	
+	    // 또는 
+        // === 자바스크립트에서 사용되는 배열 처리 4 ===
+        // 배열명.forEach(function(item, index, array){});
+		/* item  - 현재 처리 중인 배열의 각 요소  
+		   index - (optional) 처리 중인 요소의 인덱스 
+		   array - (optional) forEach()가 적용되고 있는 배열 */
+	/*	 
+		arrFruit1.forEach(function(item){
+			html += "<li>"+ item +"</li>"; 
+		}); 
+	*/	
+		// 또는
+	/*	
+		arrFruit1.forEach(function(item, index, array){
+			html += "<li>"+ array[index] +"</li>"; 
+		});
+	*/	
+			
+		html += "</ol>";
+		
+		document.getElementById("fruitDisplay1").innerHTML = html; 
+		
+		//////////////////////////////////////////////////////////
+		
+		// === 자바스크립트에서 배열은 아래와 같이도 나타낼 수 있다 === //
+		var arrFruit2 = ["사과","딸기","메론","참외","수박"]; // 배열도 객체이다. 
+		
+		html = "<ol>";
+		
+		for(var i=0; i<arrFruit2.length; i++) {
+			html += "<li>"+ arrFruit2[i] +"</li>";
+		}// end of for-----------------------------------
+		
+		html += "</ol>";
+		
+		document.getElementById("fruitDisplay2").innerHTML = html;
+		///////////////////////////////////////////////////////////
+		
+		
+		
+		
+		// ==== 배열의 맨 마지막에 과일을 추가하기 시작 ==== //
+		// 1. 이벤트 소스 
+		var btnLastAdd = document.getElementById("btnLastAdd");
+		
+		// 2. 이벤트 소스.addEventListener("이벤트", function(){});
+		btnLastAdd.addEventListener("click", function(){
+			
+			var sAddVal = document.getElementById("addVal").value; 
+			              // 사용자가 입력한 과일명 
+			
+			if( sAddVal.trim() == "" ) {  // "문자열".trim(); 은 문자열의 좌,우의 공백이 있으면 좌,우 공백을 모두 제거해주는 것이다.
+				alert("과일명을 입력하세요!!");
+				return;  // 종료 
+			}
+			
+			else {
+				// 과일명을 입력한 경우 
+				arrFruit1.push(sAddVal.trim()); // 배열명.push() : 배열의 마지막에 새로운 요소를 추가한 후, 변경된 배열의 길이를 반환해줌. 
+				arrFruit2.push(sAddVal.trim()); // 배열명.push() : 배열의 마지막에 새로운 요소를 추가한 후, 변경된 배열의 길이를 반환해줌. 
+				
+				func_display1(arrFruit1, document.getElementById("fruitDisplay1"));
+				func_display2(arrFruit2, document.getElementById("fruitDisplay2"));
+			}
+			
+		});
+		// ==== 배열의 맨 마지막에 과일을 추가하기 끝 ==== //
+		
+		
+		// ==== 배열에 있는 내용을 읽어다가 특정 엘리먼트 속에 보여주는 함수 만들기 시작 === //
+		// >> Function Expression <<
+		var func_display1 = function(arr, displayid) {
+			html = "<ol>";
+			
+			for(var i=0; i<arr.length; i++) {
+				html += "<li>"+ arr[i] +"</li>";
+			}// end of for--------------------------
+			
+			html += "</ol>";
+			
+			displayid.innerHTML = html;
+		};
+		// ==== 배열에 있는 내용을 읽어다가 특정 엘리먼트 속에 보여주는 함수 만들기 끝 === //
+		
+		
+
+		// ==== 배열의 맨 마지막에 요소인 과일을 삭제하기 ==== //
+		// 1. 이벤트 소스 
+		var btnLastDel = document.getElementById("btnLastDel");
+		
+		// 2. 이벤트 소스.on이벤트 = function(){}
+		btnLastDel.onclick = function(){
+			var sDelFruitName = arrFruit1.pop();	//  배열명.pop() :  배열의 마지막 요소를 제거한 후, 제거한 요소를 반환 
+			alert("배열 arrFruit1 에서 "+sDelFruitName+"을(를) 삭제했습니다." )
+			func_display1(arrFruit1, document.getElementById("fruitDisplay1"))
+
+			sDelFruitName = arrFruit2.pop();	//  배열명.pop() :  배열의 마지막 요소를 제거한 후, 제거한 요소를 반환 
+			alert("배열 arrFruit2 에서 "+sDelFruitName+"을(를) 삭제했습니다." )
+			func_display2(arrFruit2, document.getElementById("fruitDisplay2"))
+			
+		}
+		// ==== 배열의 맨 마지막에 요소인 과일을 삭제하기 끝 ==== //
+		
+		
+		// ==== 배열의 맨 처음에 추가하기 ==== //
+		// 1. 이벤트 소스 
+		var btnFirstAdd = document.getElementById("btnFirstAdd");
+		
+		// 2. 이벤트 소스.on이벤트 = function(){}
+		btnFirstAdd.onclick = function(){
+			arrFruit1.unshift(sAddVal.trim()); // 배열명.unshift() : 배열의 처음에 새로운 요소를 추가한 후, 변경된 배열의 길이를 반환해줌. 
+			arrFruit2.unshift(sAddVal.trim()); // 배열명.unshift() : 배열의 처음에 새로운 요소를 추가한 후, 변경된 배열의 길이를 반환해줌. 
+			
+			func_display1(arrFruit1, document.getElementById("fruitDisplay1"));
+			func_display2(arrFruit2, document.getElementById("fruitDisplay2"));
+		}
+		// ==== 배열의 맨 처음에 추가하기 끝 ==== //
+		
+		
+		// ==== 배열의 맨 처음 요소인 과일을 삭제하기 ==== //
+		// 1. 이벤트 소스 
+		var btnFirstDel = document.getElementById("btnFirstDel");
+		
+		// 2. 이벤트 소스.on이벤트 = function(){}
+		btnFirstDel.onclick = function(){
+			var sDelFruitName = arrFruit1.shift();	//  배열명.shift() :  배열의 맨 처음요소를 제거한 후, 제거한 요소를 반환 
+			alert("배열 arrFruit1 에서 "+sDelFruitName+"을(를) 삭제했습니다." )
+			func_display1(arrFruit1, document.getElementById("fruitDisplay1"))
+
+			sDelFruitName = arrFruit2.shift();	//  배열명.shift() :  배열의 맨 처음요소를 제거한 후, 제거한 요소를 반환 
+			alert("배열 arrFruit2 에서 "+sDelFruitName+"을(를) 삭제했습니다." )
+			func_display2(arrFruit2, document.getElementById("fruitDisplay2"))
+			
+		}
+		// ==== 배열의 맨 처음 요소인 과일을 삭제하기 끝 ==== //
+		
+		
+		// ===== 배열의 특정 위치에 과일 추가하기 시작 ===== //
+        var btnAdd2 = document.getElementById("btnAdd2");
+        btnAdd2.addEventListener('click', function(){
+         
+         // 배열명.splice() : 배열의 특정 위치에 배열 요소를 추가하거나 삭제하는데 사용한다. 
+         //                 리턴값은 삭제한 배열 요소이다. 삭제한 요소가 없으면 빈 배열( [] )을 반환한다.
+         /*
+         // 배열명.splice(start, 0, element);  // 배열의 특정 위치에 배열 요소를 추가하는 경우 
+                start   - 수정할 배열 요소의 인덱스
+                0       - 요소를 추가할 경우
+                element - 배열에 추가될 요소
+                
+           // 배열명.splice(start, deleteCount); // 배열의 특정 위치의 배열 요소를 삭제하는 경우    
+                start   - 수정할 배열 요소의 인덱스
+                deleteCount - 삭제할 요소 개수
+         */   
+         
+           var addArr1 = arrFruit1.splice(2, 0, "밤","감","대추");
+           var addArr2 = arrFruit2.splice(2, 0, "밤","감","대추");
+           
+           console.log(addArr1); // []  삭제한 요소가 없으면 빈 배열( [] )을 반환한다.
+           console.log(addArr2); // []  삭제한 요소가 없으면 빈 배열( [] )을 반환한다.
+           
+           func_display1(arrFruit1, document.getElementById("fruitDisplay1"));
+           func_display2(arrFruit2, document.getElementById("fruitDisplay2"));
+      });
+      // ===== 배열의 특정 위치에 과일 추가하기 끝 ===== //
+		
+		
+	}// end of window.onload = function(){}----------------------
+
+
+	// ==== 배열에 있는 내용을 읽어다가 특정 엘리먼트 속에 보여주는 함수 만들기 시작 === //
+	// >> Function Declaration <<
+	function func_display2(arr, displayid) {
+		html = "<ol>";
+		
+		for(var i=0; i<arr.length; i++) {
+			html += "<li>"+ arr[i] +"</li>";
+		}// end of for--------------------------
+		
+		html += "</ol>";
+		
+		displayid.innerHTML = html;
+	};
+	// ==== 배열에 있는 내용을 읽어다가 특정 엘리먼트 속에 보여주는 함수 만들기 끝 === //
+	
+</script>
+
+</head>
+<body>
+
+<h2>내가 좋아하는 과일</h2>
+<div class="display" id="fruitDisplay1"></div>
+<div class="display" id="fruitDisplay2"></div>
+
+<div>
+	<button type="button" onclick="javascript:history.go(0)">처음부터 다시1</button>	<!-- 페이지 새로고침(F5) -->
+	<button type="button" onclick="javascript:location.reload()">처음부터 다시2</button>	<!-- 페이지 새로고침(F5) -->
+	<br><br>
+	
+	
+	추가할 과일명 : <input type="text" id="addVal" />
+	<br><br>
+	<button type="button" id="btnLastAdd">과일을 맨 마지막에 추가하기[push()]</button>
+	<br><br>
+	<button type="button" id="btnLastDel">마지막 과일 삭제하기[pop()]</button>
+	
+	
+	<br><br>
+	<button type="button" id="btnFirstAdd">과일을 맨 처음에 추가하기[unshift()]</button>
+	<br><br>
+	<button type="button" id="btnFirstDel">맨 처음 과일 삭제하기[shift()]</button>
+	
+	
+	<br/><br/>
+    <button type="button" id="btnAdd2">딸기와 메론 사이에 &quot;밤,감,대추&quot; 추가하기[splice()]</button>
+    <br/><br/>
+    <button type="button" id="btnDel2">딸기부터 3개 요소 삭제하기[splice()]</button>
+</div>
+
+</body>
+</html>
+
+
+
+
+
