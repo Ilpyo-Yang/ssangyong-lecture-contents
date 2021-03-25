@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>금액 세 자리마다 콤마찍기</title>
+<script type="text/javascript">
+
+	window.onload = function (){
+		var sFirst = document.getElementById("first").innerText; //"50,000"
+		var sSecond = document.getElementById("second").innerText; //"1,000,000"
+
+		// "50,000" + "1,000,000" ==> "50,0001,000,000" 
+
+		/*
+			split 한 결과 	["50","000"]	["1","000","000"]
+		 	join 한 결과         "50000"			"1000000"
+			Number("50000")	+ Number("1000000") = 1050000
+			
+			"1050000" ==> "1,050,000"
+		*/
+		
+		var sResult = Number(sFirst.split(",").join("")) + Number(sSecond.split(",").join("")) + "";
+		// string 타입	"1050000"
+		
+		sResult = Number(sResult).toLocaleString('en');
+		// 숫자로 되어진 1050000 을 세자리 마다 ","를 찍어서 문자열로 반환시켜주는 내장된 함수이다.
+		// 즉, "1,050,000" 으로 반환시켜준다.
+		
+		/* 
+		   toLocaleString 은 Number 타입의 내장 함수이며, 인자로 들어온 지역 값에 따른 숫자 표기 방식을 적용하여, 문자열로 반환하는 역할을 한다. 
+           'en'은 영어권 국가의 숫자 표기 방식을 사용하겠다는 것을 지정한 것이다. 
+                      미국이나 영어권 국가에서는 숫자를 표기할 때, 3자리마다 숫자를 끊어 콤마를 삽입하여 사용한다. 
+        */
+		
+        document.getElementById("result").innerHTML = sResult;
+		
+        
+	}// window.onload = function (){} ----------------------------------------------------------------------
+	
+
+</script>
+</head>
+
+<body>
+   <div id="container">
+      <span id="first">50,000</span>원 + <span id="second">1,000,000</span>원 = <span id="result"></span>원
+   </div>
+</body>
+</html>

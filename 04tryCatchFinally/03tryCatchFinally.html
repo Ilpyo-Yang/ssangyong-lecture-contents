@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>try catch Finally</title>
+<script type="text/javascript">
+ window.onload = function(){
+	
+	try {
+		func_plus(2,3);
+ 	} catch(e) {
+ 		console.log(e);
+ 		document.getElementById("error").innerHTML = "<span style='color:red;'>오류발생: "+e+"</span>";	 	
+ 	} finally {
+ 	 	document.getElementById("mydiv").innerHTML = "<span style='color:blue;'>안녕하세요?</span>";
+ 	}
+ 	
+ }// end of window.onload = function(){}------------------
+
+</script>
+</head>
+<body>
+	<div id="error"></div>
+	<div id="mydiv"></div>
+</body>
+</html>

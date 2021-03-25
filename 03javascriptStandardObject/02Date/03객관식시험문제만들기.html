@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>객관식 시험문제 만들기</title>
+
+<style type="text/css">
+	div#container {
+		margin: 50px 0 0 100px;
+	}
+	div#timer {
+		font-size: 20pt;
+		font-weight: bold;
+	}
+	span#time {
+		color: blue;		
+	}
+	ul {
+	 	list-style-type: none;
+	}
+</style>
+
+<script type="text/javascript">
+
+	window.onload = function (){
+		
+			
+			
+	};// end of window.onload = function () ---------------------------
+	
+	
+	
+</script>
+
+</head>
+<body>
+	<div id="container">
+		<div>
+			<div id="timer">남은시간 : <span id="time"></span></div>
+		</div>
+		<br>
+		<div id="quiz">
+			<div>[문제1] 다음중 사람의 혈액형이 아닌 것은? <span class="answer1"></span></div>
+			<ul>
+				<li>1. A <input type="radio" name="quiz1"/></li>
+				<li>2. B <input type="radio" name="quiz1"/></li>
+				<li>3. C <input type="radio" name="quiz1"/></li>
+				<li>4. O <input type="radio" name="quiz1"/></li>
+				<li class="ox" id="ox1"></li>
+			</ul>
+			<br>
+			<div>[문제2] 다음중 서로간의 공통점이 없는 것은? <span class="answer2"></span></div>
+			<ul>
+				<li>1. 신발 <input type="radio" name="quiz2"/></li>
+				<li>2. 수박 <input type="radio" name="quiz2"/></li>
+				<li>3. 라면 <input type="radio" name="quiz2"/></li>
+				<li>4. 상추 <input type="radio" name="quiz2"/></li>
+				<li class="ox" id="ox2"></li>
+			</ul>
+			<br>
+			<div>[문제3] 다음중 절차가 맞는 것은? <span class="answer3"></span></div>
+			<ul>
+				<li>1. comfuter <input type="radio" name="quiz3"/></li>
+				<li>2. muose <input type="radio" name="quiz3"/></li>
+				<li>3. keyboad <input type="radio" name="quiz3"/></li>
+				<li>4. browser <input type="radio" name="quiz3"/></li>
+				<li class="ox" id="ox3"></li>
+			</ul>
+			<br>
+			<div>[문제4] 다음중 틀린 것은? <span class="answer4"></span></div>
+			<ul>
+				<li>1. 10+2=12 <input type="radio" name="quiz4"/></li>
+				<li>2. 10-2*0=0 <input type="radio" name="quiz4"/></li>
+				<li>3. 2-1*2=0 <input type="radio" name="quiz4"/></li>
+				<li>4. 4/2=2 <input type="radio" name="quiz4"/></li>
+				<li class="ox" id="ox4"></li>
+			</ul>
+			<br>
+			<div>[문제5] 다음중 팀별 스포츠가 아닌 것은? <span class="answer5"></span></div>
+			<ul>
+				<li>1. 높이뛰기 <input type="radio" name="quiz5"/></li>
+				<li>2. 야구 <input type="radio" name="quiz5"/></li>
+				<li>3. 농구 <input type="radio" name="quiz5"/></li>
+				<li>4. 축구 <input type="radio" name="quiz5"/></li>
+				<li class="ox" id="ox5"></li>
+			</ul>
+			<br>
+			<div>[문제6] 다음중 팀별 스포츠가 아닌 것은? <span class="answer6"></span></div>
+			<ul>
+				<li>1. 높이뛰기 <input type="radio" name="quiz6"/></li>
+				<li>2. 야구 <input type="radio" name="quiz6"/></li>
+				<li>3. 농구 <input type="radio" name="quiz6"/></li>
+				<li>4. 축구 <input type="radio" name="quiz6"/></li>
+				<li class="ox" id="ox6"></li>
+			</ul>
+			<br>
+			<div>[문제7] 다음중 팀별 스포츠가 아닌 것은? <span class="answer7"></span></div>
+			<ul>
+				<li>1. 높이뛰기 <input type="radio" name="quiz7"/></li>
+				<li>2. 야구 <input type="radio" name="quiz7"/></li>
+				<li>3. 농구 <input type="radio" name="quiz7"/></li>
+				<li>4. 축구 <input type="radio" name="quiz7"/></li>
+				<li class="ox" id="ox7"></li>
+			</ul>
+			<br>
+			<div>[문제8] 다음중 의미가 다른 것은? <span class="answer8"></span></div>
+			<ul>
+				<li>1. 1 <input type="radio" name="quiz8"/></li>
+				<li>2. one <input type="radio" name="quiz8"/></li>
+				<li>3. 첫째 <input type="radio" name="quiz8"/></li>
+				<li>4. 시간 <input type="radio" name="quiz8"/></li>
+				<li class="ox" id="ox8"></li>
+			</ul>
+			<br>
+			<div>[문제9] 다음중 동일한 대륙에 있지 않은 국가는? <span class="answer9"></span></div>
+			<ul>
+				<li>1. 독일 <input type="radio" name="quiz9"/></li>
+				<li>2. 브라질 <input type="radio" name="quiz9"/></li>
+				<li>3. 영국 <input type="radio" name="quiz9"/></li>
+				<li>4. 프랑스 <input type="radio" name="quiz9"/></li>
+				<li class="ox" id="ox9"></li>
+			</ul>
+			<br>
+			<div>[문제10] 다음중 미녀가 좋아하는 과일은? <span class="answer10"></span></div>
+			<ul>
+				<li>1. 사과 <input type="radio" name="quiz10"/></li>
+				<li>2. 자몽 <input type="radio" name="quiz10"/></li>
+				<li>3. 석류 <input type="radio" name="quiz10"/></li>
+				<li>4. 참외 <input type="radio" name="quiz10"/></li>
+				<li class="ox" id="ox10"></li>
+			</ul>
+			<ul>
+				<li>
+					<input type="button" value="제출" onclick="goOK()"/>
+				</li>
+			</ul>
+			
+		</div>
+	</div>
+</body>
+</html>
