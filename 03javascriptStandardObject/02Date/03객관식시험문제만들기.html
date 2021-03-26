@@ -13,129 +13,239 @@
 		font-weight: bold;
 	}
 	span#time {
-		color: blue;		
+		color: blue;
+		font-weight: bold;		
+	}
+	span.answer {
+		color: red;		
+		font-weight: bold;	
+		margin: 0 0 0 10px;	
 	}
 	ul {
 	 	list-style-type: none;
+	}
+	div.ox {
+		color: blue;
+		font-weight: bold;	
+		font-size: 20pt;
+		height: 50px;
+		padding: 10px 0 0 30px;	
+	}
+	span#score {
+		font-weight: bold;	
+		font-size: 20pt;
+		margin: 0 0 0 30px;	
 	}
 </style>
 
 <script type="text/javascript">
 
+	var timeLimit = 0;
+	var cnt = 0;
+
 	window.onload = function (){
-		
-			
+		func_timeLoop();
+				
+		var submit = document.getElementById("submit");
+		submit.addEventListener('click', function(){
+			alert("제출완료 했습니다!!");
+			cnt=300;
+			submit.disabled = true;
+			func_checkAnswer();
+		});
 			
 	};// end of window.onload = function () ---------------------------
+
+
+	//타이머	
+	function func_timer(i){
+		timeLimit = 300-i;
+		var minute = parseInt(timeLimit/60);
+		var second = (timeLimit%60<10)? "0"+timeLimit%60 : timeLimit%60;
+		
+		document.getElementById("time").innerHTML = "0"+minute+" : "+second;
+	};
 	
 	
-	
+	function func_timeLoop(){
+		func_timer(cnt++);
+		
+		if(timeLimit>0){
+			clock = setTimeout('func_timeLoop()' , 1000);
+		} else 	{
+			document.getElementById("time").innerHTML = "00 : 00";
+			alert("시간종료로 자동 제출되었습니다!!");
+			submit.disabled = true;	
+			func_checkAnswer();
+		}
+	};
+
+
+	function func_checkAnswer(){
+		
+		var ansArr = [3,1,4,2,1,1,1,4,2,3];
+		var cnt = 0;
+		
+		for (var i=0; i<10; i++) {
+			document.getElementById("answer"+(i+1)).innerHTML = ansArr[i];
+			
+			var b = false;
+
+			var choiceArr = document.getElementsByName(i+1);
+			
+			for (var j=0; j<choiceArr.length; j++) {
+				if(choiceArr[j].checked && (j+1 == ansArr[i])) {
+					b=true;
+				} 
+			}
+			
+			if(b) {
+				document.getElementById("ox"+(i+1)).innerHTML = "O";
+				cnt++;
+			} else 
+				document.getElementById("ox"+(i+1)).innerHTML = "X";	
+		}
+		
+		document.getElementById("score").innerHTML = (cnt*10)+"점";
+	}	
+
+
 </script>
 
 </head>
 <body>
 	<div id="container">
-		<div>
 			<div id="timer">남은시간 : <span id="time"></span></div>
-		</div>
-		<br>
-		<div id="quiz">
-			<div>[문제1] 다음중 사람의 혈액형이 아닌 것은? <span class="answer1"></span></div>
-			<ul>
-				<li>1. A <input type="radio" name="quiz1"/></li>
-				<li>2. B <input type="radio" name="quiz1"/></li>
-				<li>3. C <input type="radio" name="quiz1"/></li>
-				<li>4. O <input type="radio" name="quiz1"/></li>
-				<li class="ox" id="ox1"></li>
-			</ul>
 			<br>
-			<div>[문제2] 다음중 서로간의 공통점이 없는 것은? <span class="answer2"></span></div>
-			<ul>
-				<li>1. 신발 <input type="radio" name="quiz2"/></li>
-				<li>2. 수박 <input type="radio" name="quiz2"/></li>
-				<li>3. 라면 <input type="radio" name="quiz2"/></li>
-				<li>4. 상추 <input type="radio" name="quiz2"/></li>
-				<li class="ox" id="ox2"></li>
-			</ul>
+	
+			<div id="quiz1">
+				<div>[문제1] 다음중 사람의 혈액형이 아닌 것은? <span class="answer" id="answer1"></span></div>
+					<ul>
+						<li>1. A <input type="radio" name="1"/></li>
+						<li>2. B <input type="radio" name="1"/></li>
+						<li>3. C <input type="radio" name="1"/></li>
+						<li>4. O <input type="radio" name="1"/></li>
+						<div class="ox" id="ox1"></div>
+					</ul>
+			</div>
 			<br>
-			<div>[문제3] 다음중 절차가 맞는 것은? <span class="answer3"></span></div>
-			<ul>
-				<li>1. comfuter <input type="radio" name="quiz3"/></li>
-				<li>2. muose <input type="radio" name="quiz3"/></li>
-				<li>3. keyboad <input type="radio" name="quiz3"/></li>
-				<li>4. browser <input type="radio" name="quiz3"/></li>
-				<li class="ox" id="ox3"></li>
-			</ul>
+			
+			<div id="quiz2">
+			<div>[문제2] 다음중 서로간의 공통점이 없는 것은? <span class="answer" id="answer2"></span></div>
+				<ul>
+					<li>1. 신발 <input type="radio"  name="2"/></li>
+					<li>2. 수박 <input type="radio"  name="2"/></li>
+					<li>3. 라면 <input type="radio"  name="2"/></li>
+					<li>4. 상추 <input type="radio"  name="2"/></li>
+					<div class="ox" id="ox2"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제4] 다음중 틀린 것은? <span class="answer4"></span></div>
-			<ul>
-				<li>1. 10+2=12 <input type="radio" name="quiz4"/></li>
-				<li>2. 10-2*0=0 <input type="radio" name="quiz4"/></li>
-				<li>3. 2-1*2=0 <input type="radio" name="quiz4"/></li>
-				<li>4. 4/2=2 <input type="radio" name="quiz4"/></li>
-				<li class="ox" id="ox4"></li>
-			</ul>
+			
+			<div id="quiz3">
+				<div>[문제3] 다음중 절차가 맞는 것은? <span class="answer" id="answer3"></span></div>
+				<ul>
+					<li>1. comfuter <input type="radio" name="3"/></li>
+					<li>2. muose <input type="radio" name="3"/></li>
+					<li>3. keyboad <input type="radio"  name="3"/></li>
+					<li>4. browser <input type="radio" name="3"/></li>
+					<div class="ox" id="ox3"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제5] 다음중 팀별 스포츠가 아닌 것은? <span class="answer5"></span></div>
-			<ul>
-				<li>1. 높이뛰기 <input type="radio" name="quiz5"/></li>
-				<li>2. 야구 <input type="radio" name="quiz5"/></li>
-				<li>3. 농구 <input type="radio" name="quiz5"/></li>
-				<li>4. 축구 <input type="radio" name="quiz5"/></li>
-				<li class="ox" id="ox5"></li>
-			</ul>
+			
+			<div id="quiz4">
+				<div>[문제4] 다음중 틀린 것은? <span class="answer" id="answer4"></span></div>
+				<ul>
+					<li>1. 10+2=12 <input type="radio" name="4"/></li>
+					<li>2. 10-2*0=0 <input type="radio"  name="4"/></li>
+					<li>3. 2-1*2=0 <input type="radio" name="4"/></li>
+					<li>4. 4/2=2 <input type="radio" name="4"/></li>
+					<div class="ox" id="ox4"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제6] 다음중 팀별 스포츠가 아닌 것은? <span class="answer6"></span></div>
-			<ul>
-				<li>1. 높이뛰기 <input type="radio" name="quiz6"/></li>
-				<li>2. 야구 <input type="radio" name="quiz6"/></li>
-				<li>3. 농구 <input type="radio" name="quiz6"/></li>
-				<li>4. 축구 <input type="radio" name="quiz6"/></li>
-				<li class="ox" id="ox6"></li>
-			</ul>
+			
+			<div id="quiz5">
+				<div>[문제5] 다음중 팀별 스포츠가 아닌 것은? <span class="answer" id="answer5"></span></div>
+				<ul>
+					<li>1. 높이뛰기 <input type="radio" name="5"/></li>
+					<li>2. 야구 <input type="radio"  name="5"/></li>
+					<li>3. 농구 <input type="radio"  name="5"/></li>
+					<li>4. 축구 <input type="radio"  name="5"/></li>
+					<div class="ox" id="ox5"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제7] 다음중 팀별 스포츠가 아닌 것은? <span class="answer7"></span></div>
-			<ul>
-				<li>1. 높이뛰기 <input type="radio" name="quiz7"/></li>
-				<li>2. 야구 <input type="radio" name="quiz7"/></li>
-				<li>3. 농구 <input type="radio" name="quiz7"/></li>
-				<li>4. 축구 <input type="radio" name="quiz7"/></li>
-				<li class="ox" id="ox7"></li>
-			</ul>
+			
+			<div id="quiz6">
+				<div>[문제6] 다음중 팀별 스포츠가 아닌 것은? <span class="answer" id="answer6"></span></div>
+				<ul>
+					<li>1. 높이뛰기 <input type="radio"  name="6"/></li>
+					<li>2. 야구 <input type="radio"  name="6"/></li>
+					<li>3. 농구 <input type="radio" name="6"/></li>
+					<li>4. 축구 <input type="radio"  name="6"/></li>
+					<div class="ox" id="ox6"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제8] 다음중 의미가 다른 것은? <span class="answer8"></span></div>
-			<ul>
-				<li>1. 1 <input type="radio" name="quiz8"/></li>
-				<li>2. one <input type="radio" name="quiz8"/></li>
-				<li>3. 첫째 <input type="radio" name="quiz8"/></li>
-				<li>4. 시간 <input type="radio" name="quiz8"/></li>
-				<li class="ox" id="ox8"></li>
-			</ul>
+			
+			<div id="quiz7">
+				<div>[문제7] 다음중 팀별 스포츠가 아닌 것은? <span class="answer" id="answer7"></span></div>
+				<ul>
+					<li>1. 높이뛰기 <input type="radio"  name="7"/></li>
+					<li>2. 야구 <input type="radio"  name="7"/></li>
+					<li>3. 농구 <input type="radio" name="7"/></li>
+					<li>4. 축구 <input type="radio"  name="7"/></li>
+					<div class="ox" id="ox7"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제9] 다음중 동일한 대륙에 있지 않은 국가는? <span class="answer9"></span></div>
-			<ul>
-				<li>1. 독일 <input type="radio" name="quiz9"/></li>
-				<li>2. 브라질 <input type="radio" name="quiz9"/></li>
-				<li>3. 영국 <input type="radio" name="quiz9"/></li>
-				<li>4. 프랑스 <input type="radio" name="quiz9"/></li>
-				<li class="ox" id="ox9"></li>
-			</ul>
+			
+			<div id="quiz8">
+				<div>[문제8] 다음중 의미가 다른 것은? <span class="answer" id="answer8"></span></div>
+				<ul>
+					<li>1. 1 <input type="radio"  name="8"/></li>
+					<li>2. one <input type="radio" name="8"/></li>
+					<li>3. 첫째 <input type="radio"  name="8"/></li>
+					<li>4. 시간 <input type="radio" name="8"/></li>
+					<div class="ox" id="ox8"></div>
+				</ul>
+			</div>
 			<br>
-			<div>[문제10] 다음중 미녀가 좋아하는 과일은? <span class="answer10"></span></div>
-			<ul>
-				<li>1. 사과 <input type="radio" name="quiz10"/></li>
-				<li>2. 자몽 <input type="radio" name="quiz10"/></li>
-				<li>3. 석류 <input type="radio" name="quiz10"/></li>
-				<li>4. 참외 <input type="radio" name="quiz10"/></li>
-				<li class="ox" id="ox10"></li>
-			</ul>
+			
+			<div id="quiz9">
+				<div>[문제9] 다음중 동일한 대륙에 있지 않은 국가는? <span class="answer" id="answer9"></span></div>
+				<ul>
+					<li>1. 독일 <input type="radio" name="9"/></li>
+					<li>2. 브라질 <input type="radio" name="9"/></li>
+					<li>3. 영국 <input type="radio"  name="9"/></li>
+					<li>4. 프랑스 <input type="radio" name="9"/></li>
+					<div class="ox" id="ox9"></div>
+				</ul>
+			</div>
+			<br>
+			
+			<div id="quiz10">
+				<div>[문제10] 다음중 미녀가 좋아하는 과일은? <span class="answer" id="answer10"></span></div>
+				<ul>
+					<li>1. 사과 <input type="radio" name="10"/></li>
+					<li>2. 자몽 <input type="radio" name="10"/></li>
+					<li>3. 석류 <input type="radio"  name="10"/></li>
+					<li>4. 참외 <input type="radio"  name="10"/></li>
+					<div class="ox" id="ox10"></div>
+				</ul>
+			</div>
+			<br>
+			
 			<ul>
 				<li>
-					<input type="button" value="제출" onclick="goOK()"/>
+					<input type="button" id="submit" value="제출"/>
+					<span id="score"></span>
 				</li>
 			</ul>
 			
 		</div>
-	</div>
+
 </body>
 </html>

@@ -71,6 +71,7 @@
     }
 </style>
 
+<script type="text/javascript" src="../util/util.js"></script>
 <script type="text/javascript">
 
 	window.onload = function(){
@@ -118,7 +119,7 @@
 		*/
 		
 			// 나이구하기
-			var byear = Number(this.value);
+			var byear = this.value;
 			
 			if( isNaN(byear) ) {
 				// this.value 가 "출생년도" 인 경우이다. 
@@ -128,8 +129,12 @@
 			
 			else {
 				// this.value 가 "출생년도" 가 아닌 나머지 숫자년도를 선택한 경우이다.
-				document.getElementById("age").innerHTML = currentYear - byear + 1;
+				document.getElementById("age").innerHTML = func_currentAge(byear);
+				// func_currentAge(byear); 함수의 정의는 ../util/util.js 에 정의되어 있다.
+				
 			}
+			
+			
 			
 		});
 		
@@ -384,7 +389,7 @@
 			<fieldset>
 			
 			    <!-- legend 태그는 fieldset 에 대한 제목을 지정하는 것이다. --> 
-				<legend>회원가입정보 - 2</legend>
+				<legend>회원가입정보 - 3</legend>
 				
 				<ul>
 					<li>
