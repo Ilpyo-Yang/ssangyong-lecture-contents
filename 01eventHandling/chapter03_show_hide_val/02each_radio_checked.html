@@ -31,8 +31,9 @@
 								  // return true; 가 마치 for문에서의 continue; 와 같은 기능이다.
 				}
 				console.log("인덱스 : "+index);
-				console.log("아이템 : "+item);
+				console.log("value 값  : "+ $(item).val());
 				console.log("value 값 : "+ $(this).val());
+				// $(item) 와 $(this) 은 같은 것이다.
 				*/
 				
 				/*
@@ -87,10 +88,10 @@
 	<form name="frm"> 
       [문제] 다음중 8+5*3 은 얼마입니까?<br>
       <ol>
-         <li><label for="answer1">20</label><input type="radio" name="answer" id="answer1" value="1" /></li>
-         <li><label for="answer2">30</label><input type="radio" name="answer" id="answer2" value="2" /></li>
-         <li><label for="answer3">23</label><input type="radio" name="answer" id="answer3" value="3" /></li>
-         <li><label for="answer4">45</label><input type="radio" name="answer" id="answer4" value="4" /></li>
+         <li><label for="answer1">20</label><input type="radio" name="answer" id="answer1" value="11" /></li>
+         <li><label for="answer2">30</label><input type="radio" name="answer" id="answer2" value="22" /></li>
+         <li><label for="answer3">23</label><input type="radio" name="answer" id="answer3" value="33" /></li>
+         <li><label for="answer4">45</label><input type="radio" name="answer" id="answer4" value="44" /></li>
       </ol>
       <br><br>
       <button type="button" id="btnOK">정답확인</button>

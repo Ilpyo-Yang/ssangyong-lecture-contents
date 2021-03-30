@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>인물 사진 보이기/감추기( hover )</title>
+<!-- hover 는 이벤트가 아니라 jQuery 에서 제공해주는 함수(메소드)인데 mouseover 와 mouseout 을 합친것이다.  -->
+
+<style type="text/css">
+
+	div#container {
+		/* border: solid 1px gray; */
+		width: 80%;
+		margin: 0 auto;
+	}	
+	
+	span.buttons {
+		display: inline-block;
+		width: 100px;
+		border: solid 2px #ffffcc;
+		background-color: #ffcccc;
+		color: #ffffcc;
+		font-size: 15pt;
+		cursor: pointer;
+		margin: 20px;
+		padding: 5px;
+	}
+	div#seconddiv {
+	 	margin-top: 50px;
+	}
+	div#comment {
+	 /* border: solid 1px gray; */ 
+		width: 250px;
+		margin-top: 10px;
+	}
+
+	
+</style>
+
+<script type="text/javascript" src="../../js/jquery-3.3.1.min.js"></script> 
+<script type="text/javascript">
+
+	$(document).ready(function(){
+		
+		var arrPerson = [{name:"김태희", filename:"kimth.jpg", filename2:"kimthLarge.jpg", address:"서울 강동구", email:"kimth@gmail.com"}  
+                        ,{name:"아이유", filename:"iyou.jpg", filename2:"iyouLarge.jpg", address:"서울 강서구", email:"iyou@gmail.com"}
+                        ,{name:"박보영", filename:"parkby.jpg", filename2:"parkbyLarge.jpg", address:"서울 강남구", email:"parkby@gmail.com"}];
+		
+		var html = "";
+		
+		arrPerson.forEach(function(item){
+			html += "<span class='buttons'>"+ item.name +"</span>";
+			
+			$("div#firstdiv").html(html);
+ 
+		}); 
+		
+		
+		$("span.buttons").hover(function(){
+	    	var $target = $(event.target);
+			var i = $target.index();
+			
+			$target.html("클릭하세요");
+			
+			$("div#face").html("<img src='images/"+arrPerson[i].filename+"' />")
+						 .css({'width': '119px','height': '149px','opacity':'0.2'});
+		
+			$target.css({'background-color':'navy', 'color':'white', 'border':'solid 2px orange', 'border-radius':'50%'});
+			
+			$("div#seconddiv").show();
+				
+	    } , function(){
+	    	var $target = $(event.target); 
+
+	    	$target.css({'background-color':'#ffcccc', 'color':'#ffffcc', 'border':'solid 2px #ffffcc', 'border-radius':'0'});
+	    	$("div#seconddiv").hide();
+	    }); 
+	    
+	    
+	    $(document).on("click","span.buttons", function() {
+	    	$("div#seconddiv").hide();
+	    	
+			$("span.buttons").css({'background-color':'#ffcccc', 'color':'#ffffcc', 'border':'solid 2px #ffffcc', 'border-radius':'0'});			    	
+			
+			var i = $(this).index();
+
+	    	$(this).html(arrPerson[i].name);
+	    	$target.css({'background-color':'navy', 'color':'white', 'border':'solid 2px orange', 'border-radius':'0'});
+			$("div#face").html("<img src='images/"+arrPerson[i].filename2+"' />").css('border-radius','20%');									
+						
+			html = "<ol>" +
+			          "<li>성명 :&nbsp;"+arrPerson[i].name+"</li>"+
+			          "<li>주소 :&nbsp;"+arrPerson[i].address+"</li>"+
+			          "<li>e메일 :&nbsp;"+arrPerson[i].email+"</li>"+
+			       "</ol>";
+			       
+			$("div#comment").html(html);				
+			$("div#seconddiv").show();
+				
+		});
+	    
+	    
+	   
+		
+	    
+	});// end of $(document).ready(function(){})------------------
+
+</script>
+
+</head>
+<body>
+
+	<div id="container" align="center">
+		<div id="firstdiv"></div>
+		
+		<div id="seconddiv">
+			<div id="face"></div>
+			<div id="comment" align="left"></div>
+		</div>
+	</div>	
+
+</body>
+</html>
