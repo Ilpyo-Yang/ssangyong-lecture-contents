@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>여러개의 이미지 중에 한 개의 이미지를 선택하는 뽑기 게임</title>
+
+<style type="text/css">
+	
+</style>
+
+<script type="text/javascript" src="../../js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$("div#div1").html("<img class='fish' src='images/fish.jpg'/>"+
+							"<img class='fish' src='images/fish.jpg'/>"+
+							"<img class='fish' src='images/fish.jpg'/>");
+
+		var randomArr = ["iyouLarge.jpg","parkbyLarge.jpg","kimthLarge.jpg"];
+		var newArr = [];
+		var pickIndex = Math.floor(Math.random()*2-1)+1;
+		
+		if(randomArr.index)
+	
+		randomArr = random;
+		console.log(random);
+		
+	});
+</script>
+
+</head>
+
+<body>
+	<h2>박보영을 찾아라!!</h2>
+	<div id="div1"></div>
+	<div id="result"></div>
+	
+</body>
+</html>

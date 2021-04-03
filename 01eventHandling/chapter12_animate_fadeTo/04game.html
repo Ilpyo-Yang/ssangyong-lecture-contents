@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>여러개의 이미지 중에 한 개의 이미지를 선택하는 뽑기 게임</title>
+
+<style type="text/css">
+	img.fish, img.person {
+		display:inline-block;
+		margin-right: 5%;	
+		width: 150px;
+		height: 120px;	
+	}
+	
+	img.fish:hover {
+		opacity: 0.8;
+		cursor: pointer;	
+	}
+</style>
+
+<script type="text/javascript" src="../../js/jquery-3.3.1.min.js"></script>
+
+<script type="text/javascript">
+	var arrImg = ["parkbyLarge.jpg","kimthLarge.jpg","iyouLarge.jpg"];
+	var arrNewImg = [];
+
+	$(function(){
+		var html = "";
+		for (var i=0; i<arrImg.length; i++) {
+			html += "<img class='fish' src='images/fish.jpg'/>";
+		}	
+		
+		$("div#div1").html(html);
+		
+		///////////////////////////////////////////////////////////////////////
+		
+		/*
+         == 0 부터 2까지 의 난수를 발생시키기 ==
+                  공식 :  Math.floor( Math.random()*(max-min+1) ) + min;
+        */
+		
+		var arrOld = []; // 뽑은 난수번호를 기억시켜둘 장소 (동일한 난수를 뽑았는지 아닌지를 비교하려고) 
+        for (var i=0; i<2; i++) {
+			arrOld[i] = -1;
+		}
+		// arrOld ==> [-1, -1]
+		
+		var arrRndIndex = [];
+		
+		for (var i=0; i<3; i++) {
+			var nRandom = Math.floor( Math.random()*(2-0+1) ) + 0;
+	        // nRandom 은 0 ~ 2까지 중 하나이다.
+	        
+	        var bFlag = false;
+	        for (var j=0; j<arrOld.length; j++) {
+				if(arrOld[j] == nRandom) {
+					bFlag = true;
+					break;
+				}
+			}
+	        
+	        if(!bFlag) {
+				arrOld[i] = nRandom;		// arrOld[0] = 2 ==> arrOld : [2,-1]
+											// arrOld[1] = 1 ==> arrOld : [2, 1]
+											// arrOld[2] = 0 ==> arrOld : [2, 1, 0]
+				
+				arrRndIndex[i] = nRandom;	// arrRndIndex[i] = 2, arrRndIndex[i] = 1, arrRndIndex[i] = 0
+	        } else {
+	        	// nRandom 값이 조금전에 나왔던 nRandom 값과 동일한 경우
+	        	i--;
+	        	continue;	// continue; 는 반복문의 증감식으로 올라간다. 즉, for 문의 i++ 에 올라간다.
+	        }
+		}        
+		
+		// console.log("확인용 : "+arrRndIndex.join(","));
+           
+		for (var i=0; i<arrRndIndex.length; i++) {
+			var j = arrRndIndex[i];
+			arrNewImg[i] = arrImg[j];
+		}
+		
+		// console.log("확인용 : "+arrNewImg.join(","));
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		 $(document).on("click","img.fish", function(){
+		
+			// 몇번째 물고기를 출력했는지 알아온다. 즉, 물고기 이미지의 index 를 알아온다.
+			var indexFish = $("img.fish").index($(this));
+				
+			var html = "";
+			for (var i=0; i<arrNewImg.length; i++) {
+				html += "<img class='person' src='images/"+arrNewImg[i]+"' />";
+			}	
+			
+			$("div#div1").html(html);
+			
+			$("div#div1 > img.person").eq(indexFish).css('border','solid 5px blue');
+			
+			var result = ("kimthLarge.jpg" == arrNewImg[indexFish])?"당첨!!":"다음기회에...";
+			$("div#result").html(result).css({'color':'red','font-size':'16pt'});
+			
+			
+			/* $(this).prop("src", "images/"+arrNewImg[i]);
+			$(this).prop("width", "150");
+			$(this).prop("height", "120"); */
+
+
+		}); 
+		
+		
+		
+	});
+</script>
+
+</head>
+
+<body>
+	<h2>김태희를 찾아라!!</h2>
+	<div id="div1"></div>
+	<div id="result"></div>
+	
+</body>
+</html>
