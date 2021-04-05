@@ -3,43 +3,32 @@ package chap02;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /*
-	=== Servlet 이란 ? 웹서비스 기능을 해주는 자바 클래스를 말한다. ===
+	!! 중요 !! 
+	확장자가 .xml 또는 .java 인 파일에서 URL 경로를 나타낼때 맨 앞에 / 가 오면
+	그 앞에는 http://ip주소:포트번호/컨텍스트명 이 자동으로 붙게 된다.
+	우리의 컨텍스트명은 /JSPServletBegin 이다.
+	즉, 우리는 http://localhost:9090/JSPServletBegin/05_getMethod.do 으로 된다.
 	
-	*** Servlet 이 되기 위한 조건은 3가지 규칙을 따라야 한다. ***
-	1. 서블릿(Servlet)은 반드시 
-	   javax.servlet.http.HttpServlet 클래스를 부모 클래스로 상속을 받아와야 한다. 
-	
-	2. 웹클라이언트의 요청방식이 GET 방식으로 요청을 해오면
-	     doGet() 메소드로 응답을 해주도록 코딩을 해야하고,
-	     웹클라이언트의 요청방식이 POST 방식으로 요청을 해오면
-	     doPost() 메소드로 응답을 해주도록 코딩을 해주어야만 한다.
-	      그러므로  반드시  doGet() 메소드와  doPost() 메소드를 
-	   Overriding(재정의)를 해주어야만 한다.
-	   
-	   doGet() 메소드와 doPost() 메소드의 
-	           첫번째 파라미터는 HttpServletRequest 타입이고,
-	           두번째 파라미터는 HttpServletResponse 타입이다. 
-	           
-	3. 만약에  서블릿(Servlet)에서 결과물을 웹브라우저상에 출력하고자 한다라면 
-	   doGet() 메소드와 doPost() 메소드 모두 
-	      서블릿(Servlet)의 두번째 파라미터인 HttpServletResponse response 를 
-	      사용하여 출력해준다.
-*/	
+	== 배치서술자인 web.xml 에 기술하지 않고 @WebServlet 어노테이션을 사용한 예제 ==
+	http://localhost:9090/JSPServletBegin/05_getMethod.do 을 처리해주는 servlet 은 GetPostMethod_05 이다. 
+*/
 
-public class GetMethod_01 extends HttpServlet {
-	
+@WebServlet("/05_getPostMethod.do")
+public class GetPostMethod_05 extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-	    throws IOException {
-		
-		System.out.println("~~~~ 확인용 : doGet 메소드가 호출됨 ~~~~");
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// request.setCharacterEncoding("UTF-8"); 을 주석처리한다. 
+		// 왜냐하면 필터에 적용된 request.setCharacterEncoding("UTF-8"); 을 사용하기 때문이다.
+		// get 방식에서는 필요없지만 post 에서 넘겨받는 것을 처리하기 위해 필요.
 		
 		// HttpServletRequest request 객체는 전송되어져온 데이터를 처리해주는 용도로 쓰인다.
 		String name = request.getParameter("name");
@@ -70,15 +59,20 @@ public class GetMethod_01 extends HttpServlet {
 		
 		
 		// *** 웹브라우저에 출력하기 시작 *** //
+		
+		// *** 클라이언트(form 태그가 있는 .jsp)에서 넘어온 method 방식이 GET 인지 POST 인지 알아오기 *** //
+		String method = request.getMethod();	// get 또는 post
+		
 		// HttpServletResponse response 객체는 넘어온 데이터를 조작해서 결과물을 나타내고자 할 때 쓰인다.
 		response.setContentType("text/html; charset=UTF-8");
+		
 		PrintWriter out = response.getWriter();
 		// out 은 웹브라우저에 기술하는 대상체라고 생각하자.
 		out.println("<html>");
 		out.println("<head><title>개인성향 테스트 결과화면</title></head>");
 		out.println("<body>");
-		out.println("<h2>개인 성향 테스트 결과(GET)</h2>");
-		out.printf("<span style='color: blue; font-weight: bold;'>%s</span>님의 개인 성향은<br/><br/>",name);
+		out.println("<h2>개인 성향 테스트 결과("+method+")</h2>");
+		out.printf("<span style='color: purple; font-weight: bold;'>%s</span>님의 개인 성향은<br/><br/>",name);
 		
 		if(!"없음".equals(color)) {
 			out.printf("학력은 %s이며, %s색을 좋아합니다.<br><br>", school, color);
@@ -104,15 +98,11 @@ public class GetMethod_01 extends HttpServlet {
 		
 		out.println("</body>");
 		out.println("</html>");
-		// *** 웹브라우저에 출력하기 끝 *** //
+		// *** 웹브라우저에 출력하기 끝 *** //	}
 	}
-	
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-	    throws IOException {
-		
-		System.out.println("#### 확인용 : doPost 메소드가 호출됨 ####");
-		
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
 	}
-	
+
 }

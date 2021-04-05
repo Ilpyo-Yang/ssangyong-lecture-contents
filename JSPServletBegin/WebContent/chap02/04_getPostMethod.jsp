@@ -12,32 +12,27 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GET 방식으로 데이터 전송하기</title>
+<title>GET/POST 방식으로 데이터 전송하기</title>
 <style type="text/css">
 	ul{list-style: none;}
 	li{line-height: 200%;}
 </style>
 </head>
 <body>
-	<%-- <form action="/JSPServletBegin/01_getMethod.do"> 또는 --%>
-	<form action="<%= ctxPath%>/01_getMethod.do" method="get">
+	<%-- <form action="/JSPServletBegin/04_getPostMethod.do"> 또는 --%>
+	<form action="<%= ctxPath%>/04_getPostMethod.do" method="get">
 	<%-- method 를 생략하면 기본이 get 이다. --%>
 	<%-- !! 중요 !! 
 		 확장자가 .jsp 또는 .html 인 파일에서 URL 경로를 나타낼때 맨 앞에 / 가 오면
 		 그 앞에는 http://ip주소:포트번호 가 자동으로 붙게 된다.
 		 <%= ctxPath %> 이 /JSPServletBegin 이다. ★ 절대경로
-		 즉, 우리는 http://localhost:9090/JSPServletBegin/01_getMethod.do 으로 된다.
+		 즉, 우리는 http://localhost:9090/JSPServletBegin/04_getPostMethod.do 으로 된다.
 	--%>
 	<%-- form 태그에서 submit(전송)을 하면 
-		 http://localhost:9090/JSPServletBegin/01_getMethod.do 으로 데이터를 전송시킨다.
-		 
-		 GET 방식은 웹브라우저 주소창에 http://URL주소? 전송되어질 데이터와 같이 나타내주는 것이며,
-		 ? 를 중심으로 왼쪽은 사이트 URL 주소이며, 오른쪽은 전송되어질 데이터를 나타낸다.
-		 GET 방식은 웹브라우저 주소창에 데이터를 공개하므로 보안성이 떨어지지만 속도는 POST 방식보다 빠르다.
-		 그래서 일반적으로 보안과 관련없는 데이터조회(예: 물품정보 조회) 와 같은 select 절에서 주로 사용된다.		 
+		 http://localhost:9090/JSPServletBegin/03_getPostMethod.do 으로 데이터를 전송시킨다.
 	 --%>
 		<fieldset>
-	      <legend>개인성향 테스트(GET method)</legend>
+	      <legend>개인성향 테스트(GET/POST method)</legend>
 	      <ul>
 	         <li>
 	            <label for="name">성명</label>
