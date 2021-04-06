@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>객관식 시험문제 만들기</title>
+<style type="text/css">
+	div#container {
+		/* border: solid 1px gray; */
+		
+		width: 90%;
+		margin: 0 auto;
+		padding: 2%;
+	}
+	
+	li {
+		width: 100px;
+		height: 30px;
+	}
+	
+	div#timeremaining {
+		font-size: 16pt;
+		margin-bottom: 30px;
+	}
+	
+	span#timer {
+		color: blue;
+		font-weight: bold;
+	}
+	
+	span.answer {
+		display: inline-block;
+		/* border: solid 1px gray; */
+		width: 50px;
+		font-size: 14pt;
+		color: red;
+		text-align: center;
+	}
+	
+	div.answerCheck {
+		/* border: solid 1px gray; */
+		width: 100px;
+		margin: -10px 0 30px 0;
+		padding: 0 0 0 50px;
+		font-weight: bold;
+		font-size: 14pt;
+	}
+	
+	span#sumPoint {
+		display: inline-block;
+		width: 100px;
+		font-weight: bold;
+		font-size: 20pt;
+		margin: 0 0 0 40px;
+	}
+	
+</style>
+
+<script type="text/javascript">
+
+    var start = 0; // 허용시간값(예: 5분 또는 1분)
+    var cnt = 0;   // 증가치
+    var clock;
+
+	window.onload = function() {
+		
+		// 정답번호 감추기
+		var arrAnswer = document.getElementsByClassName("answer");
+		for(var i=0; i<arrAnswer.length; i++) {
+			arrAnswer[i].style.display ='none';
+		}
+		
+		// 정답체크(O,X) 감추기
+		var arrAnswerCheck = document.getElementsByClassName("answerCheck");
+		for(var i=0; i<arrAnswerCheck.length; i++) {
+			arrAnswerCheck[i].style.display ='none';
+		}
+		
+		// 타이머 실행시키기
+		func_loopTimer();
+		
+		// "제출" 버튼 클릭시 ==> 1.타이머중지, 2.정답번호 보여주기, 3. 정답체크 보여주기 해야 한다.
+		var btnFinish = document.getElementById("btnFinish");
+		btnFinish.addEventListener('click', function(event){  // 제출 버튼 클릭시 
+			func_finish();	// 시험 제출관련 함수호출
+		}); // end of btnFinish.addEventListener('click', function(event){})--------------------
+		
+	}// end of window.onload = function(){ }--------------------------
+	
+	
+	function func_timer(i) {
+		start = 5*60-i; // 5분(== 5*60초)만들기, 1분(== 1*60초)만들기
+		
+		console.log("start : "+start + " , cnt : "+cnt);
+	/*
+	    start : 300 , cnt : 1
+        start : 299 , cnt : 2
+        start : 298 , cnt : 3
+        start : 297 , cnt : 4
+        .....................
+        
+        start : -1 , cnt : 302
+	*/
+		
+		if(start >= 0) {
+			var minute = "";
+			
+			if(start < 600) { // 10분 미만인 경우
+				minute = "0";
+				// 05:00   04:59   04:58   04:57
+			}
+			
+			minute += parseInt(start/60); // 05  04  04  04 
+			
+			var second = start%60;
+			second = (second < 10)?"0"+second:second;
+			
+			var timer = document.getElementById("timer");
+			timer.innerHTML = minute+" : "+second;
+		}
+		
+		else {
+			func_finish(); // 시험시간이 초과되는 경우 강제로 시험 제출관련 함수를 호출시킨다.
+			alert("시간종료로 시험이 종료 되었습니다.");
+			return;
+		}
+		
+	}// end of function func_timer( ) { }------------------------
+	
+	
+	function func_loopTimer() {
+		
+		func_timer(cnt++);
+		
+		if(start >= 0) {
+			// 제출 버튼 클릭시 clearTimeout(clock); 을 사용하기 위해 아래와 같이 해도 setTimeout 기능은 작동된다. 
+			clock = setTimeout('func_loopTimer()', 1000);
+		}
+	
+	}// end of function func_loopTimer() {}---------------------------
+	
+	
+	function func_finish() {
+		// 타이머 중지시키기
+		clearTimeout(clock);
+		// setTimeout 메서드에서 지정한 일정한 밀리초값 시간 이후에 실행할 표현식 javascriptCode나 기능함수 functionName을 호출하는 것을 중단한다.
+		// 파라미터 clock 은 중단해야할 setTimeout 메서드를 가리키는 것임.
+		
+		alert("제출완료 했습니다.");
+		var timer = document.getElementById("timer");
+		timer.innerHTML = "00 : 00"; // 남은시간 표시를 모두 0 으로 만들기  
+		
+		// 정답번호 보여주기
+		var arrAnswerVal = [3,1,4,2,3,4,1,4,2,3]; // 정답번호
+		var arrAnswer = document.getElementsByClassName("answer");
+		for(var i=0; i<arrAnswer.length; i++) {
+			arrAnswer[i].innerHTML = arrAnswerVal[i];
+			arrAnswer[i].style.display = 'inline-block';  // 또는 '';
+		}
+		
+		// 정답여부 검사하기(점수 계산하기)
+		var arrRadio = document.getElementsByClassName("question"); // 문항수 배열
+		var length = arrRadio.length; // 문항수 알아오기
+		
+		var arrUserVal = new Array(); // 사용자가 선택한 정답번호 저장용도 배열 
+		for(var i=0; i<length; i++) {
+			arrUserVal[i] = -1;	// 초기치로 -1 을 입력함.
+		}
+		
+		for(var i=0; i<length; i++) {
+			var arrBunho = document.getElementsByName(""+i); // 번호 배열
+			for(var j=0; j<arrBunho.length; j++) {
+				if(arrBunho[j].checked == true) { // 라디오버튼이 선택되어진 것이라면 
+			    	arrUserVal[i] = arrBunho[j].getAttribute('value');
+					break;
+			    }	
+			}
+		}// end of for-------------------------------------------
+		
+		// alert( "확인용 : " + arrUserVal.join(",") );
+	
+		// 정답체크(O, X) 보여주기 
+		var arrAnswerCheck = document.getElementsByClassName("answerCheck");
+		for(var i=0; i<arrAnswerCheck.length; i++) {
+			arrAnswerCheck[i].style.display = 'block';  // 또는 '';
+		}
+		
+		var sumPoint = 0;
+		for(var i=0; i<length; i++) {
+			if(arrAnswerVal[i] == arrUserVal[i]) {
+				arrAnswerCheck[i].innerHTML = "O";
+				arrAnswerCheck[i].style.color = "blue";
+				sumPoint += 10;
+			}
+			else {
+				arrAnswerCheck[i].innerHTML = "X";
+				arrAnswerCheck[i].style.color = "red";
+			}
+		}
+		
+	//	alert( "확인용 : " + sumPoint );
+	
+	    document.getElementById("sumPoint").innerHTML = sumPoint+"점";
+	    
+	}// end of function func_finish()---------------------------------
+	
+</script>
+
+</head>
+<body oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
+<!-- 
+     === >>> 소스보기 금지 <<< === 
+	 oncontextmenu="return false" : 마우스 우클릭 금지
+     ondragstart="return false"   : 드래그 금지
+     onselectstart="return false" : 선택복사 금지
+ -->
+	<div id="container">
+		<div id="timeremaining">
+			남은시간 : <span id="timer"></span>
+		</div>
+	
+		<div class="question">
+			[문제1] 다음중 사람의 혈액형이 아닌것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>A<input type="radio" class="bunho" name="0" value="1"/></li>
+				<li>B<input type="radio" class="bunho" name="0" value="2"/></li>
+				<li>C<input type="radio" class="bunho" name="0" value="3"/></li>
+				<li>O<input type="radio" class="bunho" name="0" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제2] 다음중 서로간의 공통점이 없는 것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>신발<input type="radio" name="1" value="1"/></li>
+				<li>수박<input type="radio" name="1" value="2"/></li>
+				<li>라면<input type="radio" name="1" value="3"/></li>
+				<li>상추<input type="radio" name="1" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제3] 다음중 철자가 맞는것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>comfuter<input type="radio" name="2" value="1"/></li>
+				<li>muose<input type="radio"    name="2" value="2"/></li>
+				<li>keyboad<input type="radio"  name="2" value="3"/></li>
+				<li>browser<input type="radio"  name="2" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제4] 다음중 틀린것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>10+2=12<input type="radio"  name="3" value="1"/></li>
+				<li>10-2*0=0<input type="radio" name="3" value="2"/></li>
+				<li>2-1*2=0<input type="radio"  name="3" value="3"/></li>
+				<li>4/2=2<input type="radio"    name="3" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제5] 다음중 동일한 민족이 아닌 사람은 누구인가?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>이순신<input type="radio"  name="4" value="1"/></li>
+				<li>유관순<input type="radio"  name="4" value="2"/></li>
+				<li>조자룡<input type="radio"  name="4" value="3"/></li>
+				<li>차은우<input type="radio"  name="4" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제6] 다음중 프로그래밍 언어가 아닌것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>Java<input type="radio"        name="5" value="1"/></li>
+				<li>C++<input type="radio"         name="5" value="2"/></li>
+				<li>JSP/Servlet<input type="radio" name="5" value="3"/></li>
+				<li>English<input type="radio"     name="5" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제7] 다음중 팀별 스포츠가 아닌것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>높이뛰기<input type="radio"  name="6" value="1"/></li>
+				<li>야구<input type="radio"     name="6" value="2"/></li>
+				<li>농구<input type="radio"     name="6" value="3"/></li>
+				<li>축구<input type="radio"     name="6" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>		
+		</div>
+		
+		<div class="question">
+			[문제8] 다음중 의미가 다른것은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>1<input type="radio"    name="7" value="1"/></li>
+				<li>one<input type="radio"  name="7" value="2"/></li>
+				<li>첫째<input type="radio"  name="7" value="3"/></li>
+				<li>시간<input type="radio"  name="7" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제9] 다음중 동일한 대륙에 있지 않는 국가는?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>독일<input type="radio"   name="8" value="1"/></li>
+				<li>브라질<input type="radio"  name="8" value="2"/></li>
+				<li>영국<input type="radio"   name="8" value="3"/></li>
+				<li>프랑스<input type="radio"  name="8" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div class="question">
+			[문제10] 다음중 미녀가 좋아하는 과일은?<span class="answer"></span><br/>
+			<ol style="list-style-type: decimal;">
+				<li>사과<input type="radio" name="9" value="1"/></li>
+				<li>자몽<input type="radio" name="9" value="2"/></li>
+				<li>석류<input type="radio" name="9" value="3"/></li>
+				<li>참외<input type="radio" name="9" value="4"/></li>
+			</ol>
+			<div class="answerCheck"></div>
+		</div>
+		
+		<div>
+			<button type="button" id="btnFinish">제출</button>
+			<span id="sumPoint"></span>
+		</div>
+		
+	</div>
+</body>
+</html>

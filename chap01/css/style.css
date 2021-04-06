@@ -1,0 +1,8 @@
+@charset "UTF-8";
+
+div#today {
+	border: solid 1px red;
+	color: blue;
+	font-size: 20pt;
+	font-weight: bold;
+}
