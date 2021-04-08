@@ -46,4 +46,45 @@ public class PersonDTO_02 {
 		this.registerday = registerday;
 	}
 	
+	
+	/////////////////////////////////////////////////////////
+	public String getStrFood() {
+		if(food!=null) {
+			return String.join(",", food);
+		} else {
+			return "";
+		}
+	}
+	
+	
+	/////////////////////////////////////////////////////////
+	public String getStrFoodImgFileName() {
+		String result = "";
+		
+		if(food!=null) {
+			StringBuilder sb = new StringBuilder();
+			for (int i=0; i<food.length; i++) {
+				switch (food[i]) {
+				case "짜짱면":
+					sb.append("jjm.png");
+					break;
+				case "짬뽕":
+					sb.append("jjbong.png");
+					break;
+				case "탕수육":
+					sb.append("tangsy.png");
+					break;
+				case "양장피":
+					sb.append("yang.png");
+					break;
+				case "팔보채":
+					sb.append("palbc.png");
+					break;
+				}
+				if(i!=food.length-1) sb.append(",");
+			}
+			result = sb.toString();
+		} 
+		return result;
+	}	
 }
