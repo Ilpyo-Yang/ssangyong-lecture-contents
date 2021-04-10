@@ -151,6 +151,68 @@ public class PersonDAO_04 implements InterPersonDAO_03 {
 		
 		return psdto;
 	}// end of public PersonDTO_02 selectOne(String seq) throws SQLException--------
+
+
+	// tbl_person_interest 테이블에 저장되어진 특정 1개 행만 delete 해주는 추상메소드(미완성메소드)
+	@Override
+	public int deletePerson(String seq) throws SQLException {
+		
+		int n = 0;
+		
+		try {
+			conn = MyDBConnection_05.getConn();
+			
+			String sql = " delete from tbl_person_interest "+
+					     " where seq=? ";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, seq);
+				
+			n = pstmt.executeUpdate();
+	
+			
+		} finally {
+			close();
+		}
+		
+		return n;
+	}
+
+
+	// tbl_person_interest 테이블에 저장되어진 특정 1개 행만 update 해주는 추상메소드(미완성메소드)
+	public int updatePerson(PersonDTO_02 psdto) throws SQLException {
+		int n = 0;
+		
+		try {
+			conn = MyDBConnection_05.getConn();
+			
+			String sql = " update tbl_person_interest set name=?, school=?, color=?, food=? "+
+					     " where seq=? ";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, psdto.getName());
+			pstmt.setString(2, psdto.getSchool());
+			pstmt.setString(3, psdto.getColor());
+			
+			String[] arrFood = psdto.getFood(); 
+			if( arrFood != null ) {
+				pstmt.setString(4, String.join(",", arrFood));	
+			}
+			else {
+				pstmt.setString(4, null);
+			//  또는 
+			//	pstmt.setString(4, "없음");
+			}
+			
+			pstmt.setInt(5, psdto.getSeq());
+			
+			n = pstmt.executeUpdate();
+			
+		} finally {
+			close();
+		}
+		return n;
+	}
 	
 
 }

@@ -52,7 +52,7 @@ public class PersonDTO_02 {
 		if(food!=null) {
 			return String.join(",", food);
 		} else {
-			return "";
+			return "없음";
 		}
 	}
 	
