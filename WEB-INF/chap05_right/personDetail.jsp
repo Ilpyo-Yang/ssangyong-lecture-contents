@@ -15,9 +15,15 @@
 	td {
 		border: solid 1px gray;
 	}
-	table {
+	/* table {
+		margin-top: 50px;
 		border-collapse: collapse;
 		width: 750px;
+	} */
+	table {
+		margin-top: 50px;
+		border: none !important;
+		width: 750px !important;
 	}
 	td {
 		height: 40px;
@@ -37,6 +43,7 @@
 	}
 	button {
 		margin-right: 20px;
+		margin-top: 100px;
 	}
 </style>
 <script type="text/javascript" src="<%= request.getContextPath()%>/js/jquery-3.3.1.min.js"></script>
@@ -55,6 +62,15 @@
 		frm.method = "post";
 		frm.submit();
 	}
+	
+	function updatePerson(seq){	
+		var frm = document.updateFrm;
+		// console.log("확인용 삭제할 회원번호 seq => "+frm.seq.value);
+		
+		frm.action = "personUpdate.do";
+		frm.method = "POST";
+		frm.submit();
+	}
 </script>
 </head>
 
@@ -62,8 +78,8 @@
 	<div class="container">
 		<%-- servlet 에서 이미 null 처리함 --%>
 		<h2><span style="color:blue;">${psdto.name}</span>&nbsp;님의 개인성향 결과</h2>
-		<table>
-		<%-- <table class="table table-bordered"> --%>
+		<%-- <table>--%>
+		<table class="table table-bordered"> 
 			<tr>
 				<td width="30%" class="title">회원번호</td>
 				<td class="content">${psdto.seq}</td>
@@ -116,7 +132,13 @@
 				<td colspan="2" style="text-align:center; height: 100px; 
 				                       border-left: none; border-right: none; border-bottom: none;">
 					<button type="button" class="btn btn-success" onclick="javascript:location.href='personSelect.do'">목록보기</button>
-					<button type="button" class="btn btn-danger" onclick="deletePerson(${psdto.seq})">삭제하기</button>
+					<button type="button" class="btn btn-danger" onclick="deletePerson()">삭제하기</button>
+					<button type="button" class="btn btn-primary" onclick="updatePerson('${psdto.seq}')">내정보수정하기</button>
+					<%-- 
+						★ js 에서는 문자열의 경우에는 " " 나 ' ' 를 꼭 입력해야 한다. 없으면 undifined 이다.
+						왠만하면 문자열로 하자! 다 호환되므로!!!!!
+					--%>
+					
 					<%--DML GET 방식 사용하지 말고 POST 이용하기 --%>
 				</td>
 			</tr>
@@ -125,7 +147,11 @@
 	
 	<%-- POST 방식을 통해 회원을 삭제하기 위해서 화면에는 보이지 않는 form 태그를 만든다. --%>
 	<form name="delFrm">
-		<input type="text" name="seq" value="${psdto.seq}"/>
+		<input type="hidden" name="seq" value="${psdto.seq}"/>
+		<input type="hidden" name="name" value="${psdto.name}"/>	
+	</form>
+	<form name="updateFrm">
+		<input type="hidden" name="seq" value="${psdto.seq}"/>
 	</form>
 	
 </body>

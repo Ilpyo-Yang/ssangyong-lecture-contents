@@ -3,7 +3,7 @@
 <%
 	//컨텍스트 패스명(context path name)을 알아오고자 한다.
 	String ctxPath = request.getContextPath();
-	System.out.println("ctxPath => "+ctxPath);
+	// System.out.println("ctxPath => "+ctxPath);
 %>
 
 <%--
@@ -13,9 +13,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>개인성향 데이터를 DB로 전송하기</title>
+<title>개인성향 정보 수정하기~~</title>
 <style type="text/css">
-
 	div#container{
 		/* border:solid 1px red; */
 		width: 80%;
@@ -26,11 +25,55 @@
 	}
 	ul{list-style: none;}
 	li{line-height: 200%;}
-
 </style>
-<script type="text/javascript" src="<%= ctxPath%>/js/jquery-3.3.1.min.js>"></script>
+<script type="text/javascript" src="<%= ctxPath%>/js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript">
+
 	$(function(){
+		//alert("호호");
+		
+		// 1. 성명 등록하기
+		$("input#name").val('${psdto.name}');	// ★ val 내에 따옴표 주의하기!! 꼭 써줘야 한다.
+		
+		// 2. 학력 입력해주기
+		$("select#school").val('${psdto.school}');
+		
+		// 3. 색상 입력해주기
+		var userChoiceColor = "${psdto.color}";
+		// console.log("확인용 userChoiceColor => "+userChoiceColor);
+		$("input:radio[name=color]").each(function(index, item){		
+			// console.log("확인용 value => "+$(item).prop("value"));
+			// 확인용 value => red
+			// 확인용 value => blue
+			// 확인용 value => green
+			// 확인용 value => yellow
+			
+			if($(item).prop("value")==userChoiceColor) {
+				$(item).prop("checked", true);
+				return false;	// for 문의 break; 와 같은 뜻이다.
+			}
+		});
+		
+		
+		// 4. 음식 입력해주기
+		var userChoiceFood = "${psdto.strFood}";
+		// console.log("확인용 userChoiceFood => "+userChoiceFood);
+		// 확인용 userChoiceFood => 짜짱면,짬뽕,탕수육
+		// 확인용 userChoiceFood => 없음
+		
+		if("없음"!=userChoiceFood){
+			var arrFood = userChoiceFood.split(",");
+			
+			arrFood.forEach(function(food){
+				$("input:checkbox[name=food]").each(function(index, item){		
+					if($(item).prop("value")==food) {
+						$(item).prop("checked", true);
+					}
+				});
+			});
+		}	
+		
+		
 		// === 유효성 검사하기 === //
 		$("form[name=myFrm]").submit(function(){
 			var nameLength = $("input#name").val().trim().length();
@@ -52,18 +95,19 @@
 			if(foodLength == 0) {
 				alert("음식을 선택하세요!!");
 				return false;	// submit 을 하지 않는다.
-			} */
+			}*/ 
 		});
-	});
+	}); 
 </script>
 </head>
 <body>
 	<div id="container">
 	<form name="myFrm" action="<%= ctxPath%>/personUpdateEnd.do" method="post">
 		<fieldset>
-	      <legend>개인성향 데이터를 DB로 전송하기</legend>
+	      <legend>${psdto.name} 님 성향 정보 수정하기</legend>
 	      <ul>
 	         <li>
+	         	<input type="hidden" name="seq" value="${psdto.seq}"  readonly />
 	            <label for="name">성명</label>
 	            <input type="text" name="name" id="name" placeholder="성명입력"/> 
 	         </li>
@@ -117,8 +161,8 @@
 	            </div>
 	         </li>
 	         <li>
-	            <input type="submit" value="전송" />
-	            <input type="reset" value="취소" />
+	            <input type="submit" value="수정완료" />
+	            <input type="reset" value="수정취소" />
 	         </li>
 	      </ul>
 	   </fieldset>
