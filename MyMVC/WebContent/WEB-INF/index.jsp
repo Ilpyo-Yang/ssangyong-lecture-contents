@@ -7,6 +7,6 @@
 <title>index.up 페이지</title>
 </head>
 <body>
-	<span style="color: red;">${requestScope.name}</span> 님 반갑습니다.
+	<span style="color: red; ">${requestScope.name}</span> 님 반갑습니다.
 </body>
 </html>

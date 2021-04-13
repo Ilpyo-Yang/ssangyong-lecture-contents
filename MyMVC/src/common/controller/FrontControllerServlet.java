@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.omg.PortableServer.REQUEST_PROCESSING_POLICY_ID;
 
 
 @WebServlet(
@@ -62,7 +61,7 @@ public class FrontControllerServlet extends HttpServlet {
 	         pr.load(fis); 은  fis 객체를 사용하여 C:/NCS/workspace(jsp)/MyMVC/WebContent/WEB-INF/Command.properties 파일의 내용을 읽어다가 
 	         Properties 클래스의 객체인 pr 에 로드시킨다.
 	                  그러면 pr 은 읽어온 파일(Command.properties)의 내용에서 
-	         = 을 기준으로 왼쪽은 key로 보고, 오른쪽은 value 로 인식한다.
+	         = 을 기준으로 왼쪽(url)은 key로 보고, 오른쪽은(class) value 로 인식한다.
 	        */
 			
 			Enumeration<Object> en = pr.keys();
@@ -136,6 +135,7 @@ public class FrontControllerServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		 
 		requestProcess(request,response);
 	}
 	
@@ -158,13 +158,15 @@ public class FrontControllerServlet extends HttpServlet {
 		
 		String key = uri.substring(request.getContextPath().length());
 		/*
+		 * 컨텍스트명 다음에 나오는 주소
 		 * /member/idDuplicateCheck.up
 		 * /index.up
 		 * /main.up
 		*/
+			
 		
 		AbstractController action = (AbstractController)cmdMap.get(key);
-	
+		// 부모 클래스: AbstractController
 		if(action == null) {
 			System.out.println(">>> "+ key+"URL 패턴에 매핑된 클래스는 없습니다. <<<");
 		//	>>> /member/idDuplicateCheck.upURL 패턴에 매핑된 클래스는 없습니다. <<<
@@ -172,14 +174,13 @@ public class FrontControllerServlet extends HttpServlet {
 		else {
 			try {
 				
-				/*
-		          post 방식으로 넘어온 데이터중 영어는 글자가 안깨지지만,
-			           한글은 글자모양이 깨져나온다.
-			           그래서  post 방식에서 넘어온 한글 데이터가 글자가 안깨지게 하려면 
-			           아래처럼 request.setCharacterEncoding("UTF-8"); 을 해야 한다.
-			           주의할 것은 request.getParameter("변수명"); 보다 먼저 기술을 해주어야 한다는 것이다.      
-			    */
-				
+				/* execute 메소드를 실행하기 전에 한글 데이터를 깨지지 않게 해야한다.
+		           post 방식으로 넘어온 데이터중 영어는 글자가 안깨지지만,
+			             한글은 글자모양이 깨져나온다.
+			             그래서  post 방식에서 넘어온 한글 데이터가 글자가 안깨지게 하려면 
+			             아래처럼 request.setCharacterEncoding("UTF-8"); 을 해야 한다.
+			             주의할 것은 request.getParameter("변수명"); 보다 먼저 기술을 해주어야 한다는 것이다.      
+		        */
 				request.setCharacterEncoding("UTF-8");
 				
 				action.execute(request, response);
@@ -187,26 +188,27 @@ public class FrontControllerServlet extends HttpServlet {
 				   @@@ 확인용 IndexController 의 인스턴스 메소드 execute 가 호출됨 @@@
 				   ### 확인용 MainController 의 인스턴스 메소드 execute 가 호출됨 ###
 				 */
+				
 				boolean bool = action.isRedirect();
 				String viewPage = action.getViewPage();
 				
-				if(!bool) {
+				if(!bool) { //bool 이 false라면
 					// viewPage 에 명기된 view단 페이지로 forward(dispatcher)를 하겠다는 말이다.
-	                // forward 되어지면 웹브라우저의 URL주소 변경되지 않고 그대로 이면서 화면에 보여지는 내용은 forward 되어지는 jsp 파일이다.
-	                // 또한 forward 방식은 forward 되어지는 페이지로 데이터를 전달할 수 있다는 것이다.
-					if(viewPage!=null) {
-						RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);						
+		            // forward 되어지면 웹브라우저의 URL주소 변경되지 않고 그대로 이면서 화면에 보여지는 내용은 forward 되어지는 jsp 파일이다.
+		            // 또한 forward 방식은 forward 되어지는 페이지로 데이터를 전달할 수 있다는 것이다.
+					if(viewPage!=null) { //viewPage가 존재해야한다.
+						RequestDispatcher dispatcher = request.getRequestDispatcher(viewPage);
 						dispatcher.forward(request, response);
 					}
-				} else {
+				}
+				else {
 					// viewPage 에 명기된 주소로 sendRedirect(웹브라우저의 URL주소 변경됨)를 하겠다는 말이다.
-	                // 즉, 단순히 페이지이동을 하겠다는 말이다. 
-	                // 암기할 내용은 sendRedirect 방식은 sendRedirect 되어지는 페이지로 데이터를 전달할 수가 없다는 것이다. 
-					if(viewPage!=null) {
+		            // 즉, 단순히 페이지이동을 하겠다는 말이다. 
+		            // 암기할 내용은 sendRedirect 방식은 sendRedirect 되어지는 페이지로 데이터를 전달할 수가 없다는 것이다. 
+					if(viewPage != null) {
 						response.sendRedirect(viewPage);
 					}
 				}
-				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

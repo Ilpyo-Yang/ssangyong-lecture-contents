@@ -7,6 +7,6 @@
 <title>main.up 페이지</title>
 </head>
 <body>
-	주소는 <span style="color: blue;">${requestScope.address}</span> 입니다.
+	주소는 <span style="color: blue; ">${requestScope.address}</span> 입니다.
 </body>
 </html>

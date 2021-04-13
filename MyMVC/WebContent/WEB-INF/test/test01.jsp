@@ -1,9 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    
-<%
+<% 
 	String ctxPath = request.getContextPath();
-	//		/MyMVC
+	//    /MyMVC 
 %>
 <!DOCTYPE html>
 <html>
@@ -14,11 +13,13 @@
 <body>
 	<ol>
 		<li>
-			<label>성명</label><span>${paraMap.name}</span>
+			<label>성명</label><span>${requestScope.paraMap.name}</span>
 		</li>
-		<li>		
-			<label>사진</label><img src="<%= ctxPath %>/personimages/${paraMap.imgFilename}" />
+		<li>  
+			<label>사진</label><img src="<%= ctxPath%>/personimages/${requestScope.paraMap.imgFilename}" />
 		</li>
+			
+		
 	</ol>
 </body>
 </html>
