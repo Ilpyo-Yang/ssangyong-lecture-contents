@@ -18,7 +18,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="<%= ctxPath%>/jquery-ui-1.11.4.custom/jquery-ui.css" />
-<script type="text/javascript" src="<%= ctxPath%>/jquery-ui-1.11.4.custom/jquery-ui.css"></script>
+<script type="text/javascript" src="<%= ctxPath%>/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script> 
 
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -28,7 +28,7 @@
 			vhtml += (i+1)+".내용물<br/>";
 		}
 		
-		$("#sideconent").html(vhtml);
+	//	$("div#sideconent").html(vhtml);
 		
 	});
 
@@ -37,6 +37,7 @@
 </head>
 <body>
 
+<div id="mycontainer">
 
 	<div id="headerImg">
 		<div class="row">
@@ -66,6 +67,7 @@
 		<div class="row">
 			<div class="col-md-12" style="height: 50px; text-align: left; padding: 20px;">
 				2. 로그인/Tree/View
+				<%@ include file="/WEB-INF/login/login.jsp" %>
 			</div>
 		</div>
 		<div class="row">
@@ -73,5 +75,5 @@
 			</div>
 		</div>	
 	</div>
-
+	
 	<div id="content" align="center">
