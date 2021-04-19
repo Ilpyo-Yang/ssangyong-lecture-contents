@@ -215,3 +215,14 @@ from tbl_loginhistory
 where fk_userid = 'test'
 ) H;
 
+update tbl_member set email = 'anjfkrhgkwl7@gmail.com'
+where userid = 'ilpyoyang';
+
+delete from tbl_loginhistory where fk_userid='ilpyoyang';
+delete from tbl_member where userid='ilpyoyang';
+commit;
+
+
+select *
+from tbl_member
+order by registerday desc;

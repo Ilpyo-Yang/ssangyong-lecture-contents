@@ -238,4 +238,89 @@ public class MemberDAO implements InterMemberDAO {
 	return member;
 	}
 
+	
+	// 아이디 찾기(성명, 이메일을 입력받아서 해당 사용자의 아이디를 알려준다)
+	@Override
+	public String findUserid(Map<String, String> paraMap) throws SQLException {
+		String userid ="";
+		
+		try {
+	         conn = ds.getConnection();
+	         
+	         String sql = " select userid "
+	                    + " from tbl_member "
+	                    + " where status=1 and name=? and email = ? ";
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         pstmt.setString(1, paraMap.get("name"));
+	         pstmt.setString(2, aes.encrypt(paraMap.get("email")));
+	         
+	         rs = pstmt.executeQuery();	
+	         if(rs.next()) {
+		         userid = rs.getString(1);     	 
+	         }
+
+	         
+	      } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+	         e.printStackTrace();
+	      } finally {
+	         close();
+	      }
+	      
+		return userid;
+	}
+
+	
+	// 비밀번호 찾기(아이디, 이메일을 입력받아서 해당 사용자가 존재하는지 유무를 알려준다)
+	@Override
+	public boolean isUserExist(Map<String, String> paraMap) throws SQLException {
+		boolean isUserExist = false;
+		
+		  try {
+	         conn = ds.getConnection();
+	         
+	         String sql = " select userid "
+	                    + " from tbl_member "
+	                    + " where status=1 and userid=? and email = ? ";
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         pstmt.setString(1, paraMap.get("userid"));
+	         pstmt.setString(2, aes.encrypt(paraMap.get("email")));
+	         
+	         rs = pstmt.executeQuery();	
+	         isUserExist = rs.next();
+	       
+	      } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+	         e.printStackTrace();
+	      } finally {
+	         close();
+	      }
+		
+		return isUserExist;
+	}
+
+	
+	// 암호 변경하기
+	@Override
+	public int pwdUpdate(Map<String, String> paraMap) throws SQLException {
+		int n = 0;
+		
+		try {
+			conn = ds.getConnection();
+			String sql = " update tbl_member set pwd =? , lastpwdchangedate=sysdate " +
+			             " where userid=? ";
+			pstmt = conn.prepareStatement(sql);
+			// 암호를 SHA256 알고리즘으로 단방향 암호화 시킨다.
+			pstmt.setString(1, Sha256.encrypt(paraMap.get("pwd")));
+			pstmt.setString(2, paraMap.get("userid"));
+			
+			n = pstmt.executeUpdate();
+					
+		} finally {
+			close();
+		}
+		
+		return n;
+	}
+
 }
