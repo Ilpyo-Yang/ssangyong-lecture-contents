@@ -2,20 +2,12 @@ package member.model;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import java.sql.*;
+import java.util.*;
+import javax.naming.*;
 import javax.sql.DataSource;
+import util.security.*;
 
-import util.security.AES256;
-import util.security.SecretMyKey;
-import util.security.Sha256;
 
 public class MemberDAO implements InterMemberDAO {
 
@@ -323,4 +315,150 @@ public class MemberDAO implements InterMemberDAO {
 		return n;
 	}
 
+	
+	// 회원의 개인정보변경하기 
+	@Override
+	public int updateMember(MemberVO member) throws SQLException {
+		int n = 0;
+	      
+	      try {
+	         conn = ds.getConnection();
+	         
+	         String sql = "update tbl_member set name = ? "
+	                  + "                    , pwd = ? "
+	                  + "                    , email = ? " 
+	                  + "                    , mobile = ? "
+	                  + "                    , postcode = ? "
+	                  + "                    , address = ? "
+	                  + "                    , detailaddress = ? "
+	                  + "                    , extraaddress = ? "
+	                  + "where userid = ? "; 
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         
+	         pstmt.setString(1, member.getName()); 
+	         pstmt.setString(2, Sha256.encrypt(member.getPwd()) );
+	         pstmt.setString(3, aes.encrypt(member.getEmail()) );
+	         pstmt.setString(4, aes.encrypt(member.getMobile()) );
+	         pstmt.setString(5, member.getPostcode() );
+	         pstmt.setString(6, member.getAddress() );
+	         pstmt.setString(7, member.getDetailaddress() );
+	         pstmt.setString(8, member.getExtraaddress() );
+	         pstmt.setString(9, member.getUserid() );
+	                  
+	         n = pstmt.executeUpdate();
+	         
+	      } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+	         e.printStackTrace();
+	      } finally {
+	         close();
+	      }
+	      
+	      return n;
+	}
+
+	
+	// DB에 코인, 포인트 업데이트
+	@Override
+	public int coinPointUpdate(Map<String, String> paraMap) throws SQLException {
+		int n = 0;
+	      
+	      try {
+	         conn = ds.getConnection();
+	         
+	         String sql = "update tbl_member set coin = coin+? "
+	                  + "                    , point = point+? "
+	                  + "where userid = ? "; 
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         
+	         pstmt.setString(1, paraMap.get("coinmoney")); 
+	         pstmt.setInt(2, (int)(Integer.parseInt(paraMap.get("coinmoney")) * 0.01));	// 300000 * 0.01 ==> 3000
+	         pstmt.setString(3, paraMap.get("userid"));
+	         
+	         n = pstmt.executeUpdate();
+	         
+	      } finally {
+	         close();
+	      }
+	      
+	      return n;
+	}
+
+	
+	// *** 페이징 처리를 한 모든 회원 또는 검색한 회원 목록 보여주기 *** //
+	@Override
+	public List<MemberVO> selectPagingMember(Map<String, String> paraMap) throws SQLException {
+		List<MemberVO> memberList = new ArrayList<>();
+		try {
+	         conn = ds.getConnection();
+	         
+
+			 String sql = "select userid, name, email, gender "+
+						 "from "+
+						 " ( "+
+						 "    select rownum as rno, userid, name, email, gender "+
+						 "    from "+
+						 "    ( "+
+						 "    select userid, name, email, gender "+
+						 "    from tbl_member "+
+						 "    where userid != 'admin' "+
+						 "    order by registerday desc "+
+						 "    ) V "+
+						 " ) T "+
+						 " where rno between ? and ? ";
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         
+	         int currentShowPageNo = Integer.parseInt(paraMap.get("currentShowPageNo"));
+	         int sizePerPage = Integer.parseInt(paraMap.get("sizePerPage"));
+	         
+	         // 공식
+	         pstmt.setInt(1, (currentShowPageNo-sizePerPage)*(sizePerPage-1));
+	         pstmt.setInt(2, (currentShowPageNo * sizePerPage));
+	         
+	         rs = pstmt.executeQuery();	
+	         while(rs.next()) {
+	        	 MemberVO mvo = new MemberVO();
+	        	 mvo.setUserid(rs.getString(1));
+	        	 mvo.setName(rs.getString(2));  
+	        	 mvo.setEmail(aes.decrypt(rs.getString(3))); 
+	        	 mvo.setGender(rs.getString(4)); 
+	        	 
+	        	 memberList.add(mvo);
+	         }
+	         
+	      } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+		         e.printStackTrace();
+		  } finally {
+	         close();
+	      }
+		return memberList;
+	}
+
+	
+	// 페이징처리를 위해서 전체회원에 대한 총페이지 개수 알아오기(select)  
+	@Override
+	public int selectTotalPage(Map<String, String> paraMap) throws SQLException {
+		int totalPage = 0;
+		try {
+	         conn = ds.getConnection();
+	         
+	         String sql = " select ceil(count(*)/?) "
+	        		    + " from tbl_member "
+	        		    + " where userid!='admin' ";
+	         
+	         pstmt = conn.prepareStatement(sql);
+	         pstmt.setString(1, paraMap.get("sizePerPage"));
+	         rs = pstmt.executeQuery();	
+	         
+	         if(rs.next()) {
+	        	totalPage=rs.getInt(1);
+	         }
+	         
+	      } finally {
+	         close();
+	      }
+		return totalPage;
+	}
 }
