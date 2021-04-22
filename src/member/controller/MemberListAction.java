@@ -52,31 +52,46 @@ public class MemberListAction extends AbstractController {
 				currentShowPageNo = "1";
 			}
 			
+			
+			//////////////////////////////////////////////////////////////////
+			//	검색어가 들어온 경우
+			String searchType = request.getParameter("searchType");
+			String searchWord = request.getParameter("searchWord");
+			/////////////////////////////////////////////////////////////////
+			
+			
 			Map<String, String> paraMap = new HashMap<>();
 			paraMap.put("currentShowPageNo", currentShowPageNo);
 			paraMap.put("sizePerPage", sizePerPage);
 			
-			///////////////////////////////////////////////////////////////			
+			// 검색어가 들어온 경우
+			paraMap.put("searchType", searchType);
+			paraMap.put("searchWord", searchWord);
+			
+			///////////////////////////////////////////////////////////
+			// === GET 방식이므로 사용자가 웹브라우저 주소창에서 currentShowPageNo 에
+			//     토탈페이지수 보다 큰 값을 입력하여 장난친 경우를 1페이지로 가게끔 막아주는 것 시작.  
+			
 			// 페이징처리를 위해서 전체회원에 대한 총페이지 개수 알아오기(select)
 			int totalPage = mdao.selectTotalPage(paraMap);
-			//  System.out.println("~~~~ 확인용 totalPage => " + totalPage);	
-			/*
-					 ~~~~ 확인용 totalPage => 68 (sizePerPage 가 3 일때)
-			         ~~~~ 확인용 totalPage => 41 (sizePerPage 가 5 일때)
-			         ~~~~ 확인용 totalPage => 21 (sizePerPage 가 10 일때)
-			*/
-			///////////////////////////////////////////////////////////
+		//	System.out.println("!!! 확인용 totalPage: "+totalPage);
 			
-			if(Integer.parseInt(currentShowPageNo)>totalPage) {
-				currentShowPageNo ="1";
-				paraMap.put("currentShowPageNo", currentShowPageNo);				
+			if( Integer.parseInt(currentShowPageNo)   > totalPage ) {
+			currentShowPageNo = "1";
+			paraMap.put("currentShowPageNo", currentShowPageNo);
 			}
+			// 토탈페이지수 보다 큰 값을 입력하여 장난친 경우를 1페이지로 가게끔 막아주는 것 끝.
+			///////////////////////////////////////////////////////////////
+
+			
 			
 			List<MemberVO> memberList = mdao.selectPagingMember(paraMap);
 			
 			request.setAttribute("memberList", memberList);
 			request.setAttribute("sizePerPage", sizePerPage);
 			
+			request.setAttribute("searchType", searchType);
+			request.setAttribute("searchWord", searchWord);
 			
 			// **** ========= 페이지바 만들기 ========= **** //
 			/*
@@ -155,10 +170,20 @@ public class MemberListAction extends AbstractController {
 			pageNo = ( ( Integer.parseInt(currentShowPageNo) - 1)/blockSize ) * blockSize + 1;
 			
 			
+			//////////////////////////////////////////////////////////
+			if(searchType==null) {
+				searchType="";
+			}
+			if(searchWord==null) {
+				searchWord="";
+			}			
+			/////////////////////////////////////////////////////////
+			
+			
 			// **** [맨처음][이전] 만들기 **** //
 			if(pageNo != 1) {
-				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo=1&sizePerPage="+sizePerPage+"'>[맨처음]</a>&nbsp;";
-				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+(pageNo-1)+"&sizePerPage="+sizePerPage+"'>[이전]</a>&nbsp;";
+				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo=1&sizePerPage="+sizePerPage+"&searchType="+searchType+"&searchWord="+searchWord+"'>[맨처음]</a>&nbsp;";	
+				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+(pageNo-1)+"&sizePerPage="+sizePerPage+"&searchType="+searchType+"&searchWord="+searchWord+"'>[이전]</a>&nbsp;";
 			}
 			
 			while( !(loop > blockSize || pageNo > totalPage) ) {
@@ -167,7 +192,7 @@ public class MemberListAction extends AbstractController {
 					pageBar += "&nbsp;<span style='border:solid 1px gray; color:red; padding:2px 4px;'>"+pageNo+"</span>&nbsp;";        
 				}
 				else {
-					pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+pageNo+"&sizePerPage="+sizePerPage+"'>"+pageNo+"</a>&nbsp;";
+					pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+pageNo+"&sizePerPage="+sizePerPage+"&searchType="+searchType+"&searchWord="+searchWord+"'>"+pageNo+"</a>&nbsp;";
 				}
 				
 				loop++;
@@ -186,8 +211,8 @@ public class MemberListAction extends AbstractController {
 			// pageNo ==> 41
 			// pageNo ==> 42 [다음][마지막]이 없어야 한다.  
 			if( pageNo <= totalPage ) {
-				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+pageNo+"&sizePerPage="+sizePerPage+"'>[다음]</a>&nbsp;";
-				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+totalPage+"&sizePerPage="+sizePerPage+"'>[마지막]</a>&nbsp;";
+				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+pageNo+"&sizePerPage="+sizePerPage+"&searchType="+searchType+"&searchWord="+searchWord+"'>[다음]</a>&nbsp;";
+				pageBar += "&nbsp;<a href='memberList.up?currentShowPageNo="+totalPage+"&sizePerPage="+sizePerPage+"&searchType="+searchType+"&searchWord="+searchWord+"'>[마지막]</a>&nbsp;";
 			}
 			
 			request.setAttribute("pageBar", pageBar);

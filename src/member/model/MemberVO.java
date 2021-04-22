@@ -1,5 +1,7 @@
 package member.model;
 
+import java.util.Calendar;
+
 public class MemberVO {
 
 	private String userid;             // 회원아이디
@@ -210,5 +212,17 @@ public class MemberVO {
 		this.requiredPwdChange = requiredPwdChange;
 	}
 	
-	
+	/////////////////////////////////////////////////////////////////////
+	public int getAge() {
+	      int age = 0;
+	      
+	      Calendar currentDate = Calendar.getInstance(); 
+	      // 현재날짜와 시간을 얻어온다.
+	      
+	      int currentYear = currentDate.get(Calendar.YEAR);
+	      
+	      age =  currentYear - Integer.parseInt( birthday.substring(0, 4) ) + 1;
+	      
+	      return age;
+	}
 }

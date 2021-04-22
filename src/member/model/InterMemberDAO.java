@@ -39,6 +39,9 @@ public interface InterMemberDAO {
 	// 페이징처리를 위해서 전체회원에 대한 총페이지 개수 알아오기(select)  
 	int selectTotalPage(Map<String, String> paraMap) throws SQLException;
 
+	// userid 값을 입력받아서 회원 1명에 대한 상세 정보를 알아오기(select)
+	MemberVO memberOneDetail(String userid) throws SQLException;
+
 	
 	
 }
