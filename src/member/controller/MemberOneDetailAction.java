@@ -20,6 +20,12 @@ public class MemberOneDetailAction extends AbstractController {
 			MemberVO mvo = mdao.memberOneDetail(userid);
 			
 			request.setAttribute("mvo", mvo);
+			
+			////////////////////////////////////////////////////////////////
+			// *** 현재 페이지를 돌아갈 페이지(goBackURL)로 주소 지정하기 *** //
+			String goBackURL = request.getParameter("goBackURL");
+			request.setAttribute("goBackURL", goBackURL);
+			
 		//	super.setRedirect(false);
 			super.setViewPage("/WEB-INF/member/memberOneDetail.jsp");
 			

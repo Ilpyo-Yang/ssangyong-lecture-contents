@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import common.controller.AbstractController;
 import member.model.*;
+import my.util.MyUtil;
 
 public class MemberListAction extends AbstractController {
 
@@ -216,6 +217,21 @@ public class MemberListAction extends AbstractController {
 			}
 			
 			request.setAttribute("pageBar", pageBar);
+			
+			///////////////////////////////////////////////////////////////
+			// *** 현재 페이지를 돌아갈 페이지(goBackURL)로 주소 지정하기 ***//
+			String currentURL = MyUtil.getCurrentURL(request);
+			// 회원조회를 했을시 현재 그 페이지로 그대로 되돌아가기 위한 용도로 쓰임.
+			
+		//	System.out.println("~~~ 확인용 currentURL: "+currentURL);
+		//	~~~ 확인용 currentURL: member/memberList.up?currentShowPageNo=9&sizePerPage=10&searchType=&searchWord=
+
+			currentURL=currentURL.replaceAll("&", " ");
+
+		//	System.out.println("~~~ 확인용 currentURL: "+currentURL);
+		//	~~~ 확인용 currentURL: member/memberList.up?currentShowPageNo=9 sizePerPage=10&searchType= searchWord=
+
+			request.setAttribute("goBackURL", currentURL);
 			
 		//	super.setRedirect(false);
 			super.setViewPage("/WEB-INF/member/memberList.jsp");

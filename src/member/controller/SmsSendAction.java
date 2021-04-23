@@ -37,8 +37,14 @@ public class SmsSendAction extends AbstractController {
 	      // 10월 16일 이후로 발신번호 사전등록제로 인해 등록된 발신번호로만 문자를 보내실 수 있습니다
 	      paraMap.put("type", "SMS"); // Message type ( SMS(단문), LMS(장문), MMS, ATA )
 	      paraMap.put("text", smsContent); // 문자내용    
-	            
-	 //   paraMap.put("datetime", "20210422160000"); // 예약전송시 날짜 설정 반드시 YYYYMMDDHHMISS 형식대로 해야함.
+	 
+	 //   paraMap.put("datetime", "20210422161000");   // 예약전송시 날짜 설정 반드시 YYYYMMDDHHMISS 형식대로 해야함.
+	         
+	         String datetime = request.getParameter("datetime");
+	         if(datetime != null) {
+	            paraMap.put("datetime", datetime);
+	         }  
+	         
 	      paraMap.put("app_version", "JAVA SDK v2.2"); // application name and version
 	      
 	      //    ==  아래의 파라미터는 필요에 따라 사용하는 선택사항이다. == 
